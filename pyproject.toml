@@ -1,0 +1,9 @@
+[project]
+name = "ai-film-pipeline"
+version = "0.1.0"
+description = "Storyboard-driven pipeline that turns a family story into a 60-90 s AI short film"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

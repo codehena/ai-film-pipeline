@@ -1,0 +1,22 @@
+# Secrets: real API keys live only in .env (copy .env.example to .env)
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated media and scratch (evidence lives in runs.jsonl and the docs)
+outputs/
+cache/
+*.mp4
+*.part.*
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

@@ -1,0 +1,6 @@
+# Pinned to the versions tested on 2026-11-25 (Python 3.13)
+jsonschema==4.26.0
+python-dotenv==1.2.4
+requests==2.34.2
+google-genai==3.6.1
+pytest==9.2.0
