@@ -41,3 +41,12 @@ What broke, what I tried, what fixed it (or how I worked around it). Write these
 - **What I tried:** checked `.gitignore` / `.env` handling so secrets stay local and out of version control.
 - **What fixed it / workaround:** revoked the exposed token, generated a scoped replacement token, saved it in `.env`, and verified environment presence without printing secret values.
 - **Lesson:** rotate any exposed credential immediately rather than reusing it, and verify `.env` stays ignored before live API calls.
+---
+
+### F-04: Git push failed with HTTP 400 due to literal angle brackets in remote URL
+- **Date:** 2026-11-25
+- **Stage / model:** setup / git
+- **What happened:** `git push -u origin master` failed with `fatal: unable to access 'https://github.com/<codehena>/ai-film-pipeline.git/': The requested URL returned error: 400`.
+- **What I tried:** added `origin` using `<codehena>` placeholder brackets in the repository URL and ran `git push -u origin master`.
+- **What fixed it / workaround:** updated the remote URL with `git remote set-url origin https://github.com/codehena/ai-film-pipeline.git` without angle brackets, then re-ran `git push -u origin master`.
+- **Lesson:** replace placeholder brackets (`<...>`) completely when copying remote URLs before pushing.
