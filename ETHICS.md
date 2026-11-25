@@ -30,6 +30,7 @@ Several free endpoints may use inputs for training, so the rule is: send only wh
 
 **Sent to external APIs (Gemini, Cloudflare; later Kaggle notebooks):**
 - narration text, image prompts and music captions. From draft 3 on, these contain **no names** of real people.
+- the **generated** narration audio (a synthetic Gemini voice, not a recording of anyone) is sent to a Gemini text model for transcription by `asr-check`, to check the split and the pronunciation. It contains the same words as the narration text and no names.
 - **Never sent:** names, surnames, the name of the village, phone numbers, photos of real people, or any recorded voice.
 - **One exception, recorded honestly:** in drafts 1–2 (2026-11-25), two narration lines (s04, s10) used my brother's first name. Those lines went to Gemini TTS in the 10 narration requests logged in `runs.jsonl` before I decided not to name him. A request that has already been sent cannot be recalled, so this is recorded here rather than hidden.
 

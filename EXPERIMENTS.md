@@ -85,3 +85,17 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
   - On the real cut `radio_e4cfcbb9f085.mp4`: **−14.0 LUFS, −1.58 dBTP, linear**. The independent `ebur128` meter reads −13.9 LUFS, −1.6 dB.
 - **Cost:** the radio render went from 9.5 s to 36 s because of the extra measurement passes. That's acceptable for a correct, auditable level.
 - **Decision:** keep F. Re-check by ear that the limiting (about 7 dB on peaks) doesn't make the voice sound squashed; that's part of user test 1.
+- **Update (F-13), the same day:** on the louder draft 4 mix, F's fixed +2 dB didn't hold, and the final pass fell back to dynamic. The 48 kHz limiter let true peaks overshoot its ceiling by +0.88 dB; **limiting at 4× (192 kHz)** made the overshoot 0.00 dB. With that, both mixes reach −14.0 LUFS in one round with a linear pass, so recipe v3 replaced F. Lesson: test a recipe on a second mix before trusting it.
+
+### EXP-05: Can a speech recogniser check the split (and the pronunciation)?
+- **Date:** 2026-11-25
+- **Hypothesis:** transcribing each narration segment with a Gemini text model shows whether each segment holds exactly its own line, which the time/word ratio cannot prove.
+- **Change:** `py -m pipeline asr-check` (`gemini-3.5-flash`) on the draft 4 segments, before and after the split correction in `narration_splits.json`. Only the segments changed.
+- **Result:**
+  - The chunk transcripts located the true breaks (F-12). After the correction, all 10 segments start and end on their own line's words.
+  - Lines transcribed closely: s03 0.97, s10 0.99, and s01, s02, s05, s07, s09 at about 0.8.
+  - Lines that came back garbled: s04 (twice, in separate checks), s06 and s08. s08's ቄጠማው ሲጎዘጎዝ was heard as prayer words, and s02's ጥጃዎች ሲዘሉ as ልጆች ሲጫወቱ.
+  - The recogniser also mangled a common word (እናቶች heard as a name), so a garbled line is *a place to listen*, not proof of a bad pronunciation.
+- **Evidence:** `runs.jsonl` stage `qa` (21 ok calls); `outputs/narration/asr_64173211a953.json`; `narration_splits.json`.
+- **Decision:** keep `asr-check` as the split check after every new read. Pronunciation goes to a native ear: the words above are listed in DESIGN.md for the follow-up check.
+- **Cost:** 20 free text requests/day. One full check is 10 requests, so it is cached per segment file and saves after each line.

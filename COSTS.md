@@ -6,8 +6,8 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 | Provider | Limit found | How I found it | Date |
 |---|---|---|---|
 | Gemini API, `gemini-3.8-flash-tts` | **3 requests per minute** per model (`GenerateRequestsPerMinutePerProjectPerModel-FreeTier`, quotaValue 3) | 429 error during narration (FAILURES.md F-08) | 2026-11-25 |
+| Gemini API, `gemini-3.5-flash` (text; used for `asr-check`) | **20 requests per day** (the error names `gemini-3.6-flash`, so the quota seems shared); 503 "high demand" seen on 3.8/3.7 flash | 429 during asr-check (F-12) | 2026-11-25 |
 | Gemini API, `gemini-3.8-flash-tts` | **10 requests per day** ("Generate content requests per day limit", limit 10); resets 08:00 UTC = 11:00 EAT (`retryDelay` 23084 s at 01:35 UTC) | 429 errors during the voice audition (F-09) | 2026-11-25 |
-| Gemini API, text models | TODO (no limit hit yet) | | |
 | Cloudflare Workers AI | TODO (daily neurons) | | |
 | Kaggle GPU | TODO (hours/week) | | |
 
@@ -19,6 +19,9 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 | narration (continuous, draft 3) | `gemini-3.8-flash-tts`, Iapetus | **1** ok (after the reset; 4 attempts before it hit the daily cap) | **24.3 s** for the whole 64.7 s read | – | TODO (free tier: USD 0) |
 | assemble (radio), single-pass loudnorm | FFmpeg 9.1, local | 3 renders | 9.5–12.4 s per cut | – | 0 |
 | assemble (radio), two-pass loudness | FFmpeg 9.1, local | 1 render | **36.0 s** per 65.5 s cut (4 measure/render passes) | – | 0 |
+| narration (continuous, draft 4) | `gemini-3.8-flash-tts`, Iapetus | **1** ok | 64.9 s read; split corrected at no TTS cost | – | TODO (free tier: USD 0) |
+| qa: asr-check | `gemini-3.5-flash` | 21 ok, 8 errors (503 or quota) | a few s per segment | – | TODO (free tier: USD 0) |
+| assemble (radio), recipe v3/v4 (oversampled limiter, split subtitles) | FFmpeg 9.1, local | 3 renders | **38.7–41.1 s** per 71 s cut | – | 0 |
 | keyframes | FLUX | – | – | – | – |
 | shots | Wan 2.2 TI2V-5B | – | – | – | – |
 | music | ACE-Step 1.5 | – | – | – | – |
@@ -29,7 +32,7 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 
 **What caching saved:** changing all 10 shot durations (draft 1 → draft 2) cost **0 TTS calls** (10 `cache_hit` lines) and one 12 s FFmpeg render. For draft 3, retiming, the loudness fix and the character descriptions together cost **0 TTS calls**: the one continuous read was reused every time, and an unchanged radio cut is a logged `cache_hit` (0 s).
 
-**Quota used for the whole draft 3 radio cut: 1 of 10 daily TTS requests.** Under per-line mode the same read would have taken all 10.
+**Quota used for the whole draft 3 radio cut: 1 of 10 daily TTS requests.** Draft 4 used 1 more (2 of 10 on 2026-11-25). The split correction, re-cut, retime and 3 re-renders used 0. Under per-line mode the same read would have taken all 10.
 
 ## How list-price equivalents were calculated
 TODO: the price source and date for each provider.

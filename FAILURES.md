@@ -135,3 +135,41 @@ What broke, what I tried, what fixed it (or how I worked around it). Write these
 
   Result: **−14.0 LUFS, −1.58 dBTP, final pass linear**. FFmpeg's independent `ebur128` meter agrees: −13.9 LUFS, −1.6 dB. Every step's numbers go to `radio_<hash>.loudness.json`, and the stage prints a WARNING if the delivered file misses the target. The end-to-end test now requires a problem-free loudness report.
 - **Lesson:** "I ran loudnorm" is not "the file is at −14 LUFS". Measure the delivered file, and make missing the target loud.
+
+---
+
+### F-12: The continuous-read split put words in the wrong shot, and the ratio check didn't catch all of it
+- **Date:** 2026-11-25
+- **Stage / model:** narration (continuous) / `common/silence.py`
+- **What happened:** the draft 4 read (`full_64173211a953.wav`) split with s03 = 1.32 s for 10 words (×0.26, flagged) and s04 = 8.42 s (×1.65).
+- **What I tried:**
+  1. **Tuning the splitter (rejected).** A stronger position penalty fixed draft 4 but moved several breaks in the draft 3 read, which had been clean. That just trades one guess for another.
+  2. **Transcribing the speech chunks between 16 and 27 s** with a Gemini text model. This showed the *real* error: 16.22–17.54 s was "አንዳንዴም ይናፍቀኛል", the **end of s02**. s02 had been cut at its own internal "፤" pause even though its ratio looked perfect (×1.03), and s03/s04 were shifted by one chunk. Lines chained with "፣" made a comma breath and a line break look alike.
+- **What fixed it:**
+  - `narration_splits.json` (committed) holds verified span corrections **keyed to one specific read**, so they never leak onto a new take. `narration` applies them at no TTS cost, and the split report marks them "corrected".
+  - `py -m pipeline asr-check` transcribes every segment, so all 10 boundaries were checked, not just the flagged one. After the correction, every segment starts and ends on its own line's words.
+  - Each segment now gets 0.1 s of padding (capped at half the gap), because "**እን**ደሚባለው" came back without its first syllable, which hinted at a clipped soft onset.
+- **Side snags:**
+  - `gemini-3.8-flash` and `3.7-flash` returned 503 "high demand", so I used `gemini-3.5-flash`.
+  - Its free tier hit **20 requests/day** (the error names `gemini-3.6-flash`, so the quota seems shared).
+  - `asr-check` saved its cache only at the end, so **7 finished transcripts were lost** when the quota hit. It now saves after every line (tested).
+- **Lesson:** a ratio check can say "suspicious", but not "correct". Hearing the words back is the evidence. Corrections should be data tied to their source, not hand-edited outputs.
+
+---
+
+### F-13: The loudness recipe from F-11 failed on the next mix
+- **Date:** 2026-11-25
+- **Stage / model:** assemble / `common/loudness.py`
+- **What happened:** the draft 4 cut came out at −14.16 LUFS / −0.95 dBTP, but the final pass **fell back to dynamic**, which the new check reported as a WARNING. The Iapetus mix starts much louder (−19.8 LUFS vs −23.5), so the fixed +2 dB of extra pre-gain was wrong for it.
+- **Root cause:** after the −3.5 dBFS limiter, true peaks came out at −2.6 dB. Peaks *between samples* overshot the ceiling by about 0.9 dB, leaving only 1.3 dB of room for the +2.1 dB final gain.
+- **What I tried:** an adaptive loop that pushes more level into the limiter until the final gain fits. It did not converge in 4 rounds (needed 1.57 dB vs 1.30 allowed) and squashed the voice more each round.
+- **What fixed it:** limiting at **4× the sample rate** (192 kHz), plus the adaptive loop as a safety net. The overshoot dropped to 0.00 dB, and both the draft 3 and draft 4 mixes reach target in **one round** with a linear final pass (−14.00 / −14.01 LUFS). Recipe v3. Unit tests cover one round, more rounds, and the round cap.
+- **Lesson:** a fix tuned on one example is a guess. Re-test it on a second, different input before calling it done.
+
+---
+
+### F-14: Draft 4's richer lines made unreadable subtitles
+- **Date:** 2026-11-25
+- **Stage / model:** assemble (subtitles)
+- **What happened:** the wrapper kept each line to two subtitle rows by widening them. s02 ended up with 61-character rows and s10 with **75**, while the guideline is about 40.
+- **What fixed it:** `split_caption()` splits a long subtitle into consecutive cues at sentence and clause breaks, each timed in proportion to its length, with no words dropped or reordered (tested). The draft 4 cut now has 15 cues and its widest row is 43 characters. Recipe v4.

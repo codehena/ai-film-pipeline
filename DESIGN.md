@@ -65,22 +65,59 @@ Each shot's reason is in `storyboard.json` → `shots[].reason`. In short:
   - every line fits its shot (timing report `radio_e4cfcbb9f085.timing.md`)
   - the earlier draft 3 render `radio_633140d7a506.mp4` is the same audio but too quiet (−15.9 LUFS, F-11), so don't share it
 
+### My review of draft 3, and what changed (draft 4)
+After hearing my three listeners (user test 1 below), I agreed with all three notes. The pieces I liked about draft 3 (the single Iapetus voice, the day-in-the-life shape, the proverb) stay. What changed is the wording: more of the senses up front, less ነበር, and an ending that says *why* this childhood matters. TODO: anything else I noticed myself, in my own words.
+
+- **Draft 4 radio cut, the one to share for the follow-up check:** `outputs/cuts/radio_71461dcbe940.mp4`
+  - 71.0 s; one continuous Iapetus read
+  - −14.0 LUFS (independent meter −13.9), true peak −1.2 dB
+  - 15 subtitle cues, at most 2 lines of ≤ 43 characters
+  - every line fits its shot
+- **Do not share** `radio_6d34f88ae0ed.mp4` (its loudness pass fell back to dynamic, F-13) or `radio_9346ef6a1f30.mp4` (75-character subtitle lines, F-14).
+- **Words to listen for** (the recogniser misheard these in the ASR check, EXP-05; that may be the recogniser, not the voice):
+  - ጥጃዎች ሲዘሉ (s02)
+  - the whole s04 line
+  - ቀኑ ሲሞቅ … እንዋኝ (s06)
+  - ቄጠማው ሲጎዘጎዝ፣ ቡናው ሲፈላ (s08)
+  - the first syllable of እንደሚባለው (s09)
+
 ## User test 1: radio cut (at least 3 people from the audience)
-**How:** play the draft 3 radio cut once without introduction (in person, or on Slack or Telegram with headphones), then ask:
+**How:** play the radio cut once without introduction (in person, or on Slack or Telegram with headphones), then ask:
 1. What did you picture? Which moment felt most like *your* home?
 2. Where did your attention drift, and was any part too long?
-3. Did any Amharic word sound wrong or unnatural? (Ask native speakers especially: ሲያንጎራጉሩ, ሲጎዘጎዝ, ቄጠማ, እንደሚባለው.)
+3. Did any Amharic word sound wrong or unnatural? (Ask native speakers especially: ሲያንዣብቡ, ሲጎዘጎዝ, ቄጠማ, እንደሚባለው.)
 4. Did the proverb land? What did the ending make you feel?
 5. Was the voice right for this story? Did it feel like one person telling one story?
 
+Tested on the draft 3 radio cut (`radio_e4cfcbb9f085.mp4`), 2026-11-25.
+
 | Who (relation, not full name) | Grew up rural? | Date | What they said | Where they reacted |
+|---|---|---|---|---|
+| Best friend | TODO | 2026-11-25 | Liked the cut overall. Suggested a richer sensory opening than the bees "humming" (ሲያንጎራጉሩ): *ንቦች አበቦች ላይ ሲያንዣብቡ እና ወፎች ሲዘምሩ፣ ጥጃዎች ሲዘሉ፣ ዶሮዎች ሲሯሯጡ ማየት ለየት ያለ ስሜት አለው፤ አንዳንዴም ይናፍቀኛል።* | the opening (s01–s02) |
+| My brother (co-subject of the story) | yes (we grew up together) | 2026-11-25 | It took him back to those times. There are more ነበር endings than needed. Add the feeling that growing up in the countryside is one of the things you love about life, and that people who grew up there know the feeling and never forget it. | the whole narration; the ending |
+| Female friend | TODO | 2026-11-25 | Works well overall, but the flow breaks near the end. Suggested smoothing it with: *ቄጠማው ሲጎዘጎዝ፣ ቡናው ሲፈላ፣ እና ሰዉ ተውቦ ስናይ ደስ ይል ነበር። እነዚህ ነገሮች ልጅነቴን በገጠር ማሳለፌን እንድወደው አድርገውኛል እናም ሁሌም ከትውስታዬ ዉስጥ አይጠፉም።* | the end (s08–s10) |
+
+- **Caveat:** my brother is in the story, so his reaction is not neutral. It is still valuable as a check that the memory rings true. TODO: fill in "Grew up rural?" for the two friends.
+
+**Insights, and what changed in the storyboard (draft 4) because of them:**
+
+| Insight | Who | Change in draft 4 |
+|---|---|---|
+| The opening can carry more of the senses of rural life | best friend | s02 is now the friend's line almost word for word: bees hovering, birds singing, calves leaping, chickens running, *"sometimes I miss it"*. s01 is shortened to make room. The s03 image prompt gains a leaping calf and running chickens. |
+| Too many ነበር endings make it sound like a list | brother | ነበር cut from 8 to 4. Clauses now chain across shots (s03 → s04, s05 → s06), and ነበር is kept only where a beat closes. |
+| Say that a rural childhood is loved and never forgotten | brother | s10: *"These things made me love growing up in the countryside; whoever grew up there knows this feeling and never forgets it."* |
+| The flow breaks near the end | female friend | s08 is now her first line (qetema spread, coffee brewing, people dressed up: *"it was a joy"*). Her second line, merged with my brother's idea, closes s10. The s08 image prompt gains people in white holiday clothes. |
+
+- Draft 4: 107 words, 4 ነበር (was 8), one continuous read, film **71 s** (was 65.5 s).
+
+### Follow-up check on draft 4 (same 5 questions, blind, headphones)
+Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answers in each person's own words.
+
+| Who (relation) | Grew up rural? | Date | What they said | Where they reacted |
 |---|---|---|---|---|
 | | | | | |
 | | | | | |
 | | | | | |
-
-**Insights, and what I will change in the storyboard because of them:**
-- TODO (link each change to the commit that made it)
 
 ## User test 2: near-final cut (at least 3 people)
 | Who | Date | What they said | Where they reacted |

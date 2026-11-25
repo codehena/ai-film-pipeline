@@ -42,11 +42,12 @@ Runs validate → narration → keyframes → shots → music → assemble. Anyt
 | `py -m pipeline <stage> [--shot s03]` | Run one stage, optionally for one shot |
 | `py -m pipeline narration --shot s03` | Re-voice one line (per_line mode: only that shot calls TTS) |
 | `py -m pipeline audition --shot s01 --voices Charon,Iapetus` | Speak one line in several voices to choose by ear (`outputs/auditions/`) |
+| `py -m pipeline asr-check` | Transcribe each narration segment to check the split and the pronunciation (Gemini text model, cached) |
 | `py -m pipeline retime` | Set every `duration_s` from the measured narration (review with `git diff`) |
 | `py -m pipeline assemble --mode radio` | Radio cut: narration + ducked placeholder pad + subtitles on black, plus a timing report |
+| `py -m pipeline film` | Run everything in order (stages not built yet are skipped and listed) |
 
 **Narration modes** (`voice.mode` in `storyboard.json`): `continuous` reads the whole story in one TTS call (one voice and flow, 1 request) and splits it at the pauses. `per_line` makes one call per shot. The free tier allows 10 TTS requests a day (FAILURES.md F-09).
-| `py -m pipeline film` | Run everything in order (stages not built yet are skipped and listed) |
 
 Tested models (2026-11-25): narration `gemini-3.8-flash-tts` on API **v1beta** (it is not returned by `models.list`; see FAILURES.md F-06), images `@cf/black-forest-labs/flux-1-schnell`.
 
