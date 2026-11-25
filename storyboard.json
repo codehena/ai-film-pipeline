@@ -164,7 +164,13 @@
       },
       "video": {
         "method": "wan_i2v",
-        "fallback": "ken_burns"
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.27,
+          0.19,
+          0.71,
+          0.4
+        ]
       }
     },
     {
@@ -189,19 +195,22 @@
       },
       "video": {
         "method": "wan_i2v",
-        "fallback": "ken_burns"
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.3,
+          0.33,
+          0.7,
+          0.6
+        ]
       }
     },
     {
       "id": "s06",
       "duration_s": 4.4,
-      "reason": "Freedom of the river; downstream answers the upstream image in s03",
+      "reason": "Freedom of the river; downstream answers s03. Swimming in shorts, shirts left on the bank (attempt 2: without reference images, which kept putting the shirts on, F-21)",
       "shot_size": "wide",
-      "characters": [
-        "narrator_child",
-        "brother_child"
-      ],
-      "image_prompt": "two boys swimming and splashing in a shallow river, seen from behind and at a distance, their shirts folded on a rock on the riverbank, late afternoon light, trees along the banks",
+      "characters": [],
+      "image_prompt": "two Ethiopian boys of about ten seen from behind at a distance, swimming in a shallow river in their shorts only (one in khaki shorts, one in dark blue shorts), bare backs, splashing water, a faded green shirt and a faded red shirt folded on a rock on the riverbank, late afternoon light",
       "motion_prompt": "slow push-in, water splashing gently, light glittering on the river",
       "seed": 1006,
       "narration": {
@@ -214,11 +223,13 @@
       },
       "video": {
         "method": "wan_i2v",
-        "fallback": "ken_burns"
-      },
-      "appearance": {
-        "narrator_child": "an Ethiopian highland boy of about ten, slim, warm brown skin, short tightly curled black hair, swimming in knee-length khaki shorts, his faded green shirt left folded on the riverbank rock",
-        "brother_child": "an Ethiopian highland boy of about ten, slim, warm brown skin, short tightly curled black hair, swimming in dark blue shorts, his faded red shirt left folded on the riverbank rock"
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.08,
+          0.4,
+          0.95,
+          0.85
+        ]
       }
     },
     {
@@ -243,7 +254,13 @@
       },
       "video": {
         "method": "wan_i2v",
-        "fallback": "ken_burns"
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.25,
+          0.27,
+          0.72,
+          0.45
+        ]
       }
     },
     {
@@ -265,7 +282,13 @@
       },
       "video": {
         "method": "wan_i2v",
-        "fallback": "ken_burns"
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.12,
+          0.3,
+          0.92,
+          0.55
+        ]
       }
     },
     {
@@ -306,11 +329,8 @@
       "duration_s": 12.9,
       "reason": "Our home was never empty: the two of us at the coffee ceremony, then the farmland around the homestead",
       "shot_size": "extreme_wide",
-      "characters": [
-        "narrator_child",
-        "brother_child"
-      ],
-      "image_prompt": "inside a rural Ethiopian home at a holiday coffee ceremony: the two boys sitting together on a low bench beside a black clay jebena on its charcoal brazier and a tray of small sini cups, family around them, seen from behind and the side, warm lamplight, fresh qetema on the floor",
+      "characters": [],
+      "image_prompt": "inside a rural Ethiopian home at a holiday coffee ceremony, seen from behind: two boys of about ten sit side by side on a low bench with their backs to the viewer, faces not visible, both wearing traditional white cotton holiday tunics, one with a green woven tibeb border, the other with a red woven tibeb border, short tightly curled black hair; they look towards a black clay jebena coffee pot with a round body and a long narrow neck on a small charcoal brazier, a tray of small white sini cups, family members seen from behind, warm lamplight, fresh qetema on the floor; medium-wide framing with clear space above their heads",
       "motion_prompt": "slow push-in, steam rising from the jebena",
       "seed": 1010,
       "narration": {
@@ -323,11 +343,13 @@
       },
       "video": {
         "method": "wan_i2v",
-        "fallback": "ken_burns"
-      },
-      "appearance": {
-        "narrator_child": "an Ethiopian highland boy of about ten, slim, warm brown skin, short tightly curled black hair, wearing traditional white cotton holiday clothes with a green woven tibeb border",
-        "brother_child": "an Ethiopian highland boy of about ten, slim, warm brown skin, short tightly curled black hair, wearing traditional white cotton holiday clothes with a red woven tibeb border"
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.23,
+          0.23,
+          0.79,
+          0.42
+        ]
       },
       "beats": [
         {
