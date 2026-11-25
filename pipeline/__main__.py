@@ -56,6 +56,10 @@ def build_parser() -> argparse.ArgumentParser:
                         help="only this shot (repeatable), e.g. --shot s03")
         if name == "assemble":
             sp.add_argument("--mode", choices=["radio", "final"], default="radio")
+        if name in ("shots", "music"):
+            sp.add_argument("--export", metavar="DIR", help="write a Kaggle job bundle to DIR")
+            sp.add_argument("--import", dest="import_dir", metavar="DIR",
+                            help="copy finished Kaggle outputs (and log lines) from DIR")
     au = sub.add_parser("audition", help="speak one line in several voices to choose by ear")
     au.add_argument("--shot", default="s01", metavar="ID")
     au.add_argument("--voices", default=",".join(audition.DEFAULT_VOICES),
@@ -103,6 +107,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"\n{len(ok)} of {len(voices)} voices worked. Listen, then set "
                   "voice.voice_name in storyboard.json and run `narration`.")
             return 0 if ok else 1
+        elif args.command in ("shots", "music"):
+            STAGES[args.command](data, only=args.shot, export=args.export and Path(args.export),
+                                 import_dir=args.import_dir and Path(args.import_dir))
         elif args.command == "assemble":
             STAGES["assemble"](data, only=args.shot, mode=args.mode)
         else:
