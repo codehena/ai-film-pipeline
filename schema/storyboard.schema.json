@@ -57,7 +57,12 @@
           "enum": ["speech_metadata", "prompt_prefix", "none"],
           "description": "How style reaches the TTS model: the SDK's speech_metadata field, a text prefix, or not at all."
         },
-        "language_code": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$", "description": "Passed to TTS, e.g. am or am-ET." }
+        "language_code": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$", "description": "Passed to TTS, e.g. am or am-ET." },
+        "mode": {
+          "enum": ["per_line", "continuous"],
+          "default": "per_line",
+          "description": "per_line: one TTS call per shot (cheap single-line retakes). continuous: the whole narration in ONE call (one voice and flow throughout), split at pauses into per-shot segments. Per-line style overrides are ignored in continuous mode."
+        }
       }
     },
     "shots": {
