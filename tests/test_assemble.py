@@ -116,6 +116,10 @@ def test_radio_cut_end_to_end_and_cached_rerun(board, tmp_path):
     _, total = assemble.plan_timeline(board, {s["id"]: 2.0 for s in board["shots"]})
     assert float(info["format"]["duration"]) == pytest.approx(total, abs=0.15)
 
+    lr = json.loads(cut.with_name(cut.name.replace(".mp4", ".loudness.json")).read_text())
+    assert lr["problems"] == [], lr                     # -14 LUFS +-0.5, TP <= -1, linear pass
+    assert not list(tmp_path.glob("cuts/*.mix.wav")) and not list(tmp_path.glob("cuts/*.master.wav"))
+
     again = assemble.run(board, out_base=tmp_path, log_path=log)
     assert again == cut
     cut_rows = [r for r in read_log(log) if r["stage"] == "cuts"]
