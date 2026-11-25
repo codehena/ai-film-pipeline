@@ -55,7 +55,7 @@ Check each one yourself and record the date you checked.
 | Gemini API, `gemini-3.8-flash-tts` | narration | Google Gemini API terms; free tier may use inputs to improve products | TODO |
 | Gemini API, `gemini-3.5-flash-lite` | smoke test only | as above | TODO |
 | FLUX.1 schnell (Cloudflare Workers AI) | keyframes | Apache 2.0 (verify on model card) + Cloudflare terms | TODO |
-| FLUX.2 klein 4B / 9B | keyframes (candidate) | 4B Apache 2.0, 9B non-commercial (per brief) | TODO |
+| FLUX.2 klein **4B** (Cloudflare Workers AI) | keyframes and reference sheets | Apache 2.0 per the brief (the 9B is non-commercial; not used). Cloudflare's model page links to BFL's terms; zero data retention | TODO: confirm on the model card |
 | Wan 2.2 TI2V-5B | moving shots | Apache 2.0 (per brief) | TODO |
 | ACE-Step 1.5 | score | MIT; outputs usable commercially (per brief) | TODO |
 | FFmpeg 9.1 (gyan.dev full build) | assembly | GPL build (includes libx264) | TODO |

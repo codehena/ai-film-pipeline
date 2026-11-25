@@ -173,3 +173,44 @@ What broke, what I tried, what fixed it (or how I worked around it). Write these
 - **Stage / model:** assemble (subtitles)
 - **What happened:** the wrapper kept each line to two subtitle rows by widening them. s02 ended up with 61-character rows and s10 with **75**, while the guideline is about 40.
 - **What fixed it:** `split_caption()` splits a long subtitle into consecutive cues at sentence and clause breaks, each timed in proportion to its length, with no words dropped or reordered (tested). The draft 4 cut now has 15 cues and its widest row is 43 characters. Recipe v4.
+
+---
+
+### F-15: FLUX.2 klein edited the reference sheet instead of drawing the scene
+- **Date:** 2026-11-25
+- **Stage / model:** keyframes / `@cf/black-forest-labs/flux-2-klein-4b`
+- **What happened:** with both boys' reference sheets attached, s04 ("two boys walking to the spring") came back as a **character sheet**: front and back poses on a plain background, with both shirts recoloured yellow (taken from "yellow water container").
+- **Cause:** klein "unifies generation and editing". With input images, a plain scene prompt was read as an edit of the reference.
+- **What fixed it:** shots that use references now open with an explicit instruction: a completely new illustration of the scene, using the references only for how the boys look. The next s04 showed both boys exactly as on their sheets, by the water. Keyframes `s04_f272050fa9c7` (bad) and `s04_5feab1d8798e` (good) are both kept as evidence.
+- **Side bug:** one shared prompt-template version made the change also remake both reference sheets (2 wasted calls). The sheet and shot templates now have separate versions (tested).
+
+### F-16: s09's coffee cup kept its handle, three times
+- **Date:** 2026-11-25
+- **Stage / model:** keyframes / FLUX.2 klein
+- **What happened:**
+  - Take 1, "small white handleless sini cup": a Western mug with a handle.
+  - Take 2, "a small round bowl", without the word *handle*: one cup right, one with a handle, and the style drifted towards realism.
+  - Take 3, the jebena alone: a pot with **two** spouts, plus unrelated men in the background.
+- **Lesson:** a negated word ("handleless") still pulls its object in. Describing the shape helps, but not reliably.
+- **What fixed it (fallback after 3 attempts, per the brief):** s09 is now an **insert** from s08, whose jebena and sini cups were right: a slow push-in on the jebena as the proverb is spoken (`video.still: {from: s08, zoom: [1.5, 1.9]}`). It costs no extra calls and is consistent by construction, since it is the same scene.
+
+### F-17: The first final render had a corner end card, 3-row vertical subtitles, and a stale cached 16:9 cut
+- **Date:** 2026-11-25
+- **Stage / model:** assemble --mode final (FFmpeg / libass)
+- **How it was found:** extracting frames from both exports and looking at them. The numbers (duration, loudness) were all fine.
+- **What happened, and the fixes:**
+  1. **The end card sat in the top-left corner.** FFmpeg reads `force_style` alignment in legacy SSA numbering, where 5 is top-left. Middle-centre is **10**.
+  2. **One 9:16 subtitle wrapped to 3 rows**, because the clause had no punctuation to split at. Such clauses are now split between words, and rows are balanced.
+  3. **After the card fix, the 16:9 cut was served from the cache unchanged.** Its cache key covered the card *text* but not the card/subtitle *style* or the output size. The key now includes them, and a test proves that a style change produces a new cut.
+- **Lesson:** a cache key must cover everything that changes the delivered pixels, not just the content. And look at the frames, not only the numbers.
+
+### F-18: Work stopped mid-turn (by hand) while building the final cut
+- **Date:** 2026-11-25
+- **What happened:** the session was stopped while code for the final assembly was being written, with no render running.
+- **What I did:** audited before continuing:
+  - `git status`, branches and log
+  - searched for `*.part.*` and zero-byte files: none
+  - confirmed every keyframe the storyboard points to exists and decodes (12/12, 1024×1024)
+  - ran the full test suite: 140 passed
+  - committed the uncommitted work in focused pieces
+- **Why nothing was half-written:** model outputs are written to a `.part` file and renamed only on success (`run_model_step`), and FFmpeg segments follow the same pattern. A stop leaves either a complete file or nothing.

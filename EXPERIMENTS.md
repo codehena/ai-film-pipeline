@@ -116,3 +116,28 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
 - **Result (measured):** every between-line gap is now within ±0.08 s of the read (it was −0.46 to +1.00 s). The film runs 70.3 s, and the cut is `radio_4fa2a5146bca.mp4`. Cost: 0 model calls and one 22 s render.
 - **Result (by ear):** TODO, from the blind check against `radio_71461dcbe940.mp4`.
 - **Decision:** keep the spacing rule either way, because it removes edit-made artefacts. If the delivery still feels stiff, the remaining cause is intonation inside the lines, and EXP-07 would be a targeted re-read (Option B).
+
+### EXP-07: Keyframes on Cloudflare FLUX: what is controllable, and how to keep two boys consistent
+- **Date:** 2026-11-25
+- **Questions:**
+  1. Which inputs does each model honour?
+  2. Do reference sheets keep the boys consistent across shots?
+- **Measured:**
+  - **Model schemas** (Cloudflare API): FLUX.1 schnell takes only `prompt` and `steps`. FLUX.2 klein 4B takes multipart form data.
+  - **Probe** (2 klein calls, stage `probe` in `runs.jsonl`): `width`/`height` are honoured (1024×576 JPEG). The same `seed` gave two completely different compositions, so **the seed is ignored**. Determinism comes from the cache (keep and reuse outputs); the storyboard `seed` acts as a take number.
+  - **References:** klein accepts `input_image_0..1`. Plain scene prompt plus references: it edited the sheet (F-15). With the "new scene, references only for appearance" prompt, s04–s07 all show the green-shirt and red-shirt boys matching their sheets (contact sheet checked by eye).
+- **Result:**
+  - **19 keyframe-stage images:** 2 sheets ×2 (one wasted pair, F-15), 10 shots, 1 bad s04, 2 extra s08/s09 takes, and 3 s09 takes in all
+  - **0 errors,** median 16.8 s per image
+  - Cultural fixes from looking at the frames: s08 cauldron → jebena on a brazier, sini cups, women in netela; s09 → insert (F-16)
+- **Decision:** klein with reference sheets, the explicit scene prompt, and one 1024² master per shot cropped to both 16:9 and 9:16 around `video.focus`.
+
+### EXP-08: Can one square keyframe serve both 16:9 and 9:16?
+- **Date:** 2026-11-25
+- **Hypothesis:** keyframes are composed with the subject centred (style block), so one 1024×1024 master can be cropped to 1024×576 (16:9) and 576×1024 (9:16) without losing the subject. That halves image calls and keeps both versions identical in content.
+- **Result (frames checked from both exports):**
+  - s04 keeps both boys whole in 9:16.
+  - The s09 insert lands on the jebena in both formats.
+  - Vertical subtitles sit above the bottom area that phone apps cover.
+  - Both crops are upscaled 1.25× to 720p, with the Ken Burns move rendered at 4× for smoothness.
+- **Decision:** keep. Exports `final-16x9_79e1e669fdc0.mp4` and `final-9x16_73291dad58e1.mp4` (70.30 s, −14.0 LUFS, linear pass).

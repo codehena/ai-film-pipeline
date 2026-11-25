@@ -201,6 +201,18 @@ Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answe
   - The pictures, motion and music don't depend on the narration (ARCHITECTURE.md, "Why it is shaped this way"), so they can be built now.
   - A later re-read would only re-render the final cut.
 
+## Pictures: decisions (2026-11-25)
+- **Two boys, told apart by colour:** green shirt, khaki shorts, sandals; red shirt, blue shorts, barefoot. Both are stylised, seen from behind or at a distance. A reference sheet for each conditions every shot they appear in (EXP-07).
+- **Cultural accuracy over first takes:**
+  - s08 was redrawn: a jebena on a charcoal brazier, small sini cups, qetema on the floor, women in white netela seen from behind. The first take read as a cauldron ritual.
+  - s09 became a push-in on that same jebena after three failed cup takes (F-16).
+- **Movement:** every shot is a slow Ken Burns move that follows its motion prompt (push-in, pull-back, pan, near-still), so neighbouring shots move differently. Wan 2.2 clips replace them shot by shot when the Kaggle runs come back.
+- **Baseline film, watchable now:**
+  - `outputs/cuts/final-16x9_79e1e669fdc0.mp4` (class screen)
+  - `outputs/cuts/final-9x16_73291dad58e1.mp4` (phones)
+
+  Both are 70.3 s, Option A narration, placeholder pad until a score is chosen, end card centred.
+
 ## User test 2: near-final cut (at least 3 people)
 | Who | Date | What they said | Where they reacted |
 |---|---|---|---|

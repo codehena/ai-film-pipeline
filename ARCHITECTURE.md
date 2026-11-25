@@ -105,5 +105,18 @@ A change to this recipe bumps `assemble.RECIPE_VERSION`, so a new cut gets a new
 ## Logging (`pipeline/common/runlog.py`)
 `runs.jsonl` gets one line per attempt: `ts, run_id, stage, shot, provider, model, params, seed, input_hash, status (ok | error | cache_hit | fallback), attempt, latency_s, gpu_s, cost_usd_list, output, error`.
 
+## Keyframes (`pipeline/keyframes.py`, `providers/cloudflare.py`)
+- **`ImageModel` registry:** records what each FLUX model *verifiably* honours (size, references, seed) from the schema API and our probe. Requests a model can't honour are refused rather than silently ignored, because an ignored field in a cache key is a false promise.
+- **One reference sheet per character first.** Every shot of that character is conditioned on it and repeats the same description text. The sheet's **file** hash is in each shot's key, so a new sheet re-makes exactly that character's shots.
+- **One square 1024² master per shot.** `video.focus` chooses where the 16:9 and 9:16 crops centre. The seed is not honoured by the model, so `seed` is a take number: change it to re-roll one shot on purpose.
+- **Separate template versions** for sheets and shots, so a shot-prompt change never silently remakes the sheets.
+
+## Final cut (`assemble --mode final`, `pipeline/render.py`)
+- **Each shot** is the imported motion clip if one exists, otherwise a Ken Burns move on its keyframe, or on another shot's keyframe for an insert (`video.still`). The move comes from the shot's `motion_prompt` ("push-in", "pull-back", "pan left to right", "static").
+- **Shot boundaries** are whole frames rounded on cumulative times, so there is no drift against the narration. Per-shot segments are cached in `outputs/cuts/parts/` by everything that changes their pixels.
+- **One audio master serves both ratios:** the same chain as the radio cut, with the chosen score in place of the pad.
+- **Subtitles per ratio:** 40 characters per row for 16:9, 26 for 9:16, lifted above the bottom ~20% of the vertical frame. The end card is drawn as a centred card.
+- **The final cut's cache key** includes card/subtitle styles and output size (F-17).
+
 ## GPU stages
-Wan 2.2 and ACE-Step run in Kaggle notebooks (`notebooks/`). The local stage writes a job file listing only uncached shots, and imports the results and their log lines afterwards.
+Wan 2.2 and ACE-Step run in Kaggle notebooks (`notebooks/`, see its README for the round trip). `shots/music --export` writes a job bundle that lists only what is missing. `--import` copies back only files whose names match the current contract (a clip tied to an old keyframe is ignored) and merges the notebook's log lines without duplicates. The music hash ignores cue *times*, so retiming never invalidates the score.
