@@ -68,6 +68,16 @@ def _place(lo_need: float, hi_need: float, size: float, ideal: float, limit: flo
     return min(max(start, 0.0), limit - size)
 
 
+def _axis(b0: float, b1: float, size: float, limit: float, overflow: str) -> float:
+    """Window start on one axis for a box [b0, b1] (fractions). The margin is shrunk when the
+    box itself fits but box + margin doesn't (s08: heads + jebena span 56% of a 56.25% window),
+    instead of falling back to the overflow rule and cutting more of the box."""
+    lo, hi = max(b0 - SAFE_MARGIN, 0) * limit, min(b1 + SAFE_MARGIN, 1) * limit
+    if hi - lo > size and (b1 - b0) * limit <= size:
+        lo, hi = b0 * limit, b1 * limit
+    return _place(lo, hi, size, ((b0 + b1) / 2) * limit - size / 2, limit, overflow)
+
+
 def crop_window(src_w: int, src_h: int, ratio: float, focus: tuple[float, float] = (0.5, 0.5),
                 safe_box: Box | None = None) -> tuple[int, int, int, int]:
     """(x, y, w, h): the largest window of aspect `ratio` (w/h). With a safe_box (heads,
@@ -86,11 +96,8 @@ def crop_window(src_w: int, src_h: int, ratio: float, focus: tuple[float, float]
         y = min(max(ideal_y, 0), src_h - h)
     else:
         bx0, by0, bx1, by1 = safe_box
-        m = SAFE_MARGIN
-        x = _place(max(bx0 - m, 0) * src_w, min(bx1 + m, 1) * src_w, w,
-                   ((bx0 + bx1) / 2) * src_w - w / 2, src_w, "centre")
-        y = _place(max(by0 - m, 0) * src_h, min(by1 + m, 1) * src_h, h,
-                   ((by0 + by1) / 2) * src_h - h / 2, src_h, "start")
+        x = _axis(bx0, bx1, w, src_w, "centre")
+        y = _axis(by0, by1, h, src_h, "start")
     return round(x), round(y), w, h
 
 

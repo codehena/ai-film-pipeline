@@ -75,3 +75,8 @@ def test_too_wide_box_is_centred_not_left_aligned():
     wide = (0.1, 0.2, 0.9, 0.4)                      # wider than a 9:16 window (56%)
     x, y, w, h = render.crop_window(*SQ, TALL, safe_box=wide)
     assert abs((x + w / 2) - 512) <= 1               # centred: neither person favoured
+
+
+def test_margin_shrinks_before_the_box_is_cut():
+    box = (0.10, 0.21, 0.92, 0.77)                   # s08: heads to jebena, 56% of the height
+    assert inside(box, render.crop_window(*SQ, WIDE, safe_box=box))   # fits without its margin
