@@ -8,11 +8,12 @@ One entry per real person shown, described or voiced. The `consent_ref` of each 
 ### narrator
 - **Who:** me, the author. I tell my own childhood story.
 - **Shown as:** a stylised boy (`narrator_child`), hand-painted, seen from behind or at a distance, not a portrait.
-- **Voiced by:** a prebuilt male Gemini TTS voice (Charon, provisional; see EXPERIMENTS.md EXP-03). It is **not** a clone of my voice or anyone else's.
+- **Voiced by:** a prebuilt male Gemini TTS voice, **Iapetus**, which I chose by ear from an audition (EXPERIMENTS.md EXP-03). It is **not** a clone of my voice or anyone else's; no recording of a real person's voice was ever sent to a model.
 - **Consent:** my own; I wrote the story and approve the narration lines.
 
 ### brother
-- **Who:** my brother. He grew up with me and appears in shots s04–s07. He is called only "my brother" (ወንድሜ) in the film; his name is not used in the narration, subtitles or prompts.
+- **Who:** my brother. He grew up with me and appears in shots s04–s07.
+- **Privacy framing:** the film tells our story as "my brother and I" (እኔና ወንድሜ). He is never named in the narration, subtitles, prompts, storyboard, documents or commit history. That was my choice, to keep the film about a shared childhood rather than about identifying him.
 - **Shown as:** a stylised boy (`brother_child`), hand-painted, not a portrait, never a realistic likeness.
 - **Voiced:** no. He is mentioned in the narration (s04, s10) but does not speak.
 - **What he agreed to:** to be part of this AI-made short film about our childhood in the *geter*. He said he is "very happy to be part of the video".
@@ -24,11 +25,26 @@ One entry per real person shown, described or voiced. The `consent_ref` of each 
 ### Other people in the film
 - Friends (s07), mothers washing clothes (s03) and children at the river (s06) are **generic, unnamed and not based on real individuals**. No consent record is needed; no real person's likeness is generated.
 
-## Private data kept out of free APIs
-Several free endpoints may use inputs for training, so:
-- **Sent:** narration text, image prompts and music captions.
+## Private data: what leaves my machine, and what is public
+Several free endpoints may use inputs for training, so the rule is: send only what the film needs.
+
+**Sent to external APIs (Gemini, Cloudflare; later Kaggle notebooks):**
+- narration text, image prompts and music captions. From draft 3 on, these contain **no names** of real people.
 - **Never sent:** names, surnames, the name of the village, phone numbers, photos of real people, or any recorded voice.
-- **Correction, for honesty:** drafts 1–2 (2026-11-25) named my brother by his first name in two narration lines, and those lines were sent to Gemini TTS (10 requests in `runs.jsonl`) before I decided not to name him. From draft 3 onward, no name is sent.
+- **One exception, recorded honestly:** in drafts 1–2 (2026-11-25), two narration lines (s04, s10) used my brother's first name. Those lines went to Gemini TTS in the 10 narration requests logged in `runs.jsonl` before I decided not to name him. A request that has already been sent cannot be recalled, so this is recorded here rather than hidden.
+
+**Public (the GitHub repository):**
+- **History rewritten before the first push** (2026-11-25): the 20 unpushed commits on `feat/phase2-radio-pipeline` were rewritten with `git filter-branch` to remove his name from every file and every commit message. Phrases were replaced with natural equivalents ("my brother", ወንድሜ, `brother_child`).
+- **Verified after the rewrite:**
+  - 0 occurrences in any commit's files, messages or diffs on the branch
+  - the final files are byte-identical to before the rewrite
+  - each rewritten commit differs only in `storyboard.json`, `DESIGN.md` and `ETHICS.md`, with authors and dates unchanged
+  - every historical storyboard still validates
+- `master` never contained the name.
+- **Audit caveat:** `runs.jsonl` keeps the original input hashes for the drafts 1–2 lines of s04 and s10, which were computed from the text that was really sent. The rewritten history of those two lines hashes differently, so those two log entries cannot be reproduced from history. Every other logged call can.
+
+**Local only (git-ignored, never published):**
+- `outputs/` holds the drafts 1–2 narration audio and the radio cuts `radio_35007642475a.mp4` and `radio_4e62d2e01523.mp4`, which **speak his name**. They are not for sharing with test listeners; only draft 3 and later cuts are. I can delete them once draft 3 replaces them.
 
 ## Licences
 Check each one yourself and record the date you checked.
