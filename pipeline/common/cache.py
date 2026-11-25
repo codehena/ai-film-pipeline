@@ -83,13 +83,15 @@ def keyframe_inputs(
 
 
 def video_inputs(shot: dict, *, keyframe_hash: str, model: str, params: dict) -> dict:
+    """A Wan clip is always ~5 s (params.frame_num); assembly trims or holds it to the
+    shot's length. So the shot's duration is NOT in the key: retiming the narration
+    must never invalidate motion clips (audio stays swappable)."""
     return {
         "stage": "shots",
         "model": model,
         "params": params,
         "method": shot["video"]["method"],
         "motion_prompt": shot["motion_prompt"],
-        "duration_s": shot["duration_s"],
         "keyframe": keyframe_hash,
         "seed": shot["seed"],
     }

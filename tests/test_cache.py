@@ -91,3 +91,11 @@ def test_subtitle_change_does_not_regenerate_audio(board):
     h1 = stable_hash(narration_inputs(board, shot))
     shot["narration"]["subtitle_en"] = "edited subtitle"
     assert stable_hash(narration_inputs(board, shot)) == h1
+
+
+def test_retiming_does_not_invalidate_motion_clips(board):
+    shot = board["shots"][0]
+    h = stable_hash(video_inputs(shot, keyframe_hash="abc", model="wan", params={}))
+    shot["duration_s"] += 2.5
+    shot["narration"]["speech_metadata"]["pause_after_s"] = 1.9
+    assert stable_hash(video_inputs(shot, keyframe_hash="abc", model="wan", params={})) == h
