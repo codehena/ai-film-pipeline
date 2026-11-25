@@ -19,6 +19,8 @@ from .common.storyboard import select_shots
 from .providers import gemini
 
 STAGE = "narration"
+# Free tier: 3 TTS requests/minute (F-08). With server-delay waits, 4 attempts ride out one blocked minute.
+ATTEMPTS = 4
 
 
 def should_speak(shot: dict) -> bool:
@@ -64,7 +66,7 @@ def run(storyboard: dict, only: list[str] | None = None, *, synthesize=None,
                 model=voice["model"], text=shot["narration"]["text"].strip(),
                 voice_name=voice["voice_name"], style=style, style_mode=voice["style_mode"],
                 language_code=language_code, out_path=p),
-            out_base=out_base, log_path=log_path,
+            attempts=ATTEMPTS, out_base=out_base, log_path=log_path,
         )
         print(f"  {sid}: {'cached' if before else 'generated'}  {wav_duration(path):5.2f} s  "
               f"{config.rel(path)}")

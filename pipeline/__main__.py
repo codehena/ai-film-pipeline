@@ -42,6 +42,7 @@ def check_storyboard(path, *, show_warnings: bool = True) -> dict:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="pipeline", description="Heritage Short film pipeline")
     p.add_argument("--storyboard", default=str(config.STORYBOARD), help="path to storyboard.json")
+    p.add_argument("--debug", action="store_true", help="show full tracebacks on failure")
     sub = p.add_subparsers(dest="command", required=True)
     sub.add_parser("validate", help="check storyboard.json against the schema and rules")
     sm = sub.add_parser("smoke", help="call each provider once and log latency")
@@ -103,6 +104,13 @@ def main(argv: list[str] | None = None) -> int:
     except NotBuiltYet as e:
         print(f"not built yet: {e}", file=sys.stderr)
         return 2
+    except Exception as e:  # a model call failed after all retries
+        if args.debug:
+            raise
+        print(f"stage failed: {type(e).__name__}: {str(e)[:400]}", file=sys.stderr)
+        print("  every finished shot is cached; re-run the same command to continue "
+              "(details in runs.jsonl, full traceback with --debug)", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

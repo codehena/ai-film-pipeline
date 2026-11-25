@@ -79,3 +79,17 @@ What broke, what I tried, what fixed it (or how I worked around it). Write these
 - **What happened:** the first smoke run found no TTS model, skipped the TTS step without recording it, and exited 0.
 - **What fixed it / workaround:** a missing TTS model is now recorded as `FAILED` and the command exits 1.
 - **Lesson:** "nothing to do" must still be reported, or a broken stage looks green.
+
+---
+
+### F-08: Free-tier TTS rate limit (3 requests/minute) stopped narration at shot 7
+- **Date:** 2026-11-25
+- **Stage / model:** narration / gemini-3.8-flash-tts
+- **What happened:** the first full narration run generated s01–s06, then s07 failed 3 times with `429 RESOURCE_EXHAUSTED ... limit: 3, model: gemini-3.8-flash-tts ... Please retry in 26.5s` (`retryDelay: '26s'`). The CLI crashed with a long traceback.
+- **What I tried:** read the three `error` lines in `runs.jsonl`. All three attempts were about 0.3 s long and inside the same minute, because my backoff (2 s, then 4 s) was far shorter than the 26 s the server asked for.
+- **What fixed it / workaround:**
+  - `retry.server_retry_delay()` reads the server's wait (Gemini `retryDelay`, "retry in N s", or an HTTP `Retry-After` header) and waits that long plus 1 s, capped at 120 s.
+  - Narration now gets 4 attempts.
+  - The CLI prints a short `stage failed:` message and reminds you that finished shots are cached (`--debug` shows the traceback).
+  - Re-running resumed at s07: s01–s06 were cache hits, and s07–s10 were generated with no further 429s.
+- **Lesson:** use the wait time the server sends instead of guessing. Caching turned a crash into a resume, at no extra quota.
