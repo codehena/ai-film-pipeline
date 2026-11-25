@@ -110,6 +110,29 @@ Tested on the draft 3 radio cut (`radio_e4cfcbb9f085.mp4`), 2026-11-25.
 
 - Draft 4: 107 words, 4 ነበር (was 8), one continuous read, film **71 s** (was 65.5 s).
 
+### My own listen to draft 4 (2026-11-25, `radio_71461dcbe940.mp4`)
+- **Good:** the audio quality and mix are clean, and the subtitles are readable.
+- **Not yet right:** the delivery feels **less natural than the earlier take** (draft 3, `radio_e4cfcbb9f085.mp4`, same Iapetus voice and style).
+- **What was measured** (no new model calls; numbers from the two continuous reads and the two cuts):
+
+| | Draft 3 (felt natural) | Draft 4 (felt stiffer) |
+|---|---|---|
+| Speaking rate | 141 wpm | 141 wpm |
+| Pauses inside lines | 18, mean 0.63 s, longest 1.22 s | 17, mean 0.65 s, longest 1.20 s |
+| Gaps between lines in the read | 1.0–2.2 s | 0.7–1.3 s |
+| Gaps between lines in the cut | 0.5–1.6 s | 0.6–1.8 s |
+| Biggest change the edit makes to a gap | −1.54 s (s01→s02) | **+1.00 s after the proverb** (s09→s10: 0.82 → 1.82 s) |
+
+- **Reading:** pace and pausing are the same, so the difference is most likely **intonation** (the melody of the voice), which these numbers can't see. Three suspects, all from draft 4's changes:
+  1. **Lines that end mid-sentence.** s03 and s05 end on "፣" and continue in the next line. The read is sent as one paragraph per shot, with an instruction to pause about two seconds between paragraphs, so the voice may close each of those half-sentences as if the thought were finished.
+  2. **List-shaped lines.** s02 has four parallel ሲ- clauses and s08 has three, which invites a "list" melody.
+  3. **Take-to-take variation.** Every TTS read is a new performance, even with identical settings.
+- The cut also adds a full second of silence after the proverb, which may make the ending feel stretched.
+- **Next, before spending any TTS quota:** listen to the raw continuous reads (`outputs/narration/full_64173211a953.wav` for draft 4, `full_62660579a53d.wav` for draft 3).
+  - If the raw draft 4 read sounds natural, the stiffness comes from the edit (re-spacing), which is free to fix.
+  - If it already sounds stiff, the cause is the text or the take, and a targeted re-read is the fix.
+- TODO: my verdict after that listen.
+
 ### Follow-up check on draft 4 (same 5 questions, blind, headphones)
 Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answers in each person's own words.
 
