@@ -44,6 +44,17 @@ Each line's `narration` keeps three things apart:
 | `speech_metadata.style` | delivery override; falls back to `voice.style` | new TTS call for that shot |
 | `speech_metadata.pause_before_s` / `pause_after_s` | timing in the edit | re-time the cut only, **no** TTS call |
 
+### Narration modes (`voice.mode`)
+| | `per_line` | `continuous` |
+|---|---|---|
+| TTS calls for a full read | one per spoken shot | **1** |
+| Editing one line | 1 call (that shot) | 1 call (the whole read) |
+| Voice and pacing | can drift between calls (each call is independent) | one take, consistent throughout |
+| Per-line `speech_metadata.style` | used | ignored (one read, one style) |
+| Files | `<shot>_<hash>.wav` | `full_<hash>.wav` → `<shot>_<hash>.cont.wav` + `full_<hash>.split.json` |
+
+Continuous mode asks the model for a clear pause between paragraphs, then `common/silence.py` finds the pauses (20 ms RMS windows below −40 dBFS, at least 0.25 s long). It places each line break with an order-preserving alignment that weighs pause length against distance from the line's expected end, computed from its share of the words. So a pause *inside* a two-sentence line is not mistaken for a break. The split report flags any line whose time share is under 0.5× or over 2× its word share. `audio_path()` hides the mode, so `assemble` and `retime` work the same either way.
+
 `voice.style_mode` decides how style reaches the model. `speech_metadata` uses the SDK's `Part.speech_metadata.style` field, so the style is never part of the spoken string. `prompt_prefix` is the older "Read this in a … style:" approach, and `none` sends the words only. Comparing these modes is an experiment (EXPERIMENTS.md).
 
 ## Failure handling (`pipeline/common/retry.py`, `modelcall.py`)

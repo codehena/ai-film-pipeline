@@ -7,27 +7,28 @@ One entry per real person shown, described or voiced. The `consent_ref` of each 
 
 ### narrator
 - **Who:** me, the author. I tell my own childhood story.
-- **Shown as:** a stylised child (`narrator_child`), hand-painted, seen from behind or at a distance, not a portrait.
-- **Voiced by:** a prebuilt Gemini TTS voice ("Kore"). It is **not** a clone of my voice or anyone else's.
+- **Shown as:** a stylised boy (`narrator_child`), hand-painted, seen from behind or at a distance, not a portrait.
+- **Voiced by:** a prebuilt male Gemini TTS voice (Charon, provisional; see EXPERIMENTS.md EXP-03). It is **not** a clone of my voice or anyone else's.
 - **Consent:** my own; I wrote the story and approve the narration lines.
 
 ### brother
-- **Who:** my brother. He grew up with me and appears in shots s04–s07.
-- **Shown as:** a stylised child (`brother_child`), hand-painted, not a portrait, never a realistic likeness.
-- **Voiced:** no. He is named in the narration (s04, s10) but does not speak.
+- **Who:** my brother. He grew up with me and appears in shots s04–s07. He is called only "my brother" (ወንድሜ) in the film; his name is not used in the narration, subtitles or prompts.
+- **Shown as:** a stylised boy (`brother_child`), hand-painted, not a portrait, never a realistic likeness.
+- **Voiced:** no. He is mentioned in the narration (s04, s10) but does not speak.
 - **What he agreed to:** to be part of this AI-made short film about our childhood in the *geter*. He said he is "very happy to be part of the video".
 - **How consent was given:** verbally, in a phone call with me.
 - **Date of the call:** TODO (fill in)
-- **To strengthen the record (recommended before keyframes):** send him the final narration lines with their English translation, and a description of how he will be shown (a stylised child, not a portrait, posted publicly with an AI label). Ask him to reply "I agree" in a text or voice message, and record the date and medium here. Keep the message itself privately; do not commit it.
+- **To strengthen the record (recommended before keyframes):** send him the final narration lines with their English translation, and a description of how he will be shown (a stylised boy, not a portrait, posted publicly with an AI label). Ask him to reply "I agree" in a text or voice message, and record the date and medium here. Keep the message itself privately; do not commit it.
 - **He can withdraw:** if he asks, his shots are regenerated without him or removed, and the post is taken down.
 
 ### Other people in the film
-- Friends (s07), women washing clothes (s03) and children at the river (s06) are **generic, unnamed and not based on real individuals**. No consent record is needed; no real person's likeness is generated.
+- Friends (s07), mothers washing clothes (s03) and children at the river (s06) are **generic, unnamed and not based on real individuals**. No consent record is needed; no real person's likeness is generated.
 
 ## Private data kept out of free APIs
 Several free endpoints may use inputs for training, so:
-- **Sent:** narration text (which includes my brother's first name), image prompts and music captions.
-- **Never sent:** surnames, the name of the village, phone numbers, photos of real people, or any recorded voice.
+- **Sent:** narration text, image prompts and music captions.
+- **Never sent:** names, surnames, the name of the village, phone numbers, photos of real people, or any recorded voice.
+- **Correction, for honesty:** drafts 1–2 (2026-11-25) named my brother by his first name in two narration lines, and those lines were sent to Gemini TTS (10 requests in `runs.jsonl`) before I decided not to name him. From draft 3 onward, no name is sent.
 
 ## Licences
 Check each one yourself and record the date you checked.

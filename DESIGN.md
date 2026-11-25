@@ -3,14 +3,16 @@
 <!-- Drafted on 2026-11-25 by my coding agent from my own notes. I review it and rewrite it in my own words before submitting. -->
 
 ## Story
-- **Whose story:** mine and my brother's. We grew up side by side in the *geter* (ገጠር), the green Ethiopian countryside.
-- **Logline:** Growing up beside my brother in the green Ethiopian countryside, in a home that always had coffee and was never empty.
-- **Beats:**
-  1. Waking into the *geter*: green fields, floral air, forest bees, birdsong, everyday rural life.
-  2. Growing up side by side: fetching water from the spring together, then football in the open field with the cattle nearby.
-  3. The river and the holidays: swimming downstream, and gathering *qetema* (ቄጠማ) and tall grass with friends before every holiday.
-  4. Home: *qetema* on the floor, coffee on the fire, and the family proverb **ቡና የሌለው ቤት፣ ባዶ ነው** ("a house without coffee is empty").
-  5. Belonging: our home was never empty. Our roots, my brother's and mine, are there.
+- **Whose story:** mine and my brother's. We grew up side by side in the *geter* (ገጠር), the green Ethiopian countryside. In the film he is simply "my brother" (ወንድሜ); his name is not used.
+- **Logline:** Growing up side by side with my brother in the green Ethiopian countryside, in a home that always had coffee and was never empty.
+- **Shape:** one day in the *geter* that grows into a whole childhood: morning, then the day's tasks and play, then the river, then a holiday, then evening coffee, then home.
+  1. Waking into the *geter*: birdsong, the scent of flowers, forest bees, the village waking up.
+  2. The village at work: cattle going out to pasture, mothers washing clothes upstream.
+  3. My brother and I, side by side: fetching water from the spring, then football in the field while the cattle watch.
+  4. The river: swimming downstream when the day grows hot.
+  5. The holiday: gathering *qetema* (ቄጠማ) and tall grass with friends, the *qetema* spread through the house, the coffee brewing.
+  6. The proverb: **ቡና የሌለው ቤት፣ ባዶ ነው** ("a house without coffee is empty").
+  7. Belonging: our home was never empty. My brother's roots and mine are still there, in the *geter*.
 
 ## Audience and intent
 - **Who watches:** my classmates and peers, and Ethiopians who grew up in rural places or long to feel rural life, especially people with that nostalgia.
@@ -20,13 +22,14 @@
 
 ## Design decisions
 - **Narration in Amharic, subtitles in English.** Amharic is the language of the memory and of the proverb. The English subtitles keep it open to everyone in the room.
-- **Gender-neutral first person.** Amharic first-person verbs ("ያደግኩት", "እንሄድ ነበር") do not mark gender, so the narration works without naming the narrator.
-- **The proverb gets its own shot (s09)**, with a slower `speech_metadata.style` and longer pauses, because it is the film's central idea.
-- **The ending answers the proverb.** "A house without coffee is empty" is followed by "our home was never empty", which ties the coffee to warmth, belonging and each other.
-- **Upstream / downstream as a motif.** Women wash clothes upstream (s03) and the children swim downstream (s06): the same river, two kinds of life.
+- **A man's voice, one delivery throughout.** I am the narrator, so the voice is male. Every line uses the delivery I liked in the first draft's opening: "soft and slow, like waking up".
+- **One flowing story, not a list.** Lines hand on to each other ("As the bees hummed… the village woke", "With the water home, we played…", "When a holiday drew near… and as the qetema was spread…"), and the whole narration is read in one continuous take (EXP-02).
+- **The proverb gets its own shot (s09)**, introduced with "as they say" and given longer pauses, because it is the film's central idea.
+- **The ending answers the proverb.** "A house without coffee is empty" is followed by "our home was never empty". The last word, ገጠር, is the word the film opens with.
+- **Upstream / downstream as a motif.** Mothers wash clothes upstream (s03) and the boys swim downstream (s06): the same river, two kinds of life.
 - **The opening valley returns at dusk (s10)**, so the film closes where it began.
-- **Stylised, not portraits.** The children are seen from behind or at a distance in a hand-painted style. This keeps the likeness respectful, reduces consistency problems and matches the consent given (see ETHICS.md).
-- **Nothing that identifies the place.** No village name and no surnames, in the storyboard or in any API call.
+- **Stylised, not portraits.** The boys are seen from behind or at a distance in a hand-painted style. This keeps the likeness respectful, reduces consistency problems and matches the consent given (see ETHICS.md).
+- **Nothing that identifies the family or the place.** No names, no village name and no surnames in the narration, the storyboard or the prompts.
 
 ## Shot reasons
 Each shot's reason is in `storyboard.json` → `shots[].reason`. In short:
@@ -34,7 +37,7 @@ Each shot's reason is in `storyboard.json` → `shots[].reason`. In short:
 | Shot | Size | Reason |
 |---|---|---|
 | s01 | extreme wide | Establish the place and its peace before any people appear |
-| s02 | close-up | Sensory detail (scent, bees) to pull the viewer into the memory |
+| s02 | close-up | Bees on blossoms carry us from waking into the village waking |
 | s03 | wide | Everyday village life: animals, work and the river |
 | s04 | medium | Introduce my brother and the bond: a shared daily task |
 | s05 | wide | Play and joy: a lighter beat after the chores |
@@ -45,17 +48,26 @@ Each shot's reason is in `storyboard.json` → `shots[].reason`. In short:
 | s10 | extreme wide | Belonging: the opening valley at dusk |
 
 ## Prototype: the radio cut
-- **What it is:** Amharic narration with English subtitles on a black screen, over a placeholder pad ducked under the voice. Built with `py -m pipeline narration`, then `py -m pipeline assemble --mode radio`.
-- **File to share:** `outputs/cuts/radio_4e62d2e01523.mp4` (85 s, 1.9 MB, −14.8 LUFS).
-- **Change made before testing (EXP-01):** the measured narration runs at 87 Amharic words per minute, so draft 1's shot lengths were too short for 8 of 10 lines. Draft 2 sets each `duration_s` from the measured line. The words did not change.
+- **What it is:** Amharic narration with English subtitles on a black screen, over a placeholder pad ducked under the voice. Built with `py -m pipeline narration`, then `retime`, then `assemble --mode radio`.
+- **Draft 2** (`outputs/cuts/radio_4e62d2e01523.mp4`, 85 s): the measured narration runs at 87 Amharic words per minute, so draft 1's shot lengths were too short for 8 of 10 lines. Draft 2 set each `duration_s` from the measured line (EXP-01).
+
+### My own review of draft 2, and what changed (draft 3)
+| What I noticed | Change in draft 3 |
+|---|---|
+| I'd rather not name my brother; "my brother and I" is enough | name removed from narration and subtitles (`brother_child`) |
+| It felt like separate sentences; I want a flowing story | rewritten as one day; lines joined by connectives |
+| The opening voice was great ("cool"); later lines changed | one style for every line (the opening's), one continuous read (EXP-02) |
+| I am a man and want a man's voice | male voice audition (EXP-03); Charon set provisionally |
+
+- **Draft 3 radio cut:** TODO, waiting for the daily TTS quota (FAILURES.md F-09).
 
 ## User test 1: radio cut (at least 3 people from the audience)
-**How:** play the radio cut once without introduction (in person, or on Slack or Telegram with headphones), then ask:
+**How:** play the draft 3 radio cut once without introduction (in person, or on Slack or Telegram with headphones), then ask:
 1. What did you picture? Which moment felt most like *your* home?
-2. Where did your attention drift, and was any part too long? (Watch s03, a 13 s list of village sounds.)
-3. Did any Amharic word sound wrong or unnatural? (Ask native speakers especially: ያንጎራጉሩ, ተጎዝጉዞ, ቄጠማ.)
+2. Where did your attention drift, and was any part too long?
+3. Did any Amharic word sound wrong or unnatural? (Ask native speakers especially: ሲያንጎራጉሩ, ሲጎዘጎዝ, ቄጠማ, እንደሚባለው.)
 4. Did the proverb land? What did the ending make you feel?
-5. Was the voice right for this story? (Currently the prebuilt voice "Kore".)
+5. Was the voice right for this story? Did it feel like one person telling one story?
 
 | Who (relation, not full name) | Grew up rural? | Date | What they said | Where they reacted |
 |---|---|---|---|---|

@@ -93,3 +93,17 @@ What broke, what I tried, what fixed it (or how I worked around it). Write these
   - The CLI prints a short `stage failed:` message and reminds you that finished shots are cached (`--debug` shows the traceback).
   - Re-running resumed at s07: s01–s06 were cache hits, and s07–s10 were generated with no further 429s.
 - **Lesson:** use the wait time the server sends instead of guessing. Caching turned a crash into a resume, at no extra quota.
+
+---
+
+### F-09: Daily TTS cap of 10 requests hit during the voice audition, and my logs hid it
+- **Date:** 2026-11-25
+- **Stage / model:** auditions / gemini-3.8-flash-tts
+- **What happened:** auditioning 5 male voices on the new opening line ran for more than 10 minutes. Most attempts returned `429 ... limit: 10, model: gemini-3.8-flash-tts, description: Generate content requests per day limit`. Each retry waited my 120 s cap. Only Charon and Iapetus got through (one each, minutes apart), so the daily window seems to let a request through now and then rather than resetting all at once (observed, not confirmed).
+- **Second problem:** `runs.jsonl` cut error text at 500 characters, which dropped the words "per day". At first I read the 429s as the per-minute limit from F-08.
+- **What I tried:** read the full error text, stopped the audition (more retries could not succeed), and counted today's TTS requests in `runs.jsonl`: smoke tests, probes and 10 narration lines had used the budget.
+- **What fixed it / workaround:**
+  - Logged errors now keep the quota metric, limit, description and `retryDelay` (`modelcall._short_error`).
+  - **Design change:** a `continuous` narration mode reads the whole story in **one** TTS call and splits it at the pauses (`common/silence.py`). A full re-voice now costs 1 request instead of 10. This also answers my own feedback that the voice should stay the same throughout (EXP-02).
+  - The live continuous read waits for quota. Google's docs say daily limits reset at midnight Pacific time (about 11:00 EAT).
+- **Lesson:** at 10 requests a day, the unit of work has to be the whole narration, not the line. And a log that cuts off the reason for an error is a log that misleads.
