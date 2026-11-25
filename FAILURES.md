@@ -50,3 +50,32 @@ What broke, what I tried, what fixed it (or how I worked around it). Write these
 - **What I tried:** added `origin` using `<codehena>` placeholder brackets in the repository URL and ran `git push -u origin master`.
 - **What fixed it / workaround:** updated the remote URL with `git remote set-url origin https://github.com/codehena/ai-film-pipeline.git` without angle brackets, then re-ran `git push -u origin master`.
 - **Lesson:** replace placeholder brackets (`<...>`) completely when copying remote URLs before pushing.
+
+---
+
+### F-05: FFmpeg and Git "not found" right after installing them
+- **Date:** 2026-11-25
+- **Stage / model:** setup / assemble (FFmpeg)
+- **What happened:** after `winget install` of Git and FFmpeg, a terminal that was already open still reported `git` / `ffmpeg` as not recognised.
+- **What I tried:** reloading PATH from the registry in the session made both visible, which showed the binaries were installed but the old terminal's PATH was stale.
+- **What fixed it / workaround:** `config.find_tool()` looks for FFmpeg in this order: an `FFMPEG_PATH` override in `.env`, then PATH, then winget's own install folders. A missing binary now gives a clear `missing tool:` message with the fix. The smoke test found FFmpeg 9.1 through the winget fallback even with the stale PATH.
+- **Lesson:** open a new terminal after installing tools, and don't let the pipeline depend on PATH alone.
+
+---
+
+### F-06: Gemini TTS rejected every request: wrong API version, unlisted model, new audio format
+- **Date:** 2026-11-25
+- **Stage / model:** smoke / Gemini TTS
+- **What happened:** `models.list` returned 28 models and none had "tts" in its name. Probing five likely ids all failed with the same `400 INVALID_ARGUMENT: Unknown name "speechConfig" at 'generation_config'` (and `"speechMetadata"`), before the model id was even checked.
+- **What I tried:** stripped the request to a minimal TTS call and printed the SDK's default API version: `v1`.
+- **What fixed it / workaround:** created the client with `HttpOptions(api_version="v1beta")`. On v1beta, `gemini-3.8-flash-tts` works although `models.list` does not list it. `gemini-3.8-flash-preview-tts` returned 404, and `gemini-3.8-flash` returned 503 (high demand). The 3.8 TTS model returns `audio/wav` (with a header) where older models returned raw PCM, so `save_audio()` checks for the `RIFF` header instead of always wrapping the data. First Amharic line: 3.48 s of audio in 3.01 s.
+- **Lesson:** the model list is not the whole truth. Probe candidates and log every probe in `runs.jsonl`, and check what format the bytes actually are, not what the docs say.
+
+---
+
+### F-07: Smoke test reported success while TTS was silently skipped
+- **Date:** 2026-11-25
+- **Stage / model:** smoke
+- **What happened:** the first smoke run found no TTS model, skipped the TTS step without recording it, and exited 0.
+- **What fixed it / workaround:** a missing TTS model is now recorded as `FAILED` and the command exits 1.
+- **Lesson:** "nothing to do" must still be reported, or a broken stage looks green.

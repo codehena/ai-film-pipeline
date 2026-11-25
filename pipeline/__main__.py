@@ -44,7 +44,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--storyboard", default=str(config.STORYBOARD), help="path to storyboard.json")
     sub = p.add_subparsers(dest="command", required=True)
     sub.add_parser("validate", help="check storyboard.json against the schema and rules")
-    sub.add_parser("smoke", help="call each provider once and log latency")
+    sm = sub.add_parser("smoke", help="call each provider once and log latency")
+    sm.add_argument("--text-model")
+    sm.add_argument("--tts-model")
+    sm.add_argument("--image-model")
     for name in STAGES:
         sp = sub.add_parser(name, help=f"run the {name} stage")
         sp.add_argument("--shot", action="append", metavar="ID",
@@ -64,8 +67,8 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         config.load_env()
         if args.command == "smoke":
-            smoke.run()
-            return 0
+            results = smoke.run(args.text_model, args.tts_model, args.image_model)
+            return 0 if all(r[0] == "ok" for r in results.values()) else 1
         data = check_storyboard(args.storyboard, show_warnings=False)
         if args.command == "film":
             for name in FILM_ORDER:
@@ -79,6 +82,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     except config.MissingSecret as e:
         print(f"missing secret: {e}", file=sys.stderr)
+        return 1
+    except config.MissingTool as e:
+        print(f"missing tool: {e}", file=sys.stderr)
         return 1
     except NotBuiltYet as e:
         print(f"not built yet: {e}", file=sys.stderr)

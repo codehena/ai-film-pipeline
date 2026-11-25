@@ -30,6 +30,10 @@ def is_transient(exc: BaseException) -> bool:
         return False
     if isinstance(exc, (TimeoutError, ConnectionError)):
         return True
+    # google-genai APIError (and similar SDK errors) carry the HTTP status as .code
+    code = getattr(exc, "code", None)
+    if isinstance(code, int) and 400 <= code < 600:
+        return code == 429 or code >= 500
     try:
         import requests
     except ImportError:

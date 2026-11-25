@@ -27,6 +27,32 @@ def _short_error(exc: BaseException) -> str:
     return f"{type(exc).__name__}: {exc}"[:500]
 
 
+def logged_call(
+    fn: Callable[[], object],
+    *,
+    stage: str,
+    shot: str | None,
+    provider: str,
+    model: str,
+    params: dict,
+    seed: int | None = None,
+    output: str | None = None,
+    attempts: int = DEFAULT_ATTEMPTS,
+    log_path: Path | None = None,
+    sleep: Callable[[float], None] = time.sleep,
+):
+    """Retry + log a call that is deliberately NOT cached (smoke tests, model listings)."""
+    common = dict(stage=stage, shot=shot, provider=provider, model=model, params=params,
+                  seed=seed, input_hash=None, log_path=log_path)
+
+    def on_attempt(n: int, latency: float, err: BaseException | None) -> None:
+        log_call(**common, status="ok" if err is None else "error", attempt=n,
+                 latency_s=latency, output=output if err is None else None,
+                 error=None if err is None else _short_error(err))
+
+    return with_retry(fn, attempts=attempts, on_attempt=on_attempt, sleep=sleep)
+
+
 def run_model_step(
     *,
     stage: str,
