@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "notes": "Draft 4 (2026-11-25): narration polished after user test 1 (3 listeners, DESIGN.md): richer sensory opening, fewer ነበር endings (8 -> 4) with clauses chained across shots, smoother close on loving a rural childhood. Pauses follow the read's own gaps (Option A, EXPERIMENTS.md EXP-06). Brother not named. Iapetus, one continuous TTS read. Character descriptions are proposals: adjust before keyframes. s09 is an insert pushing in on s08's jebena: 3 takes of its own keyframe failed (a handled mug twice, then a two-spouted pot; EXPERIMENTS.md EXP-07).",
+  "notes": "Draft 4 (2026-11-25): narration polished after user test 1 (3 listeners, DESIGN.md): richer sensory opening, fewer ነበር endings (8 -> 4) with clauses chained across shots, smoother close on loving a rural childhood. Pauses follow the read's own gaps (Option A, EXPERIMENTS.md EXP-06). Brother not named. Iapetus, one continuous TTS read. Character descriptions are proposals: adjust before keyframes. s09 is an insert pushing in on s08's jebena: 3 takes of its own keyframe failed (a handled mug twice, then a two-spouted pot; EXPERIMENTS.md EXP-07). Draft 4c pictures (2026-11-25): beats show each named thing as it is spoken (s02, s03, s10); ensera jars, swimming in shorts, friends turned away, the brothers at the ceremony in traditional clothes, gojo bet farmland; head-safe framing (F-19, F-20).",
   "title": "ገጠር - Geter",
   "logline": "Growing up side by side with my brother in the green Ethiopian countryside, in a home that always had coffee and was never empty.",
   "audience": "Classmates and peers watching together in class, and Ethiopians who grew up in rural places and miss them",
@@ -77,7 +77,7 @@
     {
       "id": "s02",
       "duration_s": 12.5,
-      "reason": "A burst of rural life (bees, birds, calves, chickens) and the narrator's longing for it",
+      "reason": "The senses of the village, each shown as it is named: bees, birds, calves, chickens",
       "shot_size": "close_up",
       "characters": [],
       "image_prompt": "branch of a flowering tree in close-up, white and yellow blossoms, honey bees on the flowers, soft background blur",
@@ -94,7 +94,24 @@
       "video": {
         "method": "wan_i2v",
         "fallback": "ken_burns"
-      }
+      },
+      "beats": [
+        {
+          "from_word": 4,
+          "image_prompt": "small colourful songbirds singing on a branch of a flowering tree, beaks open, morning light",
+          "motion_prompt": "birds hopping along the branch, camera static"
+        },
+        {
+          "from_word": 6,
+          "image_prompt": "two young calves running and jumping playfully in a green meadow, legs kicking up, morning light",
+          "motion_prompt": "calves leaping across the meadow, slow pan left to right"
+        },
+        {
+          "from_word": 8,
+          "image_prompt": "brown hens walking and pecking at grain on the dirt yard beside a round thatched house",
+          "motion_prompt": "hens pecking and walking, camera static"
+        }
+      ]
     },
     {
       "id": "s03",
@@ -102,7 +119,7 @@
       "reason": "Everyday village life: animals, work and the river that later shots return to",
       "shot_size": "wide",
       "characters": [],
-      "image_prompt": "cattle walking out to a green field, a calf leaping, chickens scurrying in the foreground, a donkey and a horse carrying loads on a dirt path, women washing clothes at a river bend in the distance",
+      "image_prompt": "a herd of cattle walking out along a dirt path to a green pasture in the morning, a donkey carrying a load behind them, rolling green hills",
       "motion_prompt": "slow pan left to right, cattle walking, river water flowing",
       "seed": 1003,
       "narration": {
@@ -116,7 +133,14 @@
       "video": {
         "method": "wan_i2v",
         "fallback": "ken_burns"
-      }
+      },
+      "beats": [
+        {
+          "from_word": 4,
+          "image_prompt": "women in white cotton dresses washing clothes on the rocks of a river bend, seen from behind and from a distance, washed clothes laid out to dry on the grass",
+          "motion_prompt": "river water flowing, camera static"
+        }
+      ]
     },
     {
       "id": "s04",
@@ -127,7 +151,7 @@
         "narrator_child",
         "brother_child"
       ],
-      "image_prompt": "two boys seen from behind walking side by side on a grassy path toward a spring, each carrying a yellow water container",
+      "image_prompt": "two boys seen from behind walking side by side on a grassy path toward a spring, each carrying a traditional round clay water jar (ensera) on his back, held with a rope over the shoulder",
       "motion_prompt": "camera follows slowly behind them, grass moving in the wind",
       "seed": 1004,
       "narration": {
@@ -152,7 +176,7 @@
         "narrator_child",
         "brother_child"
       ],
-      "image_prompt": "two boys playing football in an open green field, a homemade ball, cows grazing nearby watching",
+      "image_prompt": "two boys playing football in an open green field, seen from behind and from a distance, a homemade ball, cows grazing nearby watching",
       "motion_prompt": "camera static, the boys run after the ball, a cow turns its head",
       "seed": 1005,
       "narration": {
@@ -177,7 +201,7 @@
         "narrator_child",
         "brother_child"
       ],
-      "image_prompt": "boys swimming and splashing in a shallow river, late afternoon light, trees along the banks",
+      "image_prompt": "two boys swimming and splashing in a shallow river, seen from behind and at a distance, their shirts folded on a rock on the riverbank, late afternoon light, trees along the banks",
       "motion_prompt": "slow push-in, water splashing gently, light glittering on the river",
       "seed": 1006,
       "narration": {
@@ -191,6 +215,10 @@
       "video": {
         "method": "wan_i2v",
         "fallback": "ken_burns"
+      },
+      "appearance": {
+        "narrator_child": "an Ethiopian highland boy of about ten, slim, warm brown skin, short tightly curled black hair, swimming in knee-length khaki shorts, his faded green shirt left folded on the riverbank rock",
+        "brother_child": "an Ethiopian highland boy of about ten, slim, warm brown skin, short tightly curled black hair, swimming in dark blue shorts, his faded red shirt left folded on the riverbank rock"
       }
     },
     {
@@ -202,7 +230,7 @@
         "narrator_child",
         "brother_child"
       ],
-      "image_prompt": "children gathering bundles of fresh green qetema grass and tall grass in a meadow, holding the bundles in their arms",
+      "image_prompt": "the two boys gathering bundles of fresh green qetema grass and tall grass in a meadow, a few friends around them on the grass, everyone seen from behind or turned away, faces not visible",
       "motion_prompt": "camera static, children lifting bundles of grass, grass swaying",
       "seed": 1007,
       "narration": {
@@ -276,11 +304,14 @@
     {
       "id": "s10",
       "duration_s": 12.9,
-      "reason": "Close on belonging: the same valley at dusk answers the opening and the proverb",
+      "reason": "Our home was never empty: the two of us at the coffee ceremony, then the farmland around the homestead",
       "shot_size": "extreme_wide",
-      "characters": [],
-      "image_prompt": "the same green rural valley at dusk, warm light in the round houses, smoke rising from a roof, flowering trees in silhouette",
-      "motion_prompt": "slow pull-back, smoke rising, light fading",
+      "characters": [
+        "narrator_child",
+        "brother_child"
+      ],
+      "image_prompt": "inside a rural Ethiopian home at a holiday coffee ceremony: the two boys sitting together on a low bench beside a black clay jebena on its charcoal brazier and a tray of small sini cups, family around them, seen from behind and the side, warm lamplight, fresh qetema on the floor",
+      "motion_prompt": "slow push-in, steam rising from the jebena",
       "seed": 1010,
       "narration": {
         "text": "የእኛ ቤት ግን ባዶ ሆኖ አያውቅም። እነዚህ ነገሮች በገጠር ማደጌን እንድወደው አድርገውኛል፤ እዚያ ያደገ ሁሉ ይህን ስሜት ያውቀዋል፣ መቼም አይረሳውም።",
@@ -293,7 +324,19 @@
       "video": {
         "method": "wan_i2v",
         "fallback": "ken_burns"
-      }
+      },
+      "appearance": {
+        "narrator_child": "an Ethiopian highland boy of about ten, slim, warm brown skin, short tightly curled black hair, wearing traditional white cotton holiday clothes with a green woven tibeb border",
+        "brother_child": "an Ethiopian highland boy of about ten, slim, warm brown skin, short tightly curled black hair, wearing traditional white cotton holiday clothes with a red woven tibeb border"
+      },
+      "beats": [
+        {
+          "from_word": 6,
+          "characters": [],
+          "image_prompt": "evening view of farmland around a rural Ethiopian homestead: traditional gojo bet round houses with conical thatched roofs, terraced fields of teff and maize, eucalyptus trees, smoke rising from a roof, warm dusk light",
+          "motion_prompt": "slow pull-back, smoke rising, light fading"
+        }
+      ]
     }
   ],
   "music_cues": [
