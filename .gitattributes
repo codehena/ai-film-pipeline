@@ -1,0 +1,11 @@
+# Store text with LF in the repository so diffs are identical on every OS
+* text=auto eol=lf
+Makefile text eol=lf
+*.ps1 text eol=crlf
+
+# Media is binary (normally git-ignored anyway)
+*.png binary
+*.jpg binary
+*.wav binary
+*.mp3 binary
+*.mp4 binary
