@@ -105,5 +105,6 @@ What broke, what I tried, what fixed it (or how I worked around it). Write these
 - **What fixed it / workaround:**
   - Logged errors now keep the quota metric, limit, description and `retryDelay` (`modelcall._short_error`).
   - **Design change:** a `continuous` narration mode reads the whole story in **one** TTS call and splits it at the pauses (`common/silence.py`). A full re-voice now costs 1 request instead of 10. This also answers my own feedback that the voice should stay the same throughout (EXP-02).
-  - The live continuous read waits for quota. Google's docs say daily limits reset at midnight Pacific time (about 11:00 EAT).
+  - The live continuous read waits for quota. **Reset time confirmed from the log:** with the fuller error text, the next attempt (01:35 UTC) recorded `retryDelay: '23084s'`, i.e. 6.4 h, which ends at 08:00 UTC: midnight Pacific time, **11:00 EAT**.
+  - **Follow-up bug:** my retry still waited its 120 s cap three times against that 6.4 h wait, which was pointless. Now, when the server asks for longer than the cap, `with_retry` stops at once with `QuotaExhausted` and says when the quota resets (`tests/test_retry.py::test_long_server_wait_fails_fast_instead_of_retrying`).
 - **Lesson:** at 10 requests a day, the unit of work has to be the whole narration, not the line. And a log that cuts off the reason for an error is a log that misleads.

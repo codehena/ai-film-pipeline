@@ -6,7 +6,7 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 | Provider | Limit found | How I found it | Date |
 |---|---|---|---|
 | Gemini API, `gemini-3.8-flash-tts` | **3 requests per minute** per model (`GenerateRequestsPerMinutePerProjectPerModel-FreeTier`, quotaValue 3) | 429 error during narration (FAILURES.md F-08) | 2026-11-25 |
-| Gemini API, `gemini-3.8-flash-tts` | **10 requests per day** ("Generate content requests per day limit", limit 10) | 429 errors during the voice audition (F-09) | 2026-11-25 |
+| Gemini API, `gemini-3.8-flash-tts` | **10 requests per day** ("Generate content requests per day limit", limit 10); resets 08:00 UTC = 11:00 EAT (`retryDelay` 23084 s at 01:35 UTC) | 429 errors during the voice audition (F-09) | 2026-11-25 |
 | Gemini API, text models | TODO (no limit hit yet) | | |
 | Cloudflare Workers AI | TODO (daily neurons) | | |
 | Kaggle GPU | TODO (hours/week) | | |
