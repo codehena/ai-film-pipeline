@@ -266,10 +266,10 @@
     {
       "id": "s08",
       "duration_s": 6.2,
-      "reason": "Warmth of home: qetema, coffee and people dressed up for the holiday",
+      "reason": "Warmth of home: an authentic buna ceremony, qetema on the floor, women in habesha kemis and netela",
       "shot_size": "insert",
       "characters": [],
-      "image_prompt": "Ethiopian holiday coffee ceremony inside a rural home: a traditional black clay jebena coffee pot with a round body and a long narrow neck resting on a small charcoal brazier, a low wooden tray with small white handleless sini cups, fresh green qetema grass spread on the floor, women in white netela shawls seated on low stools, seen from behind, warm light from a doorway",
+      "image_prompt": "authentic Ethiopian buna coffee ceremony in a rural home, seen from the side and behind: women wearing traditional Ethiopian habesha kemis, long white handwoven cotton dresses with colourful woven tibeb borders at the hem and cuffs, a light white cotton netela shawl with a tibeb border draped over the shoulders, hair braided; in the centre, on a woven straw ring on the floor beside a small charcoal brazier, a tall black clay jebena: a spherical body at the bottom with a long thin vertical neck rising from its top like a bottle neck, the neck as tall as the body, a thin straight spout rising from the shoulder of the body beside the neck, and a small loop handle joining the neck to the body; tiny white porcelain sini cups shaped like small round bowls arranged on a low carved wooden rekebot tray; frankincense smoke from a small clay incense burner; a plate of popcorn; fresh green qetema grass spread on the floor; warm light from a doorway",
       "motion_prompt": "camera static, steam and incense smoke rising slowly",
       "seed": 1008,
       "narration": {
@@ -284,10 +284,10 @@
         "method": "wan_i2v",
         "fallback": "ken_burns",
         "safe_box": [
-          0.12,
-          0.3,
+          0.1,
+          0.21,
           0.92,
-          0.55
+          0.77
         ]
       }
     },
@@ -312,16 +312,22 @@
         "method": "ken_burns",
         "fallback": "still",
         "focus": [
-          0.52,
-          0.52
+          0.5,
+          0.62
         ],
         "still": {
           "from": "s08",
           "zoom": [
-            1.5,
-            1.9
+            1.15,
+            1.4
           ]
-        }
+        },
+        "safe_box": [
+          0.4,
+          0.42,
+          0.6,
+          0.82
+        ]
       }
     },
     {
