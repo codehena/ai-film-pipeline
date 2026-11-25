@@ -171,9 +171,11 @@ def zoompan_filter(move: Move, frames: int, focus_y: float, out_w: int, out_h: i
     return f"zoompan=z='{z}':x='{x}':y='{y}':d=1:s={out_w}x{out_h}:fps={FPS}"
 
 
-def still_segment_cmd(ffmpeg: str, image: Path, image_wh: tuple[int, int], ratio_key: str,
-                      focus: tuple[float, float], move: Move, frames: int, out: Path,
-                      safe_box: Box | None = None) -> list[str]:
+def still_plan(image_wh: tuple[int, int], ratio_key: str, focus: tuple[float, float],
+               move: Move, safe_box: Box | None = None) -> dict:
+    """Exactly what a still segment will show: crop window, fitted move, vertical centre.
+    Segments are cached by THIS, not by its inputs, so a change to the framing rules
+    rebuilds exactly the segments whose pixels change (and no others)."""
     out_w, out_h = FORMATS[ratio_key]
     window = crop_window(*image_wh, out_w / out_h, focus, safe_box)
     x, y, w, h = window
@@ -183,6 +185,17 @@ def still_segment_cmd(ffmpeg: str, image: Path, image_wh: tuple[int, int], ratio
     else:
         # focus inside the crop window, so the zoom closes in on the subject
         fy = min(max((focus[1] * image_wh[1] - y) / h, 0.0), 1.0)
+    return {"window": window, "zoom": [round(z, 6) for z in move.zoom],
+            "drift": [round(d, 6) for d in move.drift], "fy": round(fy, 6), "out": (out_w, out_h)}
+
+
+def still_segment_cmd(ffmpeg: str, image: Path, image_wh: tuple[int, int], ratio_key: str,
+                      focus: tuple[float, float], move: Move, frames: int, out: Path,
+                      safe_box: Box | None = None) -> list[str]:
+    plan = still_plan(image_wh, ratio_key, focus, move, safe_box)
+    x, y, w, h = plan["window"]
+    out_w, out_h = plan["out"]
+    move, fy = Move(tuple(plan["zoom"]), tuple(plan["drift"])), plan["fy"]
     vf = (f"crop={w}:{h}:{x}:{y},scale={w * UPSCALE}:{h * UPSCALE}:flags=lanczos,"
           f"{zoompan_filter(move, frames, fy, out_w, out_h)},setsar=1,format=yuv420p")
     return [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-loop", "1",

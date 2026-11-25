@@ -80,3 +80,15 @@ def test_too_wide_box_is_centred_not_left_aligned():
 def test_margin_shrinks_before_the_box_is_cut():
     box = (0.10, 0.21, 0.92, 0.77)                   # s08: heads to jebena, 56% of the height
     assert inside(box, render.crop_window(*SQ, WIDE, safe_box=box))   # fits without its margin
+
+
+def test_segment_plan_changes_only_when_the_framing_changes(monkeypatch):
+    m = render.Move((1.0, 1.1), (0.5, 0.5))
+    a = render.still_plan(SQ, "16:9", (0.5, 0.5), m, HEADS_TOP)
+    assert render.still_plan(SQ, "16:9", (0.5, 0.5), m, HEADS_TOP) == a          # stable
+    # a rule change that does NOT move any pixels keeps the key (no needless rebuild):
+    monkeypatch.setattr(render, "SAFE_MARGIN", 0.06)            # window already pinned at the top
+    assert render.still_plan(SQ, "16:9", (0.5, 0.5), m, HEADS_TOP) == a
+    # a rule change that DOES change what is shown changes the key (no stale segment):
+    monkeypatch.setattr(render, "fit_move", lambda move, box: (render.Move((1.0, 1.0), (0.5, 0.5)), 0.4))
+    assert render.still_plan(SQ, "16:9", (0.5, 0.5), m, HEADS_TOP) != a

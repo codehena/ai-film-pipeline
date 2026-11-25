@@ -373,14 +373,17 @@ def shot_visual(storyboard: dict, shot: dict, out_base: Path | None) -> dict:
 
 def _segment(ffmpeg: str, parts: Path, shot_id: str, ratio: str, visual: dict, frames: int) -> Path:
     """One shot, one aspect ratio: cached by everything that changes its pixels."""
+    wh = render.image_size(visual["path"])
+    if visual["kind"] == "still":   # key on the actual framing, so rule changes can't go stale
+        framing = render.still_plan(wh, ratio, visual["focus"], visual["move"], visual["safe_box"])
+    else:
+        framing = {"window": render.crop_window(*wh, render.FORMATS[ratio][0] / render.FORMATS[ratio][1],
+                                                visual["focus"], visual["safe_box"])}
     key = {"v": RENDER_VERSION, "ratio": ratio, "frames": frames, "kind": visual["kind"],
-           "source": file_hash(visual["path"]), "focus": visual["focus"],
-           "safe_box": visual["safe_box"],
-           "move": asdict(visual["move"]) if visual["kind"] == "still" else None}
+           "source": file_hash(visual["path"]), "framing": framing}
     out = parts / f"{shot_id}_{ratio.replace(':', 'x')}_{stable_hash(key)}.mp4"
     if not out.exists():
         tmp = out.with_name(out.stem + ".part.mp4")
-        wh = render.image_size(visual["path"])
         if visual["kind"] == "clip":
             cmd = render.clip_segment_cmd(ffmpeg, visual["path"], wh, ratio, visual["focus"], frames,
                                           tmp, visual["safe_box"])
