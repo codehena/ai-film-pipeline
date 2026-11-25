@@ -62,3 +62,21 @@ def test_find_tool_respects_env_override(tmp_path, monkeypatch):
     monkeypatch.setenv("FFMPEG_PATH", str(tmp_path / "missing.exe"))
     with pytest.raises(config.MissingTool):
         config.find_tool("ffmpeg")
+
+
+def test_image_requests_a_model_cannot_honour_are_refused(tmp_path):
+    from pipeline.common.retry import PermanentError
+    from pipeline.providers import cloudflare
+    with pytest.raises(PermanentError, match="width/height"):
+        cloudflare.text_to_image(model="@cf/black-forest-labs/flux-1-schnell", prompt="x",
+                                 params={"width": 512}, out_path=tmp_path / "a.jpg")
+    with pytest.raises(PermanentError, match="reference"):
+        cloudflare.text_to_image(model="@cf/black-forest-labs/flux-1-schnell", prompt="x",
+                                 params={}, out_path=tmp_path / "a.jpg", references=[tmp_path / "r.jpg"])
+
+
+def test_image_format_sniffing():
+    from pipeline.providers.cloudflare import image_format
+    assert image_format(b"\xff\xd8\xff\xe0") == "jpeg"
+    assert image_format(b"\x89PNG\r\n\x1a\n....") == "png"
+    assert image_format(b"GIF89a") == "unknown"

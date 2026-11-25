@@ -23,6 +23,8 @@
     "style_mode": "speech_metadata",
     "language_code": "am"
   },
+  "image": { "model": "@cf/black-forest-labs/flux-2-klein-4b", "width": 1024, "height": 1024, "reference_sheets": true },
+  "score": { "model": "ACE-Step-1.5", "duration_s": 75, "candidates": 3, "chosen": null },
   "shots": [
     {
       "id": "s01", "duration_s": 7, "reason": "TODO: establish the place and time",

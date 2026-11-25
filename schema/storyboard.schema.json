@@ -5,7 +5,7 @@
   "description": "The contract between every pipeline stage. Every stage reads this file; nothing about the film is hidden in code.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "title", "logline", "audience", "intent", "language", "format", "style_block", "characters", "voice", "shots", "music_cues", "end_card"],
+  "required": ["version", "title", "logline", "audience", "intent", "language", "format", "style_block", "characters", "voice", "image", "shots", "music_cues", "end_card"],
   "properties": {
     "version": { "const": 1 },
     "notes": { "type": "string", "description": "Free text for humans. Ignored by the pipeline." },
@@ -63,6 +63,30 @@
           "default": "per_line",
           "description": "per_line: one TTS call per shot (cheap single-line retakes). continuous: the whole narration in ONE call (one voice and flow throughout), split at pauses into per-shot segments. Per-line style overrides are ignored in continuous mode."
         }
+      }
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "width", "height"],
+      "description": "Keyframe generation. One square master per shot, cropped to 16:9 and 9:16 in assembly (subjects are centred).",
+      "properties": {
+        "model": { "type": "string", "minLength": 1, "description": "Must be listed in providers/cloudflare.MODELS." },
+        "width": { "type": "integer", "minimum": 256, "maximum": 2048, "multipleOf": 16 },
+        "height": { "type": "integer", "minimum": 256, "maximum": 2048, "multipleOf": 16 },
+        "reference_sheets": { "type": "boolean", "default": true, "description": "One reference sheet per character; every shot of that character is conditioned on it (if the model supports references)." }
+      }
+    },
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "duration_s", "candidates"],
+      "description": "Music generated on Kaggle (ACE-Step) from music_cues, then trimmed to the film length.",
+      "properties": {
+        "model": { "type": "string", "minLength": 1 },
+        "duration_s": { "type": "number", "minimum": 30, "maximum": 180 },
+        "candidates": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "chosen": { "type": ["integer", "null"], "minimum": 1, "description": "Which candidate is used in the film (null = placeholder pad)." }
       }
     },
     "shots": {
