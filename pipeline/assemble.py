@@ -79,7 +79,8 @@ def plan_timeline(storyboard: dict, durations: dict[str, float],
             line.start = round(max(t + before, free_from), 3)
             line.end = round(line.start + d, 3)
             line.overrun_s = round(max(0.0, line.end + after - line.slot_end), 3)
-            line.recommended_s = math.ceil((before + d + after) * 2) / 2  # to the next 0.5 s
+            # up to the next 0.1 s (was 0.5 s, which added 0-0.5 s of arbitrary silence per line)
+            line.recommended_s = math.ceil(round((before + d + after) * 10, 6)) / 10
             line.audio = config.rel(audio[shot["id"]]) if audio else None
             free_from = line.end + max(after, MIN_GAP_S)
         lines.append(line)

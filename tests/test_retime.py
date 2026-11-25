@@ -13,8 +13,8 @@ def spoken(board):
     return board
 
 
-LINE_S = 6.5        # 0.3 + 6.5 + 0.5 = 7.3 -> rounded up to 7.5; 8 shots -> 60 s + 3 s end card
-EXPECTED_S = 7.5
+LINE_S = 6.5        # 0.3 + 6.5 + 0.5 = 7.3 (rounded up to 0.1 s); 8 shots -> 58.4 s + 3 s end card
+EXPECTED_S = 7.3
 
 
 def test_durations_follow_measured_lines(board):
@@ -60,7 +60,7 @@ def test_run_writes_one_field_per_line(board, tmp_path, monkeypatch):
     out = tmp_path / "storyboard.json"
     retime.run(board, out)
     text = out.read_text(encoding="utf-8")
-    assert '\n      "duration_s": 7.5,' in text
+    assert '\n      "duration_s": 7.3,' in text
     assert load_json(out)["shots"][0]["duration_s"] == EXPECTED_S
     json.loads(text)
     assert b"\r\n" not in out.read_bytes()  # LF on every OS, as .gitattributes stores it

@@ -3,7 +3,7 @@
     py -m pipeline retime
 
 For every spoken shot, duration_s becomes the radio cut's recommendation
-(pause_before + line + pause_after, rounded up to 0.5 s). Silent shots keep
+(pause_before + line + pause_after, rounded up to 0.1 s). Silent shots keep
 their duration. Music cue times that sat exactly on a shot start (or on the
 film's end) move with that shot, so the spotting survives the retime.
 

@@ -30,7 +30,7 @@ def test_long_line_reports_overrun_and_recommendation(board):
     meta(board, 0, pause_before_s=0.3, pause_after_s=0.5)
     lines, _ = assemble.plan_timeline(board, {"s01": slot + 1.0})
     assert lines[0].overrun_s == pytest.approx(1.8)
-    assert lines[0].recommended_s == 9.0               # 0.3 + 8 + 0.5 = 8.8 -> 9.0
+    assert lines[0].recommended_s == 8.8               # 0.3 + 8 + 0.5, rounded up to 0.1 s
 
 
 def test_overrunning_line_pushes_the_next_line_not_overlaps(board):
@@ -153,3 +153,11 @@ def test_split_cues_share_the_line_time_without_gaps(board):
     times = [c.splitlines()[1] for c in cues[:3]]
     assert times[0].startswith("00:00:00,300") and times[2].endswith("00:00:09,300")
     assert times[0].split(" --> ")[1] == times[1].split(" --> ")[0]
+
+
+def test_recommendation_rounds_up_to_a_tenth_without_float_noise(board):
+    board["shots"][0]["narration"]["speech_metadata"] = {"pause_before_s": 0.25, "pause_after_s": 0.45}
+    lines, _ = assemble.plan_timeline(board, {"s01": 3.3})   # 0.25 + 3.3 + 0.45 = 4.0 exactly
+    assert lines[0].recommended_s == 4.0
+    lines, _ = assemble.plan_timeline(board, {"s01": 3.31})
+    assert lines[0].recommended_s == 4.1
