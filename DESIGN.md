@@ -194,6 +194,13 @@ Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answe
 | | | | | |
 | | | | | |
 
+### Shipping decision for the narration (2026-11-25)
+- **Ship draft 4b (Option A) as the narration** (`radio_4fa2a5146bca.mp4` audio). It's good, though I'd still like the reading to sound a little more natural. Option B (one targeted re-read: grouping the half-sentences in s03/s05, lightening the s02/s08 lists) stays documented as the next step if time allows.
+- **Why not wait for Option B:**
+  - It needs a TTS call *and* an `asr-check` to verify the new split, and both quotas reset only at 11:00 EAT on the deadline day.
+  - The pictures, motion and music don't depend on the narration (ARCHITECTURE.md, "Why it is shaped this way"), so they can be built now.
+  - A later re-read would only re-render the final cut.
+
 ## User test 2: near-final cut (at least 3 people)
 | Who | Date | What they said | Where they reacted |
 |---|---|---|---|

@@ -10,6 +10,28 @@ storyboard.json ──validate──┬──> narration ───────�
                      every model call ──> runs.jsonl
 ```
 
+## Why it is shaped this way (engineering decisions)
+**1. One contract, independent stages, joined only by hashes.** Each stage's output is named by the hash of exactly the inputs that change it (`common/cache.py`):
+
+```
+narration  = hash(text, voice, style, model)                -> outputs/narration/
+keyframe   = hash(image_prompt, style_block, character descriptions,
+                  reference-image file hashes, seed, model)  -> outputs/keyframes/
+motion     = hash(motion_prompt, keyframe FILE hash, seed, model) -> outputs/shots/
+music      = hash(music cue captions, bpm, key, model)      -> outputs/music/
+final cut  = hash(file hashes of all of the above + timeline + recipe) -> outputs/cuts/
+```
+
+So swapping the narration (say, a future re-read) re-renders **only the final cut**. Keyframes, motion clips and music are untouched, because none of them depends on the voice. A new keyframe invalidates only its own motion clip. Nothing is regenerated "just in case", and the free quotas go to what actually changed.
+
+**2. Measure, then fix the cheapest real cause.** When the draft 4 delivery felt stiffer, the cut was measured against the raw read first (DESIGN.md). The measurable cause was edit spacing (+1.0 s after the proverb, the breath after ይናፍቀኛል shortened, 0–0.5 s rounding slack), and it was fixed at **0 API calls** (Option A). The unmeasurable remainder, intonation, would need a re-read (Option B, 1 TTS call). With the TTS and ASR quotas exhausted and a deadline the next day, we shipped Option A rather than block the picture work on a quota reset. The audio stays swappable (point 1).
+
+**3. Quotas shape the unit of work.** At 10 TTS requests/day, the whole narration is read in **one** call (continuous mode) instead of one per line (F-09). At 20 text requests/day, `asr-check` caches per segment and saves after every line (F-12). A daily cap fails fast with the reset time instead of retrying (`QuotaExhausted`).
+
+**4. Corrections are data, not hand-edited outputs.** A wrong split is fixed in `narration_splits.json` (committed, keyed to one specific read), never by editing a generated WAV. Every fix is reproducible and reviewable in git.
+
+**5. Fallbacks keep a film possible at every step.** No keyframe: the stage stops with a clear error. No motion clip: a Ken Burns pan-and-zoom on the keyframe. No chosen score: the placeholder pad. A complete film can always be rendered from whatever exists.
+
 ## Contracts
 
 | Stage | Reads from storyboard | Reads files | Writes |
