@@ -8,6 +8,8 @@ ROOT = Path(__file__).resolve().parents[2]
 STORYBOARD = ROOT / "storyboard.json"
 SCHEMA = ROOT / "schema" / "storyboard.schema.json"
 RUNS_LOG = ROOT / "runs.jsonl"
+# Verified corrections to the automatic split of a specific continuous read (narration.py, F-12)
+SPLIT_OVERRIDES = ROOT / "narration_splits.json"
 OUTPUTS = ROOT / "outputs"
 CACHE = ROOT / "cache"
 

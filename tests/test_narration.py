@@ -1,3 +1,4 @@
+import json
 """Narration stage with a fake TTS function: proves caching per shot, offline and free."""
 import wave
 
@@ -110,7 +111,7 @@ def test_continuous_mode_is_one_call_split_into_every_line(continuous_board, tmp
     assert len(calls) == 1 and calls[0].count("\n\n") == 7
     assert list(done) == [s["id"] for s in continuous_board["shots"]]
     for i, (sid, path) in enumerate(done.items()):
-        assert narration.wav_duration(path) == pytest.approx((3 + i) * 0.4, abs=0.05)
+        assert narration.wav_duration(path) == pytest.approx((3 + i) * 0.4 + 2 * narration.PAD_S, abs=0.05)
         assert narration.audio_path(continuous_board, continuous_board["shots"][i],
                                     tmp_path / "out") == path
 
@@ -143,3 +144,53 @@ def test_audio_path_matches_what_was_written(spoken_board, tmp_path, fake_tts):
     done = run(spoken_board, tmp_path, fake_tts)
     shot = spoken_board["shots"][4]
     assert narration.audio_path(spoken_board, shot, tmp_path / "out") == done[shot["id"]]
+
+
+def _overrides_file(tmp_path, monkeypatch, read_name, spans):
+    p = tmp_path / "narration_splits.json"
+    p.write_text(json.dumps({read_name: {"note": "test", "spans": spans}}), encoding="utf-8")
+    monkeypatch.setattr(narration.config, "SPLIT_OVERRIDES", p)
+    return p
+
+
+def test_split_override_replaces_the_auto_span(continuous_board, tmp_path, monkeypatch):
+    calls = []
+    kw = dict(synthesize=paragraph_reader(calls), out_base=tmp_path / "out",
+              log_path=tmp_path / "runs.jsonl")
+    done = narration.run(continuous_board, **kw)
+    read = next((tmp_path / "out" / "narration").glob("full_*.wav")).stem
+    a, b = 0.3, 0.3 + 1.0                       # a deliberately shorter s01 span
+    _overrides_file(tmp_path, monkeypatch, read, {"s01": [a, b]})
+    done = narration.run(continuous_board, **kw)
+    assert len(calls) == 1                     # correcting a split costs no TTS call
+    assert narration.wav_duration(done["s01"]) == pytest.approx(1.0 + 2 * narration.PAD_S, abs=0.01)
+    report = json.loads(next((tmp_path / "out" / "narration").glob("*.split.json")).read_text())
+    assert report["lines"][0]["source"] == "override" and report["lines"][1]["source"] == "auto"
+
+
+def test_overrides_for_another_read_are_ignored(continuous_board, tmp_path, monkeypatch):
+    _overrides_file(tmp_path, monkeypatch, "full_000000000000", {"s01": [0.0, 0.5]})
+    done = narration.run(continuous_board, synthesize=paragraph_reader([]),
+                         out_base=tmp_path / "out", log_path=tmp_path / "runs.jsonl")
+    assert narration.wav_duration(done["s01"]) == pytest.approx(3 * 0.4 + 2 * narration.PAD_S, abs=0.05)
+
+
+def test_overlapping_override_is_refused():
+    from pipeline.common.silence import SplitError
+    spans = [(0.0, 1.0), (1.5, 2.5), (3.0, 4.0)]
+    with pytest.raises(SplitError, match="ends after"):
+        narration.apply_overrides(spans, ["s01", "s02", "s03"], {"s01": [0.0, 2.0]}, 5.0)
+    with pytest.raises(SplitError, match="unknown"):
+        narration.apply_overrides(spans, ["s01", "s02", "s03"], {"s99": [0.0, 1.0]}, 5.0)
+    with pytest.raises(SplitError, match="outside"):
+        narration.apply_overrides(spans, ["s01", "s02", "s03"], {"s03": [3.0, 9.0]}, 5.0)
+
+
+def test_padding_adds_handles_without_overlap():
+    spans = [(0.05, 1.0), (1.12, 2.0), (2.5, 3.0)]
+    padded = narration.pad_spans(spans, 3.05, 0.1)
+    assert padded[0] == (0.0, pytest.approx(1.06))         # first: not below 0; gap 0.12 -> half
+    assert padded[1][0] == pytest.approx(1.06)              # neighbours meet at the gap middle
+    assert padded[1][1] == pytest.approx(2.1) and padded[2] == (pytest.approx(2.4), 3.05)
+    assert all(a < b for a, b in padded)
+    assert all(p[1] <= q[0] + 1e-9 for p, q in zip(padded, padded[1:]))
