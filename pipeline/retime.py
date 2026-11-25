@@ -78,6 +78,6 @@ def run(storyboard: dict, path: Path | None = None, out_base: Path | None = None
         print(f"music {cue['id']}: {cue['start_s']:g}-{cue['end_s']:g} s")
 
     target = Path(path or config.STORYBOARD)
-    target.write_text(json.dumps(new, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    target.write_text(json.dumps(new, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     print(f"wrote {config.rel(target)} (review with `git diff storyboard.json`)")
     return new

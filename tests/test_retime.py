@@ -63,3 +63,4 @@ def test_run_writes_one_field_per_line(board, tmp_path, monkeypatch):
     assert '\n      "duration_s": 7.5,' in text
     assert load_json(out)["shots"][0]["duration_s"] == EXPECTED_S
     json.loads(text)
+    assert b"\r\n" not in out.read_bytes()  # LF on every OS, as .gitattributes stores it
