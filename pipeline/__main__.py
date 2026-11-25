@@ -12,7 +12,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import assemble, audition, keyframes, music, narration, shots, smoke
+from . import assemble, audition, keyframes, music, narration, retime, shots, smoke
 from .common import MissingInput, NotBuiltYet, config
 from .common.storyboard import StoryboardError, film_duration, load_json, validate
 
@@ -60,6 +60,7 @@ def build_parser() -> argparse.ArgumentParser:
     au.add_argument("--shot", default="s01", metavar="ID")
     au.add_argument("--voices", default=",".join(audition.DEFAULT_VOICES),
                     help="comma-separated Gemini voice names")
+    sub.add_parser("retime", help="set each shot's duration_s from its measured narration")
     sub.add_parser("film", help="run every stage in order (cached work is skipped)")
     return p
 
@@ -89,6 +90,8 @@ def main(argv: list[str] | None = None) -> int:
                     skipped.append(name)
             if skipped:
                 print(f"\nfilm finished with stages not built yet: {', '.join(skipped)}")
+        elif args.command == "retime":
+            retime.run(data, args.storyboard)
         elif args.command == "audition":
             voices = [v.strip() for v in args.voices.split(",") if v.strip()]
             results = audition.run(data, args.shot, voices)
