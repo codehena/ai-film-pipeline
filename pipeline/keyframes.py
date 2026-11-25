@@ -31,9 +31,17 @@ from .providers import cloudflare
 
 STAGE = "keyframes"
 EXT = "jpg"
-PROMPT_VERSION = 1  # bump when the prompt templates below change
+# Separate versions, so changing the shot template does not silently remake the
+# reference sheets (a shared version did exactly that once: 2 wasted calls, EXP-07).
+REF_PROMPT_VERSION = 2   # bump when REF_TEMPLATE changes
+SHOT_PROMPT_VERSION = 2  # bump when the shot prompt (SCENE_WITH_REFS, shot_prompt) changes
+# v2: with reference images, klein *edited* the reference sheet (front/back poses, plain
+# background, shirts recoloured) instead of drawing the scene (EXPERIMENTS.md EXP-07)
 MAX_PROMPT_CHARS = 2048
 NEGATIVE = "No text, no letters, no signature, no watermark, no border"
+SCENE_WITH_REFS = ("A completely new illustration of the scene below, not a character sheet: "
+                   "full background, natural poses. Use the reference images ONLY for how the "
+                   "boys look (hair, skin, shirt and shorts colours stay exactly as in the references)")
 REF_TEMPLATE = ("Character reference sheet of {desc}. Full body, front view and back view "
                 "side by side, standing, plain warm off-white background, even soft light")
 
@@ -76,9 +84,10 @@ def reference_prompt(storyboard: dict, character: dict) -> str:
     return _clip(f"{desc}. Style: {storyboard['style_block']}. {NEGATIVE}.")
 
 
-def shot_prompt(storyboard: dict, shot: dict) -> str:
+def shot_prompt(storyboard: dict, shot: dict, with_references: bool = False) -> str:
     chars = {c["id"]: c for c in storyboard["characters"]}
-    parts = [shot["image_prompt"].rstrip(".")]
+    parts = [SCENE_WITH_REFS] if with_references and shot["characters"] else []
+    parts.append(shot["image_prompt"].rstrip("."))
     if shot["characters"]:
         who = "; ".join(chars[c]["description"] for c in shot["characters"])
         parts.append(f"Characters (stylised, faces simplified, seen from behind or at a distance): {who}")
@@ -87,12 +96,12 @@ def shot_prompt(storyboard: dict, shot: dict) -> str:
     return _clip(". ".join(parts) + ".")
 
 
-def _params(cfg: ImageConfig) -> dict:
-    return cfg.request_params() | {"prompt_version": PROMPT_VERSION}
+def _params(cfg: ImageConfig, version: int) -> dict:
+    return cfg.request_params() | {"prompt_version": version}
 
 
 def reference_inputs(storyboard: dict, character: dict, cfg: ImageConfig) -> dict:
-    return {"stage": "keyframes-ref", "model": cfg.model, "params": _params(cfg),
+    return {"stage": "keyframes-ref", "model": cfg.model, "params": _params(cfg, REF_PROMPT_VERSION),
             "prompt": reference_prompt(storyboard, character)}
 
 
@@ -120,7 +129,7 @@ def shot_inputs(storyboard: dict, shot: dict, cfg: ImageConfig, refs: list[Path]
     if missing:
         raise MissingInput(f"{shot['id']}: reference sheet(s) {missing} not made yet; "
                            "run `py -m pipeline keyframes`")
-    return keyframe_inputs(storyboard, shot, model=cfg.model, params=_params(cfg),
+    return keyframe_inputs(storyboard, shot, model=cfg.model, params=_params(cfg, SHOT_PROMPT_VERSION),
                            reference_hashes=[file_hash(r) for r in refs])
 
 
@@ -142,8 +151,7 @@ def run(storyboard: dict, only: list[str] | None = None, *, generate=None,
     common = dict(provider="cloudflare", model=cfg.model, ext=EXT, out_base=out_base,
                   log_path=log_path)
     # the model ignores seeds; log that honestly next to the take number
-    logged = cfg.request_params() | {"prompt_version": PROMPT_VERSION,
-                                     "seed_honoured": cfg.info.seed_honoured}
+    logged = cfg.request_params() | {"seed_honoured": cfg.info.seed_honoured}
 
     if cfg.use_references():
         needed = sorted({c for s in shots for c in s["characters"]})
@@ -151,7 +159,8 @@ def run(storyboard: dict, only: list[str] | None = None, *, generate=None,
             char = chars[cid]
             before = reference_path(storyboard, char, out_base).exists()
             path = run_model_step(
-                stage=STAGE, shot=f"ref-{cid}", params=logged, seed=None,
+                stage=STAGE, shot=f"ref-{cid}", params=logged | {"prompt_version": REF_PROMPT_VERSION},
+            seed=None,
                 inputs=reference_inputs(storyboard, char, cfg),
                 produce=lambda p, char=char: generate(
                     model=cfg.model, prompt=reference_prompt(storyboard, char),
@@ -164,10 +173,11 @@ def run(storyboard: dict, only: list[str] | None = None, *, generate=None,
         refs = _shot_references(storyboard, shot, cfg, out_base)
         before = keyframe_path(storyboard, shot, out_base).exists()
         path = run_model_step(
-            stage=STAGE, shot=shot["id"], params=logged | {"references": len(refs)},
+            stage=STAGE, shot=shot["id"],
+            params=logged | {"prompt_version": SHOT_PROMPT_VERSION, "references": len(refs)},
             seed=shot["seed"], inputs=shot_inputs(storyboard, shot, cfg, refs),
             produce=lambda p, shot=shot, refs=refs: generate(
-                model=cfg.model, prompt=shot_prompt(storyboard, shot),
+                model=cfg.model, prompt=shot_prompt(storyboard, shot, bool(refs)),
                 params=cfg.request_params(), out_path=p, references=refs),
             **common)
         print(f"  {shot['id']}: {'cached' if before else 'generated'}  refs {len(refs)}  "

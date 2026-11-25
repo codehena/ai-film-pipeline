@@ -100,3 +100,18 @@ def test_overlong_prompt_is_refused(board):
     board["style_block"] = "x" * 3000
     with pytest.raises(PermanentError, match="chars"):
         keyframes.shot_prompt(board, board["shots"][0])
+
+
+def test_shot_template_change_does_not_remake_reference_sheets(board, tmp_path, fake, monkeypatch):
+    run(board, tmp_path, fake)
+    n_refs = len(ref_calls(fake))
+    monkeypatch.setattr(keyframes, "SHOT_PROMPT_VERSION", keyframes.SHOT_PROMPT_VERSION + 1)
+    run(board, tmp_path, fake)
+    assert len(ref_calls(fake)) == n_refs          # sheets reused
+    assert len(fake.calls) == 2 * len(board["shots"]) + n_refs
+
+
+def test_referenced_shots_ask_for_a_new_scene_not_a_sheet(board):
+    shot = next(s for s in board["shots"] if s["characters"])
+    assert keyframes.SCENE_WITH_REFS in keyframes.shot_prompt(board, shot, with_references=True)
+    assert keyframes.SCENE_WITH_REFS not in keyframes.shot_prompt(board, shot, with_references=False)
