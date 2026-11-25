@@ -124,3 +124,32 @@ def test_radio_cut_end_to_end_and_cached_rerun(board, tmp_path):
     assert again == cut
     cut_rows = [r for r in read_log(log) if r["stage"] == "cuts"]
     assert [r["status"] for r in cut_rows] == ["ok", "cache_hit"]
+
+
+S02 = ("Watching bees hover over flowers, birds sing, calves leap and chickens scurry "
+       "is a special feeling; sometimes I miss it.")
+S10 = ("But our home was never empty. These things made me love growing up in the countryside; "
+       "whoever grew up there knows this feeling and never forgets it.")
+
+
+@pytest.mark.parametrize("text", [S02, S10])
+def test_long_subtitles_split_into_readable_cues(text):
+    parts = assemble.split_caption(text)
+    assert len(parts) >= 2
+    assert " ".join(parts) == text                               # nothing lost or reordered
+    for part in parts:
+        assert all(len(l) <= assemble.SUB_MAX_CHARS + 4 for l in assemble.wrap_subtitle(part).splitlines())
+
+
+def test_short_subtitle_stays_one_cue():
+    assert assemble.split_caption("As they say, \"A house without coffee is empty.\"") == [
+        "As they say, \"A house without coffee is empty.\""]
+
+
+def test_split_cues_share_the_line_time_without_gaps(board):
+    board["shots"][0]["narration"]["subtitle_en"] = S10
+    lines, total = assemble.plan_timeline(board, {"s01": 9.0})
+    cues = [c for c in assemble.build_srt(lines, board["end_card"], total).split("\n\n")]
+    times = [c.splitlines()[1] for c in cues[:3]]
+    assert times[0].startswith("00:00:00,300") and times[2].endswith("00:00:09,300")
+    assert times[0].split(" --> ")[1] == times[1].split(" --> ")[0]

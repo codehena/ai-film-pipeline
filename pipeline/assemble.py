@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import subprocess
 import textwrap
 import wave
@@ -32,7 +33,8 @@ STAGE = "cuts"
 # bump when the FFmpeg recipe changes, so old cuts are not reused
 # 2: two-pass loudness (pre-gain + limiter + linear loudnorm) replaced single-pass loudnorm (F-11)
 # 3: adaptive limiter rounds + 4x oversampled limiter (draft 4 mix fell back to dynamic)
-RECIPE_VERSION = 3
+# 4: long subtitles split into consecutive cues (draft 4 lines were up to 75 chars wide)
+RECIPE_VERSION = 4
 MIN_GAP_S = 0.25    # never let two lines touch
 RADIO_SIZE = "1280x720"
 SUB_MAX_CHARS = 40  # per subtitle line, at most two lines
@@ -133,12 +135,36 @@ def wrap_subtitle(text: str) -> str:
     return "\n".join(lines)
 
 
+CUE_MAX_CHARS = 2 * SUB_MAX_CHARS + 4  # what fits on two ~40-character lines
+
+
+def split_caption(text: str, limit: int = CUE_MAX_CHARS) -> list[str]:
+    """Split a long subtitle into consecutive cues at sentence and clause breaks, so each
+    cue fits on two short lines. Words are never dropped or reordered."""
+    if len(text) <= limit:
+        return [text]
+    pieces = [p for p in re.split(r"(?<=[.;:!?,])\s+", text) if p]
+    chunks: list[str] = []
+    for piece in pieces:
+        if chunks and len(chunks[-1]) + 1 + len(piece) <= limit:
+            chunks[-1] += " " + piece
+        else:
+            chunks.append(piece)
+    return chunks
+
+
 def build_srt(lines: list[Line], end_card: dict, total: float) -> str:
     cues = []
     for line in lines:
         if line.start is not None and line.subtitle:
             end = max(line.end, line.start + 1.0)  # at least 1 s on screen
-            cues.append((line.start, end, wrap_subtitle(line.subtitle)))
+            parts = split_caption(line.subtitle)
+            chars = sum(len(p) for p in parts)
+            t = line.start
+            for k, part in enumerate(parts):         # time shared in proportion to length
+                t_end = end if k == len(parts) - 1 else t + (end - line.start) * len(part) / chars
+                cues.append((t, t_end, wrap_subtitle(part)))
+                t = t_end
     cues.append((total - end_card["duration_s"], total, wrap_subtitle(end_card["text"])))
     return "\n".join(f"{i}\n{_ts(a)} --> {_ts(b)}\n{txt}\n"
                      for i, (a, b, txt) in enumerate(cues, 1))
