@@ -97,3 +97,17 @@ def test_select_shots(board):
     assert len(select_shots(board)) == len(board["shots"])
     with pytest.raises(StoryboardError):
         select_shots(board, ["s99"])
+
+
+def test_still_from_must_name_another_existing_shot(board, schema):
+    board["shots"][1]["video"]["still"] = {"from": "s01", "zoom": [1.2, 1.5]}
+    validate(board, schema)
+    board["shots"][1]["video"]["still"] = {"from": "s99"}
+    assert "video.still.from 's99'" in problems(board, schema)
+    board["shots"][1]["video"]["still"] = {"from": board["shots"][1]["id"]}
+    assert "must be another existing shot" in problems(board, schema)
+
+
+def test_focus_must_be_fractions(board, schema):
+    board["shots"][0]["video"]["focus"] = [1.4, 0.5]
+    assert "focus" in problems(board, schema)

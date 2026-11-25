@@ -96,6 +96,12 @@ def rule_problems(data: dict) -> list[str]:
                     f"shot {shot['id']}: character '{c}' is not defined in characters"
                 )
 
+    shot_ids = set(ids)
+    for shot in data["shots"]:
+        src = (shot["video"].get("still") or {}).get("from")
+        if src and (src not in shot_ids or src == shot["id"]):
+            problems.append(f"shot {shot['id']}: video.still.from '{src}' must be another existing shot")
+
     for cue in data["music_cues"]:
         if cue["end_s"] <= cue["start_s"]:
             problems.append(f"music cue {cue['id']}: end_s must be after start_s")
