@@ -118,5 +118,13 @@ A change to this recipe bumps `assemble.RECIPE_VERSION`, so a new cut gets a new
 - **Subtitles per ratio:** 40 characters per row for 16:9, 26 for 9:16, lifted above the bottom ~20% of the vertical frame. The end card is drawn as a centred card.
 - **The final cut's cache key** includes card/subtitle styles and output size (F-17).
 
+## Beats and head-safe framing (`pipeline/beats.py`, `render.crop_window` / `fit_move`, `pipeline/framing.py`)
+- **A shot is one or more *visual units*.** Unit 0 is the shot itself, so old cache names stay valid. Beat k is `<shot>-b<k>`, with its own keyframe, segment and Wan clip contract.
+- **A beat starts 0.15 s before its word** (`from_word`), estimated from the cached narration by character share. Narration never reads visual fields, so swapping the audio later re-times beats automatically and regenerates nothing.
+- **`video.safe_box`** must be inside every crop and every Ken Burns moment. When it can't fit: vertically keep the top (heads), sideways centre.
+- **Shot prompt templates are versioned per kind** (character vs scene), so changing the character template never re-rolls a scene-only keyframe.
+- **A motion clip's key excludes the shot duration:** a narration retime never invalidates Wan clips.
+- **`py -m pipeline framing`** draws all of this on the keyframes for review before rendering.
+
 ## GPU stages
 Wan 2.2 and ACE-Step run in Kaggle notebooks (`notebooks/`, see its README for the round trip). `shots/music --export` writes a job bundle that lists only what is missing. `--import` copies back only files whose names match the current contract (a clip tied to an old keyframe is ignored) and merges the notebook's log lines without duplicates. The music hash ignores cue *times*, so retiming never invalidates the score.

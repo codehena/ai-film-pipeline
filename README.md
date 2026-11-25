@@ -47,6 +47,7 @@ Runs validate → narration → keyframes → shots → music → assemble. Anyt
 | `py -m pipeline keyframes [--shot s04]` | Reference sheets, then one square keyframe per shot (cached; change a shot's `seed` to re-roll it) |
 | `py -m pipeline shots --export DIR` / `--import DIR` | Kaggle round trip for Wan 2.2 clips (`notebooks/README.md`) |
 | `py -m pipeline music --export DIR` / `--import DIR` | Kaggle round trip for ACE-Step score candidates |
+| `py -m pipeline framing [--shot s04]` | Draw safe boxes and 16:9/9:16 crops on the keyframes (`outputs/qa/framing.png`) before rendering |
 | `py -m pipeline assemble --mode final` | The film in every storyboard aspect ratio (16:9 and 9:16) |
 | `py -m pipeline assemble --mode radio` | Radio cut: narration + ducked placeholder pad + subtitles on black, plus a timing report |
 | `py -m pipeline film` | Run everything in order (stages not built yet are skipped and listed) |

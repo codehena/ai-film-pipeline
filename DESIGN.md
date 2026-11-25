@@ -213,6 +213,24 @@ Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answe
 
   Both are 70.3 s, Option A narration, placeholder pad until a score is chosen, end card centred.
 
+## Draft 4c pictures: what changed after my viewing (2026-11-25)
+| What I saw in the baseline | Change |
+|---|---|
+| 16:9 cut our heads | head-safe crops (`safe_box`), Ken Burns clamped; framing sheet reviewed (F-19) |
+| Pictures arrived after the words | beats: birds, calves, hens, mothers and the farmland each land on their word (F-20) |
+| Jerrycans, not our real jars | both of us carry clay ensera jars |
+| Swimming in full clothes | swimming in shorts, shirts folded on the riverbank |
+| Friends' faces exposed | friends around on the grass, everyone turned away |
+| "Our home was never empty" | the two of us at the coffee ceremony in white holiday clothes with green/red tibeb, seen from behind (within recorded consent) |
+| Ending not Ethiopian enough | gojo bet homestead among teff and maize terraces |
+
+- **Films to re-watch:**
+  - `outputs/cuts/final-16x9_cf2f2882d313.mp4`
+  - `outputs/cuts/final-9x16_2be4fa87d02c.mp4`
+
+  Both are 70.3 s, −14 LUFS, Option A narration and the placeholder pad.
+- TODO: my verdict after watching.
+
 ## User test 2: near-final cut (at least 3 people)
 | Who | Date | What they said | Where they reacted |
 |---|---|---|---|

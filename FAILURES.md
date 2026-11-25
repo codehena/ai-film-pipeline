@@ -214,3 +214,48 @@ What broke, what I tried, what fixed it (or how I worked around it). Write these
   - ran the full test suite: 140 passed
   - committed the uncommitted work in focused pieces
 - **Why nothing was half-written:** model outputs are written to a `.part` file and renamed only on success (`run_model_step`), and FFmpeg segments follow the same pattern. A stop leaves either a complete file or nothing.
+
+---
+
+### F-19: The 16:9 film cut the boys' heads (s04, s05 through the eyes, s07)
+- **Date:** 2026-11-25
+- **Stage:** assemble --mode final / `render.crop_window`
+- **Reported by:** the author, watching `final-16x9_79e1e669fdc0.mp4`.
+- **Root cause (measured with a crop overlay):**
+  - 16:9 kept the middle 56% of each square keyframe, centred vertically. Standing figures have their heads in the top quarter, so a centred crop removed them.
+  - The Ken Burns zoom-in then tightened the crop by another 10%, with no check that heads stayed in frame.
+- **What fixed it:**
+  1. **`video.safe_box`:** the heads, faces or key action that must stay in frame. The crop keeps the box plus a 5% margin. If the box can't fit, it keeps the box's *top* (heads over feet) and centres sideways.
+  2. **`fit_move()`:** clamps the zoom and drift so the box stays visible for the whole move.
+  3. **The character prompt asks for medium-wide framing** with space above the heads (template v3).
+  4. **`py -m pipeline framing`:** draws every crop and box on the keyframes. The boxes for s04–s08 and s10 were read off it, and the sheet was re-checked after.
+- **Regression tests** (`tests/test_framing.py`) reproduce the measured bug, and cover both ratios, overflow, clamping and image edges.
+
+### F-20: Pictures arrived after the words they illustrate
+- **Date:** 2026-11-25
+- **Reported by:** the author: "visuals stay static and catch up after the narration mentions something".
+- **Root cause:** a content mismatch, not slow cutting. Each shot had one picture for its whole line:
+  - **s02 (12.5 s):** the voice lists bees, birds, calves and chickens, but the picture showed bees only.
+  - **The calves and chickens were in s03's picture,** which arrived *after* the line about them.
+  - **s10 (12.9 s):** one image for two ideas.
+- **What fixed it:** `shots[].beats`. Each beat is its own picture landing 0.15 s before the word it shows (`from_word`), with timing from the cached narration by character share. That means no model call, and narration text and audio are unchanged (tested). Measured in the new cut: all 5 beats land 0.15 s before ወፎች, ጥጃዎች, ዶሮዎች, እናቶች and እነዚህ.
+
+### F-21: Two keyframes needed retakes (s06 swimming, s10 coffee ceremony)
+- **Date:** 2026-11-25
+- **s06:** attempt 1, with reference sheets plus a per-shot "in shorts" appearance, still showed the boys swimming in their shirts. The sheets show the shirts, and they win over the text. **Attempt 2, without references:** two boys from behind in khaki/blue shorts, with the green and red shirts folded on the rock. Kept.
+- **s10:**
+  - Attempt 1 showed both boys and other children **facing the camera with clear faces**, outside the recorded consent (ETHICS.md, "Option 1").
+  - Attempt 2 had them from behind, but the brother wore his everyday red shirt (pulled from his sheet).
+  - **Attempt 3, without references**, with both outfits described: from behind, white holiday tunics with green/red tibeb borders, beside the jebena. Kept, and the 3-attempt cap was reached.
+- **Lesson:** reference sheets lock *clothes* as well as identity. When a shot needs different clothes, leave the references out and carry identity through colours and position.
+
+### F-22: Two broken commits nearly slipped through (process)
+- **Date:** 2026-11-25
+- **What happened:**
+  1. A patch script stopped halfway (an anchor matched twice), but the next command committed anyway. The schema then referenced a `#/$defs/box` that didn't exist.
+  2. Later, `pytest ... | tail -1` hid a failing exit code from `set -e`, and a commit went in with a red test.
+- **What fixed it:**
+  - Both commits were local and unpushed, so each was repaired and amended.
+  - Since then, every patch-then-commit step is chained with `&&`, and the test suite's exit code is captured *before* the pipe and checked. The commit only runs on 0.
+  - The red test had found a real flaw: one shot-template version re-keyed scene-only keyframes too. Versions are now per template kind (character vs scene), so s01/s02/s08 kept their images (tested).
+- **Lesson:** a commit gate that a pipe can bypass is not a gate.

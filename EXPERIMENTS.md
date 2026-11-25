@@ -141,3 +141,27 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
   - Vertical subtitles sit above the bottom area that phone apps cover.
   - Both crops are upscaled 1.25× to 720p, with the Ken Burns move rendered at 4× for smoothness.
 - **Decision:** keep. Exports `final-16x9_79e1e669fdc0.mp4` and `final-9x16_73291dad58e1.mp4` (70.30 s, −14.0 LUFS, linear pass).
+
+### EXP-09: Do word-timed beats make the pictures follow the voice?
+- **Date:** 2026-11-25
+- **Hypothesis:** if each named thing gets its own picture landing just before its word, the film stops "catching up" (F-20). Estimating word times by character share is accurate enough that no speech recognition is needed.
+- **Change:**
+  - 5 beats: s02 → birds, calves, hens; s03 → mothers washing; s10 → the gojo bet farmland
+  - each beat starts 0.15 s before its word
+  - narration unchanged
+- **Result:**
+  - Every beat's picture starts 0.15 s before its estimated word time.
+  - 15 visual units in place of 10.
+  - Narration cache hits throughout (0 TTS calls).
+  - Frames checked in both exports.
+  - TODO, by ear: does each picture *feel* on time? If one is late, adjust its `from_word`.
+- **Decision:** keep. Tune `from_word` from the author's viewing rather than adding an ASR dependency.
+
+### EXP-10: Safe boxes vs. centred crops for 16:9
+- **Date:** 2026-11-25
+- **Hypothesis:** keeping an explicit head box inside every crop (and every zoom) removes cut heads in 16:9 without hurting 9:16.
+- **Result:**
+  - On the old keyframes, the overlay showed the 16:9 crop cutting heads in s04, s05 and s07. With boxes, all heads sit inside both crops at every zoom (`outputs/qa/framing.png`).
+  - In 9:16, s08's four seated women can't all fit (the box is wider than the frame), so the crop centres on the jebena, as designed.
+  - The new character prompt (medium-wide, space above heads) also helped: most new keyframes already placed heads inside the 16:9 band.
+- **Decision:** safe boxes for every shot with people; the framing sheet is part of the review before a render.

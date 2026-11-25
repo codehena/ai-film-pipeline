@@ -8,7 +8,7 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 | Gemini API, `gemini-3.8-flash-tts` | **3 requests per minute** per model (`GenerateRequestsPerMinutePerProjectPerModel-FreeTier`, quotaValue 3) | 429 error during narration (FAILURES.md F-08) | 2026-11-25 |
 | Gemini API, `gemini-3.5-flash` (text; used for `asr-check`) | **20 requests per day** (the error names `gemini-3.6-flash`, so the quota seems shared); 503 "high demand" seen on 3.8/3.7 flash | 429 during asr-check (F-12) | 2026-11-25 |
 | Gemini API, `gemini-3.8-flash-tts` | **10 requests per day** ("Generate content requests per day limit", limit 10); resets 08:00 UTC = 11:00 EAT (`retryDelay` 23084 s at 01:35 UTC) | 429 errors during the voice audition (F-09) | 2026-11-25 |
-| Cloudflare Workers AI | Not hit: 21 FLUX.2 klein images on 2026-11-25 with 0 errors (free daily neuron allowance; per-image neurons aren't reported by the API) | `runs.jsonl` stages `keyframes`, `probe` | 2026-11-25 |
+| Cloudflare Workers AI | Not hit: **41** FLUX.2 klein images on 2026-11-25 with 0 errors (free daily neuron allowance; per-image neurons aren't reported by the API) | `runs.jsonl` stages `keyframes`, `probe` | 2026-11-25 |
 | Kaggle GPU | TODO (hours/week) | | |
 
 ## Per stage (Phase 1: radio cut)
@@ -24,6 +24,7 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 | assemble (radio), recipe v3/v4 (oversampled limiter, split subtitles) | FFmpeg 9.1, local | 3 renders | **38.7–41.1 s** per 71 s cut | – | 0 |
 | assemble (radio), Option A spacing (draft 4b) | FFmpeg 9.1, local | 1 render | **22.4 s** per 70.3 s cut; 0 model calls | – | 0 |
 | keyframes (2 sheets + 10 shots + retakes) | FLUX.2 klein 4B (Cloudflare) | **19** ok + 2 probe, 0 errors | **16.8 s** (12.1–25.8) | – | TODO (free tier: USD 0) |
+| keyframes, draft 4c (beats, ensera, swimming, friends, ceremony, gojo bet) | FLUX.2 klein 4B | **14** ok (11 + s06 retake + 2 s10 retakes), 0 errors | **18.1 s** median | – | TODO (free tier: USD 0) |
 | assemble (final, 16:9 + 9:16) | FFmpeg 9.1, local | 5 renders | first render 110 s (16:9) + 72 s (9:16), building every Ken Burns segment at 4×; re-renders with cached segments 13–42 s | – | 0 |
 | shots | Wan 2.2 TI2V-5B | – | – | – | – |
 | music | ACE-Step 1.5 | – | – | – | – |
@@ -41,3 +42,5 @@ TODO: the price source and date for each provider.
 
 ## Frontier comparison (if available)
 TODO
+
+**Draft 4c render cost:** 15 visual units (10 shots + 5 beats) per ratio. A full rebuild of both ratios took 276 s (16:9) + 265 s (9:16) locally, with 0 model calls, because every Ken Burns segment is rendered at 4× for smoothness. Unchanged segments are cached, so later re-renders only rebuild what changed.
