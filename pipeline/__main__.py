@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
-from . import assemble, keyframes, music, narration, shots, smoke
+from . import assemble, audition, keyframes, music, narration, shots, smoke
 from .common import MissingInput, NotBuiltYet, config
 from .common.storyboard import StoryboardError, film_duration, load_json, validate
 
@@ -55,6 +56,10 @@ def build_parser() -> argparse.ArgumentParser:
                         help="only this shot (repeatable), e.g. --shot s03")
         if name == "assemble":
             sp.add_argument("--mode", choices=["radio", "final"], default="radio")
+    au = sub.add_parser("audition", help="speak one line in several voices to choose by ear")
+    au.add_argument("--shot", default="s01", metavar="ID")
+    au.add_argument("--voices", default=",".join(audition.DEFAULT_VOICES),
+                    help="comma-separated Gemini voice names")
     sub.add_parser("film", help="run every stage in order (cached work is skipped)")
     return p
 
@@ -84,6 +89,13 @@ def main(argv: list[str] | None = None) -> int:
                     skipped.append(name)
             if skipped:
                 print(f"\nfilm finished with stages not built yet: {', '.join(skipped)}")
+        elif args.command == "audition":
+            voices = [v.strip() for v in args.voices.split(",") if v.strip()]
+            results = audition.run(data, args.shot, voices)
+            ok = [v for v, r in results.items() if isinstance(r, Path)]
+            print(f"\n{len(ok)} of {len(voices)} voices worked. Listen, then set "
+                  "voice.voice_name in storyboard.json and run `narration`.")
+            return 0 if ok else 1
         elif args.command == "assemble":
             STAGES["assemble"](data, only=args.shot, mode=args.mode)
         else:
