@@ -168,3 +168,24 @@ def test_a_style_change_invalidates_the_final_cut(pictured, tmp_path, small_form
     monkeypatch.setattr(render, "card_style", lambda r: "Alignment=10,FontSize=30")
     second = assemble.run_final(pictured, out_base=tmp_path, log_path=tmp_path / "runs.jsonl")
     assert all(first[r] != second[r] for r in first)          # no stale cut from the cache
+
+
+def test_beats_become_their_own_segments_on_the_timeline(pictured, tmp_path, small_formats):
+    from pipeline import beats, framing
+    shot = pictured["shots"][1]
+    shot["beats"] = [{"from_word": 1, "image_prompt": "a second picture"}]   # text "line 1": 2 words
+    shot["video"]["safe_box"] = [0.3, 0.1, 0.7, 0.4]
+
+    def gen(*, model, prompt, params, out_path, references=()):
+        _jpeg(out_path, colour="0x884422")
+    keyframes.run(pictured, [shot["id"]], generate=gen, out_base=tmp_path,
+                  log_path=tmp_path / "runs.jsonl")
+    outs = assemble.run_final(pictured, out_base=tmp_path, log_path=tmp_path / "runs.jsonl")
+    parts = list((tmp_path / "cuts" / "parts").glob(f"{shot['id']}-b1_*.mp4"))
+    assert len(parts) == 2                                   # the beat rendered in both ratios
+    _, total = assemble.plan_timeline(pictured, {s["id"]: 2.0 for s in pictured["shots"]})
+    assert render.media_duration(outs["16:9"]) == pytest.approx(total, abs=0.1)
+    status = shots.status(pictured, tmp_path)
+    assert f"{shot['id']}-b1" in status                      # Wan contract per beat too
+    sheet = framing.run(pictured, [shot["id"]], out_base=tmp_path)
+    assert sheet.exists() and render.image_size(sheet)[0] == 2 * framing.TILE

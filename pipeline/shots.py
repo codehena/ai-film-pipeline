@@ -63,20 +63,32 @@ def status(storyboard: dict, out_base: Path | None = None) -> dict[str, str]:
     return out
 
 
+def all_units(storyboard: dict, only: list[str] | None = None) -> list[dict]:
+    return [u for s in select_shots(storyboard, only) for u in beats.visual_units(s)]
+
+
+def export_window(storyboard: dict, unit: dict, out_base: Path | None = None):
+    """The 16:9 window of the keyframe sent to Wan, and the keyframe size. Assembly uses the
+    same function to map the safe box into clip coordinates."""
+    kf = keyframes.keyframe_path(storyboard, unit, out_base)
+    wh = render.image_size(kf)
+    window = render.crop_window(*wh, EXPORT_W / EXPORT_H, tuple(unit["video"].get("focus", (0.5, 0.5))),
+                                unit["video"].get("safe_box"))
+    return kf, wh, window
+
+
 def export_job(storyboard: dict, dest: Path, only: list[str] | None = None,
                out_base: Path | None = None) -> Path:
-    """Write job.json + 16:9 keyframe crops for every shot that still needs a clip."""
+    """Write job.json + head-safe 16:9 keyframe crops for every unit that still needs a clip."""
     dest = Path(dest)
     (dest / "keyframes").mkdir(parents=True, exist_ok=True)
     ffmpeg = config.find_tool("ffmpeg")
     jobs = []
-    for shot in select_shots(storyboard, only):
+    for shot in all_units(storyboard, only):
         if not wants_clip(shot) or clip_path(storyboard, shot, out_base).exists():
             continue
-        kf = keyframes.keyframe_path(storyboard, shot, out_base)
+        kf, _, (x, y, w, h) = export_window(storyboard, shot, out_base)
         img = dest / "keyframes" / f"{shot['id']}.jpg"
-        x, y, w, h = render.crop_window(*render.image_size(kf), EXPORT_W / EXPORT_H,
-                                        tuple(shot["video"].get("focus", (0.5, 0.5))))
         subprocess.run([ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-i", str(kf), "-vf",
                         f"crop={w}:{h}:{x}:{y},scale={EXPORT_W}:{EXPORT_H}:flags=lanczos",
                         "-q:v", "2", str(img)], check=True)
@@ -113,7 +125,8 @@ def import_clips(storyboard: dict, src: Path, out_base: Path | None = None,
     folder = config.output_dir(STAGE, out_base)
     found = {p.name: p for p in src.rglob("*.mp4")}
     imported = []
-    for shot in storyboard["shots"]:
+    units = all_units(storyboard)
+    for shot in units:
         if not wants_clip(shot):
             continue
         name = clip_path(storyboard, shot, out_base).name
@@ -123,7 +136,7 @@ def import_clips(storyboard: dict, src: Path, out_base: Path | None = None,
             shutil.copy2(found[name], folder / name)
             imported.append(shot["id"])
     stale = sorted(set(found) - {clip_path(storyboard, s, out_base).name
-                                 for s in storyboard["shots"] if wants_clip(s)})
+                                 for s in units if wants_clip(s)})
     added = _merge_runs(src / "runs_fragment.jsonl", log_path)
     print(f"  imported clips for {imported or 'no shots'}; merged {added} log line(s)")
     if stale:

@@ -29,7 +29,7 @@ import wave
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from . import keyframes, music, narration, render, shots
+from . import beats, keyframes, music, narration, render, shots
 from .common import MissingInput, config, loudness
 from .common.cache import file_hash, stable_hash
 from .common.modelcall import run_model_step
@@ -344,7 +344,8 @@ def run(storyboard: dict, only: list[str] | None = None, *, mode: str = "radio",
 # ---------------------------------------------------------------- final cut
 # bump when render.py's picture recipe changes
 # 2: the final cut's cache key now includes how the card and subtitles are drawn (F-15)
-RENDER_VERSION = 2
+# 3: visual beats per shot, head-safe crops (safe_box) and Ken Burns clamp (F-19, F-20)
+RENDER_VERSION = 3
 SUB_WIDTH = {"16:9": SUB_MAX_CHARS, "9:16": 26}  # characters per subtitle row
 
 
@@ -354,31 +355,38 @@ def shot_visual(storyboard: dict, shot: dict, out_base: Path | None) -> dict:
     by_id = {s["id"]: s for s in storyboard["shots"]}
     video = shot["video"]
     focus = tuple(video.get("focus", (0.5, 0.5)))
+    box = tuple(video["safe_box"]) if video.get("safe_box") else None
     if shots.wants_clip(shot):
         clip = shots.clip_path(storyboard, shot, out_base)
         if clip.exists():
-            return {"kind": "clip", "path": clip, "focus": focus}
+            # the clip IS the exported 16:9 window: express the safe box in its coordinates
+            _, kf_wh, window = shots.export_window(storyboard, shot, out_base)
+            cbox = render.box_in_window(box, kf_wh, window) if box else None
+            return {"kind": "clip", "path": clip, "focus": focus, "safe_box": cbox}
     src_shot = by_id[video["still"]["from"]] if video.get("still") else shot
     kf = keyframes.keyframe_path(storyboard, src_shot, out_base)
     if not kf.exists():
         raise MissingInput(f"{shot['id']}: keyframe {kf.name} missing; run `py -m pipeline keyframes`")
-    return {"kind": "still", "path": kf, "focus": focus, "move": render.move_for(shot)}
+    return {"kind": "still", "path": kf, "focus": focus, "move": render.move_for(shot),
+            "safe_box": box}
 
 
 def _segment(ffmpeg: str, parts: Path, shot_id: str, ratio: str, visual: dict, frames: int) -> Path:
     """One shot, one aspect ratio: cached by everything that changes its pixels."""
     key = {"v": RENDER_VERSION, "ratio": ratio, "frames": frames, "kind": visual["kind"],
            "source": file_hash(visual["path"]), "focus": visual["focus"],
+           "safe_box": visual["safe_box"],
            "move": asdict(visual["move"]) if visual["kind"] == "still" else None}
     out = parts / f"{shot_id}_{ratio.replace(':', 'x')}_{stable_hash(key)}.mp4"
     if not out.exists():
         tmp = out.with_name(out.stem + ".part.mp4")
         wh = render.image_size(visual["path"])
         if visual["kind"] == "clip":
-            cmd = render.clip_segment_cmd(ffmpeg, visual["path"], wh, ratio, visual["focus"], frames, tmp)
+            cmd = render.clip_segment_cmd(ffmpeg, visual["path"], wh, ratio, visual["focus"], frames,
+                                          tmp, visual["safe_box"])
         else:
             cmd = render.still_segment_cmd(ffmpeg, visual["path"], wh, ratio, visual["focus"],
-                                           visual["move"], frames, tmp)
+                                           visual["move"], frames, tmp, visual["safe_box"])
         run_ffmpeg(cmd)
         tmp.replace(out)
     return out
@@ -406,9 +414,18 @@ def run_final(storyboard: dict, out_base: Path | None = None,
     folder = config.output_dir(STAGE, out_base)
     parts = config.output_dir(f"{STAGE}/parts", out_base)
     score = music.score_path(storyboard, out_base)
-    visuals = {s["id"]: shot_visual(storyboard, s, out_base) for s in storyboard["shots"]}
+    # every shot is one or more visual units (beats), each landing on the word it shows
+    by_id = {s["id"]: s for s in storyboard["shots"]}
+    visuals, bounds = {}, []
+    for ln in lines:
+        shot = by_id[ln.shot]
+        voice = (ln.start, ln.end) if ln.start is not None else None
+        for unit, b in zip(beats.visual_units(shot),
+                           beats.unit_bounds(shot, (ln.slot_start, ln.slot_end), voice)):
+            visuals[unit["id"]] = shot_visual(storyboard, unit, out_base)
+            bounds.append(b)
     last_end = lines[-1].slot_end
-    bounds = [(ln.slot_start, ln.slot_end) for ln in lines] + [(last_end, total)]
+    bounds.append((last_end, total))
     frames = render.frame_bounds(bounds)
 
     audio_key = {"audio": {sid: file_hash(p) for sid, p in audio.items()},
@@ -431,7 +448,7 @@ def run_final(storyboard: dict, out_base: Path | None = None,
                   "sub_style": render.subtitle_style(ratio), "card": storyboard["end_card"],
                   "card_style": render.card_style(ratio),
                   "shots": [{"id": sid, "kind": v["kind"], "source": file_hash(v["path"]),
-                             "focus": v["focus"], "frames": f,
+                             "focus": v["focus"], "safe_box": v["safe_box"], "frames": f,
                              "move": asdict(v["move"]) if v["kind"] == "still" else None}
                             for (sid, v), f in zip(visuals.items(), frames)]}
 
