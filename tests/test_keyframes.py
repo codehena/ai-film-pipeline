@@ -105,10 +105,20 @@ def test_overlong_prompt_is_refused(board):
 def test_shot_template_change_does_not_remake_reference_sheets(board, tmp_path, fake, monkeypatch):
     run(board, tmp_path, fake)
     n_refs = len(ref_calls(fake))
-    monkeypatch.setattr(keyframes, "SHOT_PROMPT_VERSION", keyframes.SHOT_PROMPT_VERSION + 1)
+    monkeypatch.setattr(keyframes, "CHAR_PROMPT_VERSION", keyframes.CHAR_PROMPT_VERSION + 1)
+    monkeypatch.setattr(keyframes, "SCENE_PROMPT_VERSION", keyframes.SCENE_PROMPT_VERSION + 1)
     run(board, tmp_path, fake)
     assert len(ref_calls(fake)) == n_refs          # sheets reused
     assert len(fake.calls) == 2 * len(board["shots"]) + n_refs
+
+
+def test_character_template_change_keeps_scene_only_keyframes(board, tmp_path, fake, monkeypatch):
+    run(board, tmp_path, fake)
+    n = len(fake.calls)
+    monkeypatch.setattr(keyframes, "CHAR_PROMPT_VERSION", keyframes.CHAR_PROMPT_VERSION + 1)
+    run(board, tmp_path, fake)
+    with_chars = sum(1 for s in board["shots"] if s["characters"])
+    assert len(fake.calls) == n + with_chars       # scene-only shots untouched
 
 
 def test_referenced_shots_ask_for_a_new_scene_not_a_sheet(board):

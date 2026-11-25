@@ -23,7 +23,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .common import MissingInput, config
-from .common.cache import file_hash, keyframe_inputs, stable_hash
+from . import beats
+from .common.cache import character_description, file_hash, keyframe_inputs, stable_hash
 from .common.modelcall import run_model_step
 from .common.retry import PermanentError
 from .common.storyboard import select_shots
@@ -34,11 +35,23 @@ EXT = "jpg"
 # Separate versions, so changing the shot template does not silently remake the
 # reference sheets (a shared version did exactly that once: 2 wasted calls, EXP-07).
 REF_PROMPT_VERSION = 2   # bump when REF_TEMPLATE changes
-SHOT_PROMPT_VERSION = 2  # bump when the shot prompt (SCENE_WITH_REFS, shot_prompt) changes
+# Shot templates are versioned PER KIND, so changing the character template re-rolls only
+# shots with characters, never good scene-only keyframes (s01/s02/s08 kept their keys).
+SCENE_PROMPT_VERSION = 2  # shots without characters
+CHAR_PROMPT_VERSION = 3   # v3: FRAMING clause (heads safe in both crops, F-19), faces turned away
+
+
+def shot_prompt_version(shot: dict) -> int:
+    return CHAR_PROMPT_VERSION if shot["characters"] else SCENE_PROMPT_VERSION
 # v2: with reference images, klein *edited* the reference sheet (front/back poses, plain
 # background, shirts recoloured) instead of drawing the scene (EXPERIMENTS.md EXP-07)
 MAX_PROMPT_CHARS = 2048
 NEGATIVE = "No text, no letters, no signature, no watermark, no border"
+# Within the recorded consent (ETHICS.md): stylised boys, seen from behind or at a distance,
+# faces never shown clearly. Composed so the heads fit both the 16:9 and the 9:16 crop.
+FRAMING = ("Medium-wide framing: full figures in the middle of the image with clear space "
+           "above their heads; faces turned away from the viewer or too small to see; warmth "
+           "shown through posture and the scene")
 SCENE_WITH_REFS = ("A completely new illustration of the scene below, not a character sheet: "
                    "full background, natural poses. Use the reference images ONLY for how the "
                    "boys look (hair, skin, shirt and shorts colours stay exactly as in the references)")
@@ -85,12 +98,12 @@ def reference_prompt(storyboard: dict, character: dict) -> str:
 
 
 def shot_prompt(storyboard: dict, shot: dict, with_references: bool = False) -> str:
-    chars = {c["id"]: c for c in storyboard["characters"]}
     parts = [SCENE_WITH_REFS] if with_references and shot["characters"] else []
     parts.append(shot["image_prompt"].rstrip("."))
     if shot["characters"]:
-        who = "; ".join(chars[c]["description"] for c in shot["characters"])
+        who = "; ".join(character_description(storyboard, shot, c) for c in shot["characters"])
         parts.append(f"Characters (stylised, faces simplified, seen from behind or at a distance): {who}")
+        parts.append(FRAMING)
     parts.append(f"Style: {storyboard['style_block']}")
     parts.append(NEGATIVE)
     return _clip(". ".join(parts) + ".")
@@ -129,7 +142,7 @@ def shot_inputs(storyboard: dict, shot: dict, cfg: ImageConfig, refs: list[Path]
     if missing:
         raise MissingInput(f"{shot['id']}: reference sheet(s) {missing} not made yet; "
                            "run `py -m pipeline keyframes`")
-    return keyframe_inputs(storyboard, shot, model=cfg.model, params=_params(cfg, SHOT_PROMPT_VERSION),
+    return keyframe_inputs(storyboard, shot, model=cfg.model, params=_params(cfg, shot_prompt_version(shot)),
                            reference_hashes=[file_hash(r) for r in refs])
 
 
@@ -147,6 +160,7 @@ def run(storyboard: dict, only: list[str] | None = None, *, generate=None,
     generate = generate or cloudflare.text_to_image
     cfg = ImageConfig.from_storyboard(storyboard)
     shots = select_shots(storyboard, only)
+    units = [u for s in shots for u in beats.visual_units(s)]   # each beat has its own keyframe
     chars = {c["id"]: c for c in storyboard["characters"]}
     common = dict(provider="cloudflare", model=cfg.model, ext=EXT, out_base=out_base,
                   log_path=log_path)
@@ -154,7 +168,7 @@ def run(storyboard: dict, only: list[str] | None = None, *, generate=None,
     logged = cfg.request_params() | {"seed_honoured": cfg.info.seed_honoured}
 
     if cfg.use_references():
-        needed = sorted({c for s in shots for c in s["characters"]})
+        needed = sorted({c for u in units for c in u["characters"]})
         for cid in needed:
             char = chars[cid]
             before = reference_path(storyboard, char, out_base).exists()
@@ -169,12 +183,12 @@ def run(storyboard: dict, only: list[str] | None = None, *, generate=None,
             print(f"  ref-{cid}: {'cached' if before else 'generated'}  {config.rel(path)}")
 
     done: dict[str, Path] = {}
-    for shot in shots:
+    for shot in units:
         refs = _shot_references(storyboard, shot, cfg, out_base)
         before = keyframe_path(storyboard, shot, out_base).exists()
         path = run_model_step(
             stage=STAGE, shot=shot["id"],
-            params=logged | {"prompt_version": SHOT_PROMPT_VERSION, "references": len(refs)},
+            params=logged | {"prompt_version": shot_prompt_version(shot), "references": len(refs)},
             seed=shot["seed"], inputs=shot_inputs(storyboard, shot, cfg, refs),
             produce=lambda p, shot=shot, refs=refs: generate(
                 model=cfg.model, prompt=shot_prompt(storyboard, shot, bool(refs)),

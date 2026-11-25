@@ -101,6 +101,25 @@ def rule_problems(data: dict) -> list[str]:
 
     shot_ids = set(ids)
     for shot in data["shots"]:
+        n_words = len(shot["narration"]["text"].split())
+        last = 0
+        for k, beat in enumerate(shot.get("beats", []), 1):
+            w = beat["from_word"]
+            if w <= last or w >= max(n_words, 1):
+                problems.append(f"shot {shot['id']} beat {k}: from_word {w} must increase and be "
+                                f"below the line's {n_words} words")
+            last = w
+            if bad_box(beat.get("safe_box")):
+                problems.append(f"shot {shot['id']} beat {k}: safe_box must have x0<x1, y0<y1")
+            for c in beat.get("characters", []):
+                if c not in char_ids:
+                    problems.append(f"shot {shot['id']} beat {k}: character '{c}' is not defined")
+            for c in beat.get("appearance", {}):
+                if c not in beat.get("characters", []):
+                    problems.append(f"shot {shot['id']} beat {k}: appearance for '{c}', who is not in the beat")
+        for c in shot.get("appearance", {}):
+            if c not in shot["characters"]:
+                problems.append(f"shot {shot['id']}: appearance for '{c}', who is not in the shot")
         if bad_box(shot["video"].get("safe_box")):
             problems.append(f"shot {shot['id']}: video.safe_box must be [x0, y0, x1, y1] with x0<x1, y0<y1")
         src = (shot["video"].get("still") or {}).get("from")

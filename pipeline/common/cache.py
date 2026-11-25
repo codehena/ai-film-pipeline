@@ -41,9 +41,17 @@ def output_name(shot_id: str, inputs: dict, ext: str) -> str:
     return f"{shot_id}_{stable_hash(inputs)}.{ext.lstrip('.')}"
 
 
+def character_description(storyboard: dict, shot: dict, cid: str) -> str:
+    """A shot's `appearance` replaces a character's description for that shot only
+    (e.g. swimming in shorts), so it is part of that shot's keyframe key and no other."""
+    override = (shot.get("appearance") or {}).get(cid)
+    if override:
+        return override
+    return next(c["description"] for c in storyboard["characters"] if c["id"] == cid)
+
+
 def _character_descriptions(storyboard: dict, shot: dict) -> list[str]:
-    chars = {c["id"]: c for c in storyboard["characters"]}
-    return [chars[c]["description"] for c in shot["characters"]]
+    return [character_description(storyboard, shot, c) for c in shot["characters"]]
 
 
 def speech_style(storyboard: dict, shot: dict) -> str:

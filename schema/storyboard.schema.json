@@ -135,6 +135,26 @@
         "image_prompt": { "type": "string", "minLength": 1 },
         "motion_prompt": { "type": "string", "minLength": 1, "description": "Only motion and camera; the keyframe already holds the subject." },
         "seed": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "appearance": { "$ref": "#/$defs/appearance" },
+        "beats": {
+          "type": "array",
+          "description": "More pictures inside this shot, each starting at the word it shows (pipeline/beats.py). The shot's own image is beat 0.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from_word", "image_prompt"],
+            "properties": {
+              "from_word": { "type": "integer", "minimum": 1, "description": "Index of the narration word (0-based, split on spaces) this picture lands on." },
+              "image_prompt": { "type": "string", "minLength": 1 },
+              "motion_prompt": { "type": "string", "minLength": 1 },
+              "characters": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+              "appearance": { "$ref": "#/$defs/appearance" },
+              "seed": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+              "focus": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+              "safe_box": { "$ref": "#/$defs/box" }
+            }
+          }
+        },
         "narration": {
           "type": "object",
           "additionalProperties": false,
@@ -170,6 +190,11 @@
           }
         }
       }
+    },
+    "appearance": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 },
+      "description": "Character id -> a full description used instead of the character's own for this shot/beat only (e.g. swimming in shorts)."
     },
     "box": {
       "type": "array", "minItems": 4, "maxItems": 4,

@@ -17,7 +17,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from . import keyframes, render
+from . import beats, keyframes, render
 from .common import MissingInput, config
 from .common.cache import file_hash, stable_hash, video_inputs
 from .common.runlog import read_log
@@ -47,14 +47,19 @@ def clip_path(storyboard: dict, shot: dict, out_base: Path | None = None) -> Pat
 
 
 def status(storyboard: dict, out_base: Path | None = None) -> dict[str, str]:
+    """Per visual unit (a shot or one of its beats): clip, Ken Burns, or what is missing."""
     out = {}
     for shot in storyboard["shots"]:
-        if not wants_clip(shot):
-            out[shot["id"]] = "ken burns (by design)"
-        elif clip_path(storyboard, shot, out_base).exists():
-            out[shot["id"]] = "clip"
-        else:
-            out[shot["id"]] = "ken burns (no clip yet)"
+        for unit in beats.visual_units(shot):
+            if not wants_clip(unit):
+                out[unit["id"]] = "ken burns (by design)"
+                continue
+            try:
+                has = clip_path(storyboard, unit, out_base).exists()
+            except MissingInput:
+                out[unit["id"]] = "keyframe missing (run `keyframes`)"
+                continue
+            out[unit["id"]] = "clip" if has else "ken burns (no clip yet)"
     return out
 
 
