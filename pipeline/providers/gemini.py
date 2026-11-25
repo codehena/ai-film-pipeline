@@ -38,6 +38,17 @@ def generate_text(model: str, prompt: str) -> str:
     return client().models.generate_content(model=model, contents=prompt).text or ""
 
 
+def transcribe(model: str, wav_path: Path, language: str = "Amharic") -> str:
+    """Speech-to-text with a Gemini text model (used to check narration, not to make it)."""
+    from google.genai import types
+
+    response = client().models.generate_content(model=model, contents=[
+        types.Part.from_bytes(data=Path(wav_path).read_bytes(), mime_type="audio/wav"),
+        f"Transcribe this short {language} speech exactly, in its own script. Output only the words.",
+    ])
+    return (response.text or "").strip()
+
+
 def build_tts_contents(text: str, style: str | None, style_mode: str):
     """How the delivery instruction reaches the model, kept apart from the spoken words.
 
