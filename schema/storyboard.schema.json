@@ -156,6 +156,7 @@
               "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 },
               "description": "Point of interest (x, y as fractions of the keyframe) that the 16:9 / 9:16 crops and the Ken Burns move centre on. Default [0.5, 0.5]."
             },
+            "safe_box": { "$ref": "#/$defs/box" },
             "still": {
               "type": "object",
               "additionalProperties": false,
@@ -169,6 +170,11 @@
           }
         }
       }
+    },
+    "box": {
+      "type": "array", "minItems": 4, "maxItems": 4,
+      "items": { "type": "number", "minimum": 0, "maximum": 1 },
+      "description": "x0, y0, x1, y1 as fractions of the keyframe: the region (heads, faces, key action) that must stay inside every crop and every Ken Burns move."
     },
     "speech_metadata": {
       "type": "object",

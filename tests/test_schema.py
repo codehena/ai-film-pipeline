@@ -111,3 +111,12 @@ def test_still_from_must_name_another_existing_shot(board, schema):
 def test_focus_must_be_fractions(board, schema):
     board["shots"][0]["video"]["focus"] = [1.4, 0.5]
     assert "focus" in problems(board, schema)
+
+
+def test_safe_box_must_be_well_formed(board, schema):
+    board["shots"][0]["video"]["safe_box"] = [0.2, 0.1, 0.8, 0.4]
+    validate(board, schema)
+    board["shots"][0]["video"]["safe_box"] = [0.8, 0.1, 0.2, 0.4]
+    assert "safe_box" in problems(board, schema)
+    board["shots"][0]["video"]["safe_box"] = [0.2, 0.1, 1.4, 0.4]
+    assert "safe_box" in problems(board, schema)

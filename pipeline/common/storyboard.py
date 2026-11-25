@@ -96,8 +96,13 @@ def rule_problems(data: dict) -> list[str]:
                     f"shot {shot['id']}: character '{c}' is not defined in characters"
                 )
 
+    def bad_box(b):
+        return b is not None and not (b[0] < b[2] and b[1] < b[3])
+
     shot_ids = set(ids)
     for shot in data["shots"]:
+        if bad_box(shot["video"].get("safe_box")):
+            problems.append(f"shot {shot['id']}: video.safe_box must be [x0, y0, x1, y1] with x0<x1, y0<y1")
         src = (shot["video"].get("still") or {}).get("from")
         if src and (src not in shot_ids or src == shot["id"]):
             problems.append(f"shot {shot['id']}: video.still.from '{src}' must be another existing shot")

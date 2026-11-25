@@ -50,10 +50,29 @@ def media_duration(path: Path) -> float:
         return 0.0
 
 
-def crop_window(src_w: int, src_h: int, ratio: float,
-                focus: tuple[float, float] = (0.5, 0.5)) -> tuple[int, int, int, int]:
-    """(x, y, w, h): the largest window of aspect `ratio` (w/h), centred on `focus`
-    as far as the image allows. Even sizes, for yuv420p."""
+SAFE_MARGIN = 0.05  # breathing room kept around a safe box (fraction of the image)
+
+Box = tuple[float, float, float, float]  # x0, y0, x1, y1 as fractions (0-1)
+
+
+def _place(lo_need: float, hi_need: float, size: float, ideal: float, limit: float,
+           overflow: str) -> float:
+    """Start of a window of `size` inside [0, limit] that contains [lo_need, hi_need] if
+    it can, as close to `ideal` as possible. If the region is bigger than the window:
+    overflow="start" keeps its start (vertically: keep heads, lose feet), "centre" centres
+    it (sideways: don't favour the left person)."""
+    if hi_need - lo_need > size:
+        start = lo_need if overflow == "start" else (lo_need + hi_need) / 2 - size / 2
+    else:
+        start = min(max(ideal, hi_need - size), lo_need)
+    return min(max(start, 0.0), limit - size)
+
+
+def crop_window(src_w: int, src_h: int, ratio: float, focus: tuple[float, float] = (0.5, 0.5),
+                safe_box: Box | None = None) -> tuple[int, int, int, int]:
+    """(x, y, w, h): the largest window of aspect `ratio` (w/h). With a safe_box (heads,
+    faces, key action) the window contains that box plus SAFE_MARGIN wherever it fits,
+    otherwise it keeps the box's top; without one it centres on `focus`. Even sizes."""
     if src_w / src_h > ratio:
         h = src_h
         w = round(h * ratio)
@@ -61,9 +80,54 @@ def crop_window(src_w: int, src_h: int, ratio: float,
         w = src_w
         h = round(w / ratio)
     w, h = w - w % 2, h - h % 2
-    x = round(min(max(focus[0] * src_w - w / 2, 0), src_w - w))
-    y = round(min(max(focus[1] * src_h - h / 2, 0), src_h - h))
-    return x, y, w, h
+    ideal_x, ideal_y = focus[0] * src_w - w / 2, focus[1] * src_h - h / 2
+    if safe_box is None:
+        x = min(max(ideal_x, 0), src_w - w)
+        y = min(max(ideal_y, 0), src_h - h)
+    else:
+        bx0, by0, bx1, by1 = safe_box
+        m = SAFE_MARGIN
+        x = _place(max(bx0 - m, 0) * src_w, min(bx1 + m, 1) * src_w, w,
+                   ((bx0 + bx1) / 2) * src_w - w / 2, src_w, "centre")
+        y = _place(max(by0 - m, 0) * src_h, min(by1 + m, 1) * src_h, h,
+                   ((by0 + by1) / 2) * src_h - h / 2, src_h, "start")
+    return round(x), round(y), w, h
+
+
+def box_in_window(safe_box: Box, src_wh: tuple[int, int],
+                  window: tuple[int, int, int, int]) -> Box:
+    """The safe box in the window's own 0-1 coordinates (clipped to the window)."""
+    sw, sh = src_wh
+    x, y, w, h = window
+    b = ((safe_box[0] * sw - x) / w, (safe_box[1] * sh - y) / h,
+         (safe_box[2] * sw - x) / w, (safe_box[3] * sh - y) / h)
+    return tuple(min(max(v, 0.0), 1.0) for v in b)
+
+
+def _centre_range(lo: float, hi: float, z: float) -> tuple[float, float]:
+    """Allowed centres of a view of width 1/z (in window units) that keep [lo, hi] visible."""
+    half = 0.5 / z
+    a, b = max(hi - half, half), min(lo + half, 1 - half)
+    return (a, b) if a <= b else (lo + half, lo + half)   # region too big: keep its start
+
+
+def fit_move(move: Move, box: Box | None) -> tuple[Move, float]:
+    """Clamp a Ken Burns move so `box` (window coordinates) stays fully visible all the way
+    through: zoom never tighter than the box allows, drift kept to where the box still
+    fits. Returns the fitted move and the vertical centre to use."""
+    if box is None:
+        return move, 0.5
+    x0, y0, x1, y1 = box
+    zmax = max(1.0, min(1 / max(x1 - x0, 1e-6), 1 / max(y1 - y0, 1e-6)))
+    z0, z1 = (min(z, zmax) for z in move.zoom)
+    drift = []
+    for d, z in zip(move.drift, (z0, z1)):
+        a, b = _centre_range(x0, x1, z)
+        drift.append(min(max(d, a), b))
+    za = max(z0, z1)
+    a, b = _centre_range(y0, y1, za)
+    fy = min(max((y0 + y1) / 2, a), b)
+    return Move((z0, z1), (drift[0], drift[1])), fy
 
 
 def move_for(shot: dict) -> Move:
@@ -101,11 +165,17 @@ def zoompan_filter(move: Move, frames: int, focus_y: float, out_w: int, out_h: i
 
 
 def still_segment_cmd(ffmpeg: str, image: Path, image_wh: tuple[int, int], ratio_key: str,
-                      focus: tuple[float, float], move: Move, frames: int, out: Path) -> list[str]:
+                      focus: tuple[float, float], move: Move, frames: int, out: Path,
+                      safe_box: Box | None = None) -> list[str]:
     out_w, out_h = FORMATS[ratio_key]
-    x, y, w, h = crop_window(*image_wh, out_w / out_h, focus)
-    # focus inside the crop window, so the zoom closes in on the subject
-    fy = min(max((focus[1] * image_wh[1] - y) / h, 0.0), 1.0)
+    window = crop_window(*image_wh, out_w / out_h, focus, safe_box)
+    x, y, w, h = window
+    if safe_box is not None:
+        # the move may never zoom or drift the safe box (heads) out of frame
+        move, fy = fit_move(move, box_in_window(safe_box, image_wh, window))
+    else:
+        # focus inside the crop window, so the zoom closes in on the subject
+        fy = min(max((focus[1] * image_wh[1] - y) / h, 0.0), 1.0)
     vf = (f"crop={w}:{h}:{x}:{y},scale={w * UPSCALE}:{h * UPSCALE}:flags=lanczos,"
           f"{zoompan_filter(move, frames, fy, out_w, out_h)},setsar=1,format=yuv420p")
     return [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-loop", "1",
@@ -114,10 +184,12 @@ def still_segment_cmd(ffmpeg: str, image: Path, image_wh: tuple[int, int], ratio
 
 
 def clip_segment_cmd(ffmpeg: str, clip: Path, clip_wh: tuple[int, int], ratio_key: str,
-                     focus: tuple[float, float], frames: int, out: Path) -> list[str]:
-    """A motion clip cropped to the ratio; held on its last frame if the shot is longer."""
+                     focus: tuple[float, float], frames: int, out: Path,
+                     safe_box: Box | None = None) -> list[str]:
+    """A motion clip cropped to the ratio; held on its last frame if the shot is longer.
+    safe_box is in the CLIP's coordinates (see shots.export_job)."""
     out_w, out_h = FORMATS[ratio_key]
-    x, y, w, h = crop_window(*clip_wh, out_w / out_h, focus)
+    x, y, w, h = crop_window(*clip_wh, out_w / out_h, focus, safe_box)
     vf = (f"crop={w}:{h}:{x}:{y},scale={out_w}:{out_h}:flags=lanczos,fps={FPS},"
           f"tpad=stop_mode=clone:stop_duration={frames / FPS + 1:.3f},setsar=1,format=yuv420p")
     return [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-i", str(clip), "-vf", vf,
