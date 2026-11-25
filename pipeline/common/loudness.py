@@ -7,8 +7,10 @@ silently falls back to "dynamic" mode and stops short (we measured -15.9 LUFS).
 
 Recipe (measured on the real radio mix, EXPERIMENTS.md EXP-04):
   1. measure the raw mix
-  2. pre-gain to (target + MAKEUP_DB) and limit peaks at LIMIT_DBFS, so the
-     loudness fits under the true-peak ceiling with headroom
+  2. pre-gain to (target + MAKEUP_DB) and limit peaks at LIMIT_DBFS; measure; if the
+     final gain still needed would push true peaks past the ceiling (minus MARGIN_DB),
+     push more level into the limiter and repeat (up to MAX_ROUNDS). A fixed pre-gain
+     fit one mix and not the next (F-11), so the recipe adapts to each mix
   3. measure again and apply loudnorm with those measurements, linear=true:
      a plain, auditable gain change, no further dynamics processing
 Every number is kept in a report so the result can be checked from text alone.
@@ -25,6 +27,11 @@ TARGET_LRA = 11.0     # LU
 LIMIT_DBFS = -3.5     # limiter ceiling: leaves room for the final gain and inter-sample peaks
 MAKEUP_DB = 2.0       # extra pre-gain, because limiting itself lowers integrated loudness
 TOLERANCE_LU = 0.5    # how far from TARGET_I still counts as on target
+MARGIN_DB = 0.3       # keep the final linear gain this far under the true-peak ceiling
+MAX_ROUNDS = 4        # limiter rounds before accepting a dynamic final pass (and warning)
+# Limit at 4x the sample rate: at 48 kHz, peaks between samples overshot the ceiling by
+# ~0.9 dB, which left too little headroom for a linear final gain (EXPERIMENTS.md EXP-04)
+OVERSAMPLE_HZ = 192000
 
 
 class LoudnessError(Exception):
@@ -67,10 +74,22 @@ def normalize(ffmpeg: str, src: Path, dst: Path) -> dict:
     pre_gain = round(TARGET_I - float(raw["input_i"]) + MAKEUP_DB, 2)
     limit = round(10 ** (LIMIT_DBFS / 20), 4)
     limited = dst.with_name(dst.stem + ".limited.wav")
-    _run([ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-i", str(src), "-af",
-          f"volume={pre_gain}dB,alimiter=limit={limit}:level=false:attack=5:release=100",
-          str(limited)])
-    mid = measure(ffmpeg, limited)
+    rounds = []
+    for _ in range(MAX_ROUNDS):
+        _run([ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-i", str(src), "-af",
+              f"volume={pre_gain}dB,aresample={OVERSAMPLE_HZ},"
+              f"alimiter=limit={limit}:level=false:attack=5:release=100,aresample=48000",
+              str(limited)])
+        mid = measure(ffmpeg, limited)
+        need = TARGET_I - float(mid["input_i"])                    # final linear gain required
+        allowed = (TARGET_TP - MARGIN_DB) - float(mid["input_tp"])  # gain the peaks can take
+        rounds.append({"pre_gain_db": pre_gain, "limited_i": float(mid["input_i"]),
+                       "limited_tp": float(mid["input_tp"]), "final_gain_needed_db": round(need, 2),
+                       "final_gain_allowed_db": round(allowed, 2)})
+        if need <= allowed:
+            break
+        # not enough headroom for a linear final gain: push more level into the limiter
+        pre_gain = round(pre_gain + (need - allowed) + 0.2, 2)
     applied = parse_loudnorm(_run([
         ffmpeg, "-hide_banner", "-y", "-i", str(limited), "-af",
         f"loudnorm={_target()}:measured_I={mid['input_i']}:measured_TP={mid['input_tp']}"
@@ -81,7 +100,7 @@ def normalize(ffmpeg: str, src: Path, dst: Path) -> dict:
     return {
         "target_i": TARGET_I, "target_tp": TARGET_TP,
         "raw_i": float(raw["input_i"]), "raw_tp": float(raw["input_tp"]),
-        "pre_gain_db": pre_gain, "limit_dbfs": LIMIT_DBFS,
+        "pre_gain_db": pre_gain, "limit_dbfs": LIMIT_DBFS, "rounds": rounds,
         "limited_i": float(mid["input_i"]), "limited_tp": float(mid["input_tp"]),
         "final_pass": applied["normalization_type"],
     }

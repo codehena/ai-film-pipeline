@@ -31,7 +31,8 @@ from .common.modelcall import run_model_step
 STAGE = "cuts"
 # bump when the FFmpeg recipe changes, so old cuts are not reused
 # 2: two-pass loudness (pre-gain + limiter + linear loudnorm) replaced single-pass loudnorm (F-11)
-RECIPE_VERSION = 2
+# 3: adaptive limiter rounds + 4x oversampled limiter (draft 4 mix fell back to dynamic)
+RECIPE_VERSION = 3
 MIN_GAP_S = 0.25    # never let two lines touch
 RADIO_SIZE = "1280x720"
 SUB_MAX_CHARS = 40  # per subtitle line, at most two lines
@@ -40,6 +41,7 @@ SUB_MAX_CHARS = 40  # per subtitle line, at most two lines
 DUCK = "threshold=0.02:ratio=6:attack=300:release=1500"
 LOUDNESS = {"target_i": loudness.TARGET_I, "target_tp": loudness.TARGET_TP,
             "limit_dbfs": loudness.LIMIT_DBFS, "makeup_db": loudness.MAKEUP_DB,
+            "margin_db": loudness.MARGIN_DB, "oversample_hz": loudness.OVERSAMPLE_HZ,
             "method": "two-pass linear"}
 # Placeholder pad: an open fifth (A2 + E3 + A3) with a slow swell. No melody to fight the voice.
 PAD_EXPR = ("0.20*sin(2*PI*110*t)*(0.6+0.4*sin(2*PI*0.07*t))"
