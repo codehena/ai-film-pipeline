@@ -13,6 +13,7 @@ It combines caching, retries, logging and fallback:
 """
 from __future__ import annotations
 
+import re
 import time
 from pathlib import Path
 from typing import Callable
@@ -23,8 +24,20 @@ from .retry import DEFAULT_ATTEMPTS, PermanentError, with_retry
 from .runlog import log_call
 
 
+_QUOTA_FACTS = (
+    re.compile(r"Quota exceeded for metric: [^,]+, limit: \d+, model: [\w.\-]+"),
+    re.compile(r"description: ([^.']+)"),
+    re.compile(r"retryDelay['\"]?\s*:\s*['\"][\d.]+s"),
+)
+
+
 def _short_error(exc: BaseException) -> str:
-    return f"{type(exc).__name__}: {exc}"[:500]
+    """First 300 chars, plus the facts that matter for a quota error (which limit, how long
+    to wait), which otherwise sit past the cut-off (FAILURES.md F-09)."""
+    text = f"{type(exc).__name__}: {exc}"
+    facts = [m.group(0) for p in _QUOTA_FACTS for m in p.finditer(text)]
+    head = text[:300]
+    return head + (" | " + " | ".join(dict.fromkeys(facts)) if facts else "")
 
 
 def logged_call(
