@@ -113,25 +113,48 @@ Tested on the draft 3 radio cut (`radio_e4cfcbb9f085.mp4`), 2026-11-25.
 ### My own listen to draft 4 (2026-11-25, `radio_71461dcbe940.mp4`)
 - **Good:** the audio quality and mix are clean, and the subtitles are readable.
 - **Not yet right:** the delivery feels **less natural than the earlier take** (draft 3, `radio_e4cfcbb9f085.mp4`, same Iapetus voice and style).
-- **What was measured** (no new model calls; numbers from the two continuous reads and the two cuts):
 
-| | Draft 3 (felt natural) | Draft 4 (felt stiffer) |
+**Measured** (no model calls). Two pause detectors are used, so each number names its method:
+- *my silencedetect*: FFmpeg `silencedetect=noise=-35dB:d=0.35` on the raw reads. I ran this; the agent reproduced the same numbers.
+- *pipeline detector*: `common/silence.py`, below −40 dBFS for at least 0.25 s.
+
+| | Draft 3 read `full_62660579a53d.wav` (felt natural) | Draft 4 read `full_64173211a953.wav` (felt stiffer) |
 |---|---|---|
-| Speaking rate | 141 wpm | 141 wpm |
-| Pauses inside lines | 18, mean 0.63 s, longest 1.22 s | 17, mean 0.65 s, longest 1.20 s |
-| Gaps between lines in the read | 1.0–2.2 s | 0.7–1.3 s |
-| Gaps between lines in the cut | 0.5–1.6 s | 0.6–1.8 s |
-| Biggest change the edit makes to a gap | −1.54 s (s01→s02) | **+1.00 s after the proverb** (s09→s10: 0.82 → 1.82 s) |
+| Length / words | 64.68 s / 94 | 64.87 s / 107 |
+| Pauses, my silencedetect | 24 pauses, 0.44–2.12 s, **22.4 s in total** | 21 pauses, 0.42–1.25 s, **17.4 s in total** |
+| Longest pauses, my silencedetect | 40.07–42.19 (2.12), 22.17–23.81 (1.64) | 36.08–37.33 (1.25), 48.79–50.00 (1.21); 17.54–19.02 is one pause split in two by a blip (0.77 + 0.71) |
+| Speaking rate, pipeline detector | 141 wpm | 141 wpm |
+| Pauses *inside* lines, pipeline detector | 18, mean 0.63 s | 17, mean 0.65 s |
+| Gaps *between* lines in the read | 1.0–2.2 s | 0.7–1.3 s |
 
-- **Reading:** pace and pausing are the same, so the difference is most likely **intonation** (the melody of the voice), which these numbers can't see. Three suspects, all from draft 4's changes:
+- **Reading:** pause *counts* don't explain it. The voice speaks at the same rate with the same pauses inside lines. But the draft 4 read fits 13 more words into the same length, so it has **about 5 s less silence**, almost all of it *between* lines. It breathes less. The rest is most likely **intonation**, which pause measurements can't see:
   1. **Lines that end mid-sentence.** s03 and s05 end on "፣" and continue in the next line. The read is sent as one paragraph per shot, with an instruction to pause about two seconds between paragraphs, so the voice may close each of those half-sentences as if the thought were finished.
   2. **List-shaped lines.** s02 has four parallel ሲ- clauses and s08 has three, which invites a "list" melody.
   3. **Take-to-take variation.** Every TTS read is a new performance, even with identical settings.
-- The cut also adds a full second of silence after the proverb, which may make the ending feel stretched.
-- **Next, before spending any TTS quota:** listen to the raw continuous reads (`outputs/narration/full_64173211a953.wav` for draft 4, `full_62660579a53d.wav` for draft 3).
-  - If the raw draft 4 read sounds natural, the stiffness comes from the edit (re-spacing), which is free to fix.
-  - If it already sounds stiff, the cause is the text or the take, and a targeted re-read is the fix.
-- TODO: my verdict after that listen.
+
+**Where the cut changes the read's spacing** (`assemble` placed each line from the timeline; the read's own spacing is on the left):
+
+| Shot | Raw read (s) | Cut (s) | Gap before: read → cut | Change |
+|---|---|---|---|---|
+| s01 | 0.00–5.48 | 1.00–6.48 | 0.00 → 1.00 | +1.00 (lead-in, `pause_before`) |
+| s02 | 6.36–17.64 | 7.20–18.48 | 0.88 → 0.72 | −0.16 |
+| s03 | 18.92–23.26 | 19.30–23.64 | 1.28 → 0.82 | **−0.46** (the breath after "አንዳንዴም ይናፍቀኛል" is shortened) |
+| s04 | 23.98–27.54 | 24.20–27.76 | 0.72 → 0.56 | −0.16 |
+| s05 | 28.40–32.10 | 28.70–32.40 | 0.86 → 0.94 | +0.08 |
+| s06 | 32.84–36.18 | 33.20–36.54 | 0.74 → 0.80 | +0.06 |
+| s07 | 37.22–42.50 | 37.80–43.08 | 1.04 → 1.26 | +0.22 |
+| s08 | 43.36–48.90 | 43.70–49.24 | 0.86 → 0.62 | −0.24 |
+| s09 (proverb) | 49.90–52.88 | 50.60–53.58 | 1.00 → 1.36 | **+0.36** |
+| s10 | 53.70–64.64 | 55.40–66.34 | 0.82 → 1.82 | **+1.00** (after the proverb) |
+| tail | 0.23 s after s10 | 1.66 s after s10, then 3 s end card | | +1.43 and +3.00 |
+
+- **The read runs 64.87 s and the cut 71.00 s, +6.13 s.** That breaks down as:
+  - 3.00 s end card
+  - 1.00 s lead-in
+  - 1.43 s tail
+  - **0.70 s net between lines**: 1.72 s added (most of it around the proverb) and 1.02 s removed
+- **Every gap includes rounding slack.** `retime` rounds each shot up to the next 0.5 s, which adds 0–0.5 s of arbitrary silence per line.
+- **Next:** decide between Option A (fix the spacing, 0 TTS calls) and Option B (one targeted re-read, 1 TTS call), as laid out with the agent. TODO: my verdict after comparing.
 
 ### Follow-up check on draft 4 (same 5 questions, blind, headphones)
 Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answers in each person's own words.
