@@ -17,9 +17,9 @@ One entry per real person shown, described or voiced. The `consent_ref` of each 
 - **Shown as:** a stylised boy (`brother_child`), hand-painted, not a portrait, never a realistic likeness.
 - **Voiced:** no. He is mentioned in the narration (s04, s10) but does not speak.
 - **What he agreed to:** to be part of this AI-made short film about our childhood in the *geter*. He said he is "very happy to be part of the video".
-- **How consent was given:** verbally, in a phone call with me.
-- **Date of the call:** TODO (fill in)
-- **To strengthen the record (recommended before keyframes):** send him the final narration lines with their English translation, and a description of how he will be shown (a stylised boy, not a portrait, posted publicly with an AI label). Ask him to reply "I agree" in a text or voice message, and record the date and medium here. Keep the message itself privately; do not commit it.
+- **How consent was given:** verbally, in a phone call with me, on **2026-11-25**.
+- **Written confirmation:** **received 2026-11-25**, before any image of him was generated. He confirmed in a written message that he agrees to the narration lines and to being shown as a stylised boy (hand-painted, from behind or at a distance, not a portrait) in a film posted publicly with an AI label. The message itself is kept privately and is **not** committed to this repository.
+- **What was never used:** no photo of him (or of me), no recording of his voice, and no name. Keyframes are generated from text descriptions only (`characters[].description` in `storyboard.json`).
 - **He can withdraw:** if he asks, his shots are regenerated without him or removed, and the post is taken down.
 
 ### Other people in the film
