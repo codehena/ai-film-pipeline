@@ -229,7 +229,9 @@ Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answe
   - `outputs/cuts/final-9x16_2be4fa87d02c.mp4`
 
   Both are 70.3 s, −14 LUFS, Option A narration and the placeholder pad.
-- TODO: my verdict after watching.
+- My verdict (2026-11-25): framing, beat sync, ensera, swimming, friends, and the s10 ceremony and ending all work. Still wrong: s08's women looked Arabic-dressed, and the jebena and sini weren't a real buna ceremony.
+- **Draft 4d (s08 only):** women in white habesha kemis with tibeb borders and netela over the shoulders; a real jebena (round base, tall neck), sini cups and popcorn on a rekebot, straw ring, incense (F-23). s09's push-in follows the new jebena.
+  - **Films:** `outputs/cuts/final-16x9_6fcb4e5373e3.mp4`, `outputs/cuts/final-9x16_9b8225f4742d.mp4`
 
 ## User test 2: near-final cut (at least 3 people)
 | Who | Date | What they said | Where they reacted |

@@ -125,6 +125,8 @@ A change to this recipe bumps `assemble.RECIPE_VERSION`, so a new cut gets a new
 - **Shot prompt templates are versioned per kind** (character vs scene), so changing the character template never re-rolls a scene-only keyframe.
 - **A motion clip's key excludes the shot duration:** a narration retime never invalidates Wan clips.
 - **`py -m pipeline framing`** draws all of this on the keyframes for review before rendering.
+- **Segments are cached by their actual framing** (`render.still_plan`: window, fitted move, vertical centre), not by its inputs, so a framing-rule change can never leave a stale segment (F-24).
+- **Prompt rule for cultural objects:** describe the shape and parts (a jebena: spherical base, tall bottle-like neck, side spout, loop handle), never only the name, and never name what to avoid (EXP-11).
 
 ## GPU stages
 Wan 2.2 and ACE-Step run in Kaggle notebooks (`notebooks/`, see its README for the round trip). `shots/music --export` writes a job bundle that lists only what is missing. `--import` copies back only files whose names match the current contract (a clip tied to an old keyframe is ignored) and merges the notebook's log lines without duplicates. The music hash ignores cue *times*, so retiming never invalidates the score.

@@ -8,7 +8,7 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 | Gemini API, `gemini-3.8-flash-tts` | **3 requests per minute** per model (`GenerateRequestsPerMinutePerProjectPerModel-FreeTier`, quotaValue 3) | 429 error during narration (FAILURES.md F-08) | 2026-11-25 |
 | Gemini API, `gemini-3.5-flash` (text; used for `asr-check`) | **20 requests per day** (the error names `gemini-3.6-flash`, so the quota seems shared); 503 "high demand" seen on 3.8/3.7 flash | 429 during asr-check (F-12) | 2026-11-25 |
 | Gemini API, `gemini-3.8-flash-tts` | **10 requests per day** ("Generate content requests per day limit", limit 10); resets 08:00 UTC = 11:00 EAT (`retryDelay` 23084 s at 01:35 UTC) | 429 errors during the voice audition (F-09) | 2026-11-25 |
-| Cloudflare Workers AI | Not hit: **41** FLUX.2 klein images on 2026-11-25 with 0 errors (free daily neuron allowance; per-image neurons aren't reported by the API) | `runs.jsonl` stages `keyframes`, `probe` | 2026-11-25 |
+| Cloudflare Workers AI | Not hit: **43** FLUX.2 klein images on 2026-11-25 with 0 errors (free daily neuron allowance; per-image neurons aren't reported by the API) | `runs.jsonl` stages `keyframes`, `probe` | 2026-11-25 |
 | Kaggle GPU | TODO (hours/week) | | |
 
 ## Per stage (Phase 1: radio cut)
@@ -44,3 +44,4 @@ TODO: the price source and date for each provider.
 TODO
 
 **Draft 4c render cost:** 15 visual units (10 shots + 5 beats) per ratio. A full rebuild of both ratios took 276 s (16:9) + 265 s (9:16) locally, with 0 model calls, because every Ken Burns segment is rendered at 4× for smoothness. Unchanged segments are cached, so later re-renders only rebuild what changed.
+**s08 fix (draft 4d):** 2 keyframe generations (attempt 1: jebena wrong; attempt 2 kept), 0 TTS/ASR calls. s09 changed with it at no generation cost (insert from s08). The new segment cache key (framing plan, F-24) forced one full rebuild of both ratios: 164 s (16:9) + 262 s (9:16), local FFmpeg only.

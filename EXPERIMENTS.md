@@ -165,3 +165,18 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
   - In 9:16, s08's four seated women can't all fit (the box is wider than the frame), so the crop centres on the jebena, as designed.
   - The new character prompt (medium-wide, space above heads) also helped: most new keyframes already placed heads inside the 16:9 band.
 - **Decision:** safe boxes for every shot with people; the framing sheet is part of the review before a render.
+
+### EXP-11: Naming a cultural object vs. describing its shape
+- **Date:** 2026-11-25
+- **Hypothesis:** FLUX.2 klein knows the *words* for Ethiopian objects (jebena, sini, netela, habesha kemis) but not their *shapes*. Describing the shape and parts will get them right where names alone didn't.
+- **Evidence across takes:**
+
+| Shot / take | Prompt style | Result |
+|---|---|---|
+| s08 v1 (morning) | names only ("black clay jebena", "white netela shawls") | cauldron-like pot; lace veils over the head |
+| s08 now, attempt 1 | names + described garments, tray, straw ring, popcorn | attire and ceremony right; jebena a squat teapot |
+| s08 now, attempt 2 | + jebena geometry (spherical base, tall bottle-like neck, side spout, loop handle) | a recognisable jebena; kept |
+| s09 takes 1–2 (morning) | "handleless" / "bowl-shaped" cup | handles kept appearing (F-16) |
+
+- **Result:** describing shape and parts worked, on the second attempt. Naming the thing to avoid ("handleless", and the reason "teapot" was left out) does the opposite.
+- **Decision:** for every culturally specific object, the prompt describes its shape. Recorded as a prompt rule in ARCHITECTURE.md.

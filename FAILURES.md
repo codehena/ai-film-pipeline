@@ -259,3 +259,22 @@ What broke, what I tried, what fixed it (or how I worked around it). Write these
   - Since then, every patch-then-commit step is chained with `&&`, and the test suite's exit code is captured *before* the pipe and checked. The commit only runs on 0.
   - The red test had found a real flaw: one shot-template version re-keyed scene-only keyframes too. Versions are now per template kind (character vs scene), so s01/s02/s08 kept their images (tested).
 - **Lesson:** a commit gate that a pipe can bypass is not a gate.
+
+### F-23: s08's coffee ceremony didn't look Ethiopian (clothing and jebena)
+- **Date:** 2026-11-25
+- **Reported by:** the author, watching `final-16x9_cf2f2882d313.mp4`.
+- **What happened:**
+  - The women wore lace veils over their heads, which read as Arabic-style dress rather than habesha wear.
+  - The jebena and sini cups didn't look like a real Ethiopian *buna* ceremony.
+- **Cause:** the prompt named the garments ("white netela shawls") without describing them, and the model filled the gap with a generic veil.
+- **What I tried:**
+  - **Attempt 1:** named and described each element: *habesha kemis* (white handwoven cotton with *tibeb* borders at hem and cuffs), *netela* over the shoulders not the face, braided hair, a straw ring, *rekebot*, popcorn, incense, *qetema*. The attire and ceremony came out right, but the jebena came out as a squat teapot.
+  - **Attempt 2:** kept attempt 1's prompt and described the jebena's geometry: a spherical base, a tall thin neck like a bottle neck, a spout beside the neck, a loop handle. The word "teapot" was deliberately left out (F-16: a negated word pulls its object in). **Kept.**
+- **Knock-on:** s09 is an insert from s08, so it changed with it. Its focus, safe box and zoom were retargeted on the new jebena, with no extra generation.
+- **Lesson:** for cultural objects, describe the *shape and parts*, not just the name. The model knows the words but not the objects.
+
+### F-24: The framing rules could leave stale segments in the cache
+- **Date:** 2026-11-25
+- **Found while:** fixing s08's crop. Heads plus the jebena (56% of the height) fit a 16:9 window (56.25%), but box + 5% margin didn't. The rule then fell back to "keep the top" and cut the jebena's body. **Fix:** shrink the margin before cutting into the box (tested).
+- **The risk it exposed:** a segment's cache key held the crop *inputs* (focus, safe box), not the crop *computed*. A change to the rules could therefore silently reuse old segments with the old framing.
+- **Fix:** `render.still_plan()` computes exactly what a segment shows (window, fitted move, vertical centre), and segments are keyed by that. Tested both ways: a rule change that moves pixels rebuilds the segment, and one that doesn't keeps the cache. The new key format meant one full rebuild.
