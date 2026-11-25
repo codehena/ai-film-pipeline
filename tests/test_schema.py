@@ -11,9 +11,13 @@ def problems(board, schema):
     return "\n".join(info.value.problems)
 
 
-def test_real_storyboard_is_valid(board, schema):
+def test_real_storyboard_is_valid(real_board, schema):
+    validate(real_board, schema)
+    assert 60 <= film_duration(real_board) <= 90
+
+
+def test_fixture_storyboard_is_valid(board, schema):
     validate(board, schema)
-    assert 60 <= film_duration(board) <= 90
 
 
 def test_missing_field_is_reported(board, schema):
