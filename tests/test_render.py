@@ -146,3 +146,25 @@ def test_final_cut_renders_both_ratios_on_the_timeline(pictured, tmp_path, small
         assert lr["problems"] == []
     again = assemble.run_final(pictured, out_base=tmp_path, log_path=tmp_path / "runs.jsonl")
     assert again == outs                                # cached: no re-render
+
+
+def test_card_is_centred_in_legacy_alignment():
+    assert "Alignment=10" in render.card_style("16:9") and "Alignment=10" in render.card_style("9:16")
+
+
+def test_clause_without_punctuation_is_split_between_words():
+    text = "my brother and I went side by side to the spring to fetch water."
+    parts = assemble.split_caption(text, 2 * 26 + 4)
+    assert len(parts) == 2 and " ".join(parts) == text
+    assert all(len(r) <= 30 for p in parts for r in assemble.wrap_subtitle(p, 26).splitlines())
+
+
+def test_subtitle_rows_are_balanced():
+    assert assemble.wrap_subtitle("my brother and I went side by", 26) == "my brother and\nI went side by"
+
+
+def test_a_style_change_invalidates_the_final_cut(pictured, tmp_path, small_formats, monkeypatch):
+    first = assemble.run_final(pictured, out_base=tmp_path, log_path=tmp_path / "runs.jsonl")
+    monkeypatch.setattr(render, "card_style", lambda r: "Alignment=10,FontSize=30")
+    second = assemble.run_final(pictured, out_base=tmp_path, log_path=tmp_path / "runs.jsonl")
+    assert all(first[r] != second[r] for r in first)          # no stale cut from the cache

@@ -126,8 +126,10 @@ def clip_segment_cmd(ffmpeg: str, clip: Path, clip_wh: tuple[int, int], ratio_ke
 
 
 def card_style(ratio_key: str) -> str:
-    size = 18 if ratio_key == "16:9" else 11
-    return f"Alignment=5,FontSize={size},Outline=0,Shadow=0,PrimaryColour=&H00E8EEF2"
+    # FFmpeg reads force_style alignment in legacy SSA numbering: 10 = middle centre
+    # (5 put the card in the top-left corner of the first render)
+    size = 24 if ratio_key == "16:9" else 14
+    return f"Alignment=10,FontSize={size},Outline=0,Shadow=0,PrimaryColour=&H00E8EEF2"
 
 
 def card_segment_cmd(ffmpeg: str, srt_name: str, ratio_key: str, frames: int, out_name: str) -> list[str]:

@@ -133,6 +133,13 @@ def _ts(seconds: float) -> str:
 def wrap_subtitle(text: str, width: int = SUB_MAX_CHARS) -> str:
     """At most two lines, ~`width` chars each. A too-long subtitle gets wider lines, never lost
     words (split_caption keeps that from happening in practice)."""
+    if len(text) <= width:
+        return text
+    # balanced rows: the narrowest width that still fits on two rows (no "…side / by")
+    for w in range(math.ceil(len(text) / 2), width + 1):
+        lines = textwrap.wrap(text, w)
+        if len(lines) <= 2:
+            return "\n".join(lines)
     lines = textwrap.wrap(text, width)
     while len(lines) > 2:
         width += 4
@@ -149,8 +156,17 @@ def split_caption(text: str, limit: int = CUE_MAX_CHARS) -> list[str]:
     if len(text) <= limit:
         return [text]
     pieces = [p for p in re.split(r"(?<=[.;:!?,])\s+", text) if p]
-    chunks: list[str] = []
+    # a clause still too long (no punctuation to break at) is split between words
+    fitted: list[str] = []
     for piece in pieces:
+        if len(piece) <= limit:
+            fitted.append(piece)
+            continue
+        words, n = piece.split(), math.ceil(len(piece) / limit)
+        per = math.ceil(len(words) / n)
+        fitted += [" ".join(words[i:i + per]) for i in range(0, len(words), per)]
+    chunks: list[str] = []
+    for piece in fitted:
         if chunks and len(chunks[-1]) + 1 + len(piece) <= limit:
             chunks[-1] += " " + piece
         else:
@@ -326,7 +342,9 @@ def run(storyboard: dict, only: list[str] | None = None, *, mode: str = "radio",
 
 
 # ---------------------------------------------------------------- final cut
-RENDER_VERSION = 1  # bump when render.py's picture recipe changes
+# bump when render.py's picture recipe changes
+# 2: the final cut's cache key now includes how the card and subtitles are drawn (F-15)
+RENDER_VERSION = 2
 SUB_WIDTH = {"16:9": SUB_MAX_CHARS, "9:16": 26}  # characters per subtitle row
 
 
@@ -406,8 +424,12 @@ def run_final(storyboard: dict, out_base: Path | None = None,
         tag = ratio.replace(":", "x")
         srt_text = build_srt(lines, storyboard["end_card"], total, width=SUB_WIDTH[ratio],
                              end_card_cue=False)
+        # everything that changes the delivered pixels or sound belongs in the key: a changed
+        # card or subtitle STYLE once left a stale 16:9 cut in the cache (F-15)
         inputs = {"stage": STAGE, "mode": "final", "ratio": ratio, "render": RENDER_VERSION,
-                  "audio": audio_key, "srt": srt_text, "card": storyboard["end_card"],
+                  "size": render.FORMATS[ratio], "audio": audio_key, "srt": srt_text,
+                  "sub_style": render.subtitle_style(ratio), "card": storyboard["end_card"],
+                  "card_style": render.card_style(ratio),
                   "shots": [{"id": sid, "kind": v["kind"], "source": file_hash(v["path"]),
                              "focus": v["focus"], "frames": f,
                              "move": asdict(v["move"]) if v["kind"] == "still" else None}
