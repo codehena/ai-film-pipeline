@@ -98,6 +98,21 @@ def test_retry_waits_as_long_as_the_server_asks():
     assert waits[0] >= 27  # 26 s asked + 1 s margin, not the 2 s default
 
 
+def test_long_server_wait_fails_fast_instead_of_retrying():
+    from pipeline.common.retry import QuotaExhausted
+    calls, waits = [], []
+    daily = TransientError("429 ... per day limit exceeded ... 'retryDelay': '23084s'")
+
+    def capped():
+        calls.append(1)
+        raise daily
+
+    with pytest.raises(QuotaExhausted, match="6.4 h") as info:
+        with_retry(capped, attempts=4, sleep=waits.append)
+    assert len(calls) == 1 and waits == []
+    assert info.value.__cause__ is daily
+
+
 def test_retry_after_header_is_honoured():
     from pipeline.common.retry import server_retry_delay
     err = http_error(429)

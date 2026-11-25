@@ -27,20 +27,21 @@ _DELAY_PATTERNS = (
 )
 
 
-def server_retry_delay(exc: BaseException) -> float | None:
-    """Seconds the server asked us to wait, if it said so."""
+def server_retry_delay(exc: BaseException, cap: bool = True) -> float | None:
+    """Seconds the server asked us to wait, if it said so (capped at MAX_SERVER_DELAY_S unless cap=False)."""
+    limit = MAX_SERVER_DELAY_S if cap else float("inf")
     response = getattr(exc, "response", None)
     headers = getattr(response, "headers", None) or {}
     try:
         if headers.get("Retry-After"):
-            return min(float(headers["Retry-After"]), MAX_SERVER_DELAY_S)
+            return min(float(headers["Retry-After"]), limit)
     except (TypeError, ValueError):
         pass
     text = str(exc)
     for pattern in _DELAY_PATTERNS:
         m = pattern.search(text)
         if m:
-            return min(float(m.group(1)), MAX_SERVER_DELAY_S)
+            return min(float(m.group(1)), limit)
     return None
 
 
@@ -50,6 +51,18 @@ class TransientError(Exception):
 
 class PermanentError(Exception):
     """A problem retrying will not fix."""
+
+
+class QuotaExhausted(PermanentError):
+    """The server asked for a wait longer than we are willing to sleep (e.g. a daily quota)."""
+
+    def __init__(self, wait_s: float):
+        from datetime import datetime, timedelta
+
+        self.wait_s = wait_s
+        at = (datetime.now().astimezone() + timedelta(seconds=wait_s)).strftime("%H:%M %Z")
+        super().__init__(f"quota exhausted: the server asks to wait {wait_s:.0f} s "
+                         f"(~{wait_s / 3600:.1f} h, until about {at}); not retrying")
 
 
 def is_transient(exc: BaseException) -> bool:
@@ -94,6 +107,10 @@ def with_retry(
                 on_attempt(attempt, latency, exc)
             if attempt == attempts or not is_transient(exc):
                 raise
+            raw = server_retry_delay(exc, cap=False)
+            if raw is not None and raw > MAX_SERVER_DELAY_S:
+                # e.g. a daily cap: waiting 2 min and retrying cannot help (F-09)
+                raise QuotaExhausted(raw) from exc
             backoff = base_delay_s * 2 ** (attempt - 1)
             asked = server_retry_delay(exc)
             wait = max(backoff, asked + 1.0) if asked is not None else backoff
