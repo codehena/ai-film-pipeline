@@ -12,7 +12,7 @@ import argparse
 import sys
 
 from . import assemble, keyframes, music, narration, shots, smoke
-from .common import NotBuiltYet, config
+from .common import MissingInput, NotBuiltYet, config
 from .common.storyboard import StoryboardError, film_duration, load_json, validate
 
 STAGES = {
@@ -52,6 +52,8 @@ def build_parser() -> argparse.ArgumentParser:
         sp = sub.add_parser(name, help=f"run the {name} stage")
         sp.add_argument("--shot", action="append", metavar="ID",
                         help="only this shot (repeatable), e.g. --shot s03")
+        if name == "assemble":
+            sp.add_argument("--mode", choices=["radio", "final"], default="radio")
     sub.add_parser("film", help="run every stage in order (cached work is skipped)")
     return p
 
@@ -71,12 +73,24 @@ def main(argv: list[str] | None = None) -> int:
             return 0 if all(r[0] == "ok" for r in results.values()) else 1
         data = check_storyboard(args.storyboard, show_warnings=False)
         if args.command == "film":
+            skipped = []
             for name in FILM_ORDER:
                 print(f"== {name} ==")
-                STAGES[name](data, only=None)
+                try:
+                    STAGES[name](data, only=None)
+                except NotBuiltYet as e:  # until every stage exists, film = what is built so far
+                    print(f"  skipped: {e}")
+                    skipped.append(name)
+            if skipped:
+                print(f"\nfilm finished with stages not built yet: {', '.join(skipped)}")
+        elif args.command == "assemble":
+            STAGES["assemble"](data, only=args.shot, mode=args.mode)
         else:
             STAGES[args.command](data, only=args.shot)
         return 0
+    except MissingInput as e:
+        print(f"missing input: {e}", file=sys.stderr)
+        return 1
     except StoryboardError as e:
         print(e, file=sys.stderr)
         return 1

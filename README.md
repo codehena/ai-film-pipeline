@@ -2,7 +2,7 @@
 
 A small studio in code. One file, [`storyboard.json`](storyboard.json), describes a 60–90 second family-history film: shots, prompts, narration, music cues. Each pipeline stage reads that file, writes its outputs and logs every model call to [`runs.jsonl`](runs.jsonl). Change one shot and only that shot is regenerated.
 
-> **Status:** starter skeleton. Validation, caching, retries and logging work and are tested. The generation stages are stubs (see "Roadmap").
+> **Status:** Phase 1 pipeline. Smoke test, narration (Gemini TTS) and the radio cut work and are tested. Keyframes, shots and music are stubs (see "Roadmap").
 
 ## Quick start
 
@@ -40,7 +40,11 @@ Runs validate → narration → keyframes → shots → music → assemble. Anyt
 | `py -m pipeline validate` | Check `storyboard.json` against the schema and the extra rules |
 | `py -m pipeline smoke` | Call each provider once and log latency |
 | `py -m pipeline <stage> [--shot s03]` | Run one stage, optionally for one shot |
-| `py -m pipeline film` | Run everything in order |
+| `py -m pipeline narration --shot s03` | Re-voice one line (only that shot calls TTS) |
+| `py -m pipeline assemble --mode radio` | Radio cut: narration + ducked placeholder pad + subtitles on black, plus a timing report |
+| `py -m pipeline film` | Run everything in order (stages not built yet are skipped and listed) |
+
+Tested models (2026-11-25): narration `gemini-3.8-flash-tts` on API **v1beta** (it is not returned by `models.list`; see FAILURES.md F-06), images `@cf/black-forest-labs/flux-1-schnell`.
 
 ## Stages
 
@@ -66,7 +70,7 @@ DESIGN.md  ARCHITECTURE.md  EXPERIMENTS.md  FAILURES.md  COSTS.md  ETHICS.md
 
 ## Roadmap
 - [x] Skeleton: schema, validation, caching, retries, logging, tests
-- [ ] Step 2: smoke test, narration, radio cut (Phase 1 checkpoint)
+- [x] Step 2: smoke test, narration, radio cut (code done; real story + user test 1 pending)
 - [ ] Step 3: reference sheet, keyframes, Wan 2.2 shots, ACE-Step score
 - [ ] Step 4: final edit (ducking, subtitles, loudness, end card, 9:16 + 16:9)
 
