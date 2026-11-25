@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "notes": "Draft 3 (2026-11-25): one flowing day-arc narration, brother not named, one delivery style for every line, male voice Iapetus (chosen by ear from the audition, EXP-03), read in ONE continuous TTS call. Durations retimed to that read (65.5 s). Amharic lines must be checked by a native speaker before user test 1. Character descriptions are proposals: adjust to real memory before keyframes.",
+  "notes": "Draft 4 (2026-11-25): narration polished after user test 1 (3 listeners, DESIGN.md): richer sensory opening, fewer ነበር endings (8 -> 4) with clauses chained across shots, smoother close on loving a rural childhood. Brother not named. Iapetus, one continuous TTS read. Character descriptions are proposals: adjust before keyframes.",
   "title": "ገጠር - Geter",
   "logline": "Growing up side by side with my brother in the green Ethiopian countryside, in a home that always had coffee and was never empty.",
   "audience": "Classmates and peers watching together in class, and Ethiopians who grew up in rural places and miss them",
@@ -42,7 +42,7 @@
   "shots": [
     {
       "id": "s01",
-      "duration_s": 9.0,
+      "duration_s": 7.0,
       "reason": "Establish the place and its peace before any people appear",
       "shot_size": "extreme_wide",
       "characters": [],
@@ -50,8 +50,8 @@
       "motion_prompt": "slow push-in, mist drifting, birds crossing the sky",
       "seed": 1001,
       "narration": {
-        "text": "ያደግኩት ገጠር ነው። ጠዋት ስነቃ የወፎች ዝማሬና የአበቦች መዓዛ ይቀበለኝ ነበር።",
-        "subtitle_en": "I grew up in the countryside. Each morning, birdsong and the scent of flowers greeted me.",
+        "text": "ያደግኩት ገጠር ነው። ጠዋቱ ሁሌም በአበቦች መዓዛ ይጀምራል።",
+        "subtitle_en": "I grew up in the countryside. There, mornings always begin with the scent of flowers.",
         "speech_metadata": {
           "pause_before_s": 1.0,
           "pause_after_s": 0.4
@@ -64,19 +64,19 @@
     },
     {
       "id": "s02",
-      "duration_s": 7.0,
-      "reason": "Sensory detail (bees on blossoms) carries us from waking into the village waking",
+      "duration_s": 12.0,
+      "reason": "A burst of rural life (bees, birds, calves, chickens) and the narrator's longing for it",
       "shot_size": "close_up",
       "characters": [],
       "image_prompt": "branch of a flowering tree in close-up, white and yellow blossoms, honey bees on the flowers, soft background blur",
       "motion_prompt": "camera static, bees moving between blossoms, petals trembling in a light breeze",
       "seed": 1002,
       "narration": {
-        "text": "የጫካ ንቦች በአበቦቹ ላይ ሲያንጎራጉሩ፣ መንደሩም ቀስ ብሎ ይነቃ ነበር።",
-        "subtitle_en": "As forest bees hummed over the blossoms, the village slowly woke.",
+        "text": "ንቦች አበቦች ላይ ሲያንዣብቡ፣ ወፎች ሲዘምሩ፣ ጥጃዎች ሲዘሉ፣ ዶሮዎች ሲሯሯጡ ማየት ለየት ያለ ስሜት አለው፤ አንዳንዴም ይናፍቀኛል።",
+        "subtitle_en": "Watching bees hover over flowers, birds sing, calves leap and chickens scurry is a special feeling; sometimes I miss it.",
         "speech_metadata": {
           "pause_before_s": 0.2,
-          "pause_after_s": 0.3
+          "pause_after_s": 0.5
         }
       },
       "video": {
@@ -86,16 +86,41 @@
     },
     {
       "id": "s03",
-      "duration_s": 6.0,
+      "duration_s": 5.0,
       "reason": "Everyday village life: animals, work and the river that later shots return to",
       "shot_size": "wide",
       "characters": [],
-      "image_prompt": "cattle walking out to a green field, a donkey and a horse carrying loads on a dirt path, women washing clothes at a river bend in the distance",
+      "image_prompt": "cattle walking out to a green field, a calf leaping, chickens scurrying in the foreground, a donkey and a horse carrying loads on a dirt path, women washing clothes at a river bend in the distance",
       "motion_prompt": "slow pan left to right, cattle walking, river water flowing",
       "seed": 1003,
       "narration": {
-        "text": "ከብቶች ወደ መስክ ሲወጡ፣ ከወንዙ ላይ እናቶች ልብስ ያጥቡ ነበር።",
-        "subtitle_en": "As the cattle went out to pasture, mothers washed clothes upstream.",
+        "text": "ከብቶች ወደ መስክ ሲወጡ፣ እናቶች ደግሞ ከወንዙ ላይ ልብስ ሲያጥቡ፣",
+        "subtitle_en": "As the cattle went out to pasture and mothers washed clothes upstream,",
+        "speech_metadata": {
+          "pause_before_s": 0.3,
+          "pause_after_s": 0.2
+        }
+      },
+      "video": {
+        "method": "wan_i2v",
+        "fallback": "ken_burns"
+      }
+    },
+    {
+      "id": "s04",
+      "duration_s": 4.5,
+      "reason": "Introduce my brother and the bond: a shared daily task, side by side",
+      "shot_size": "medium",
+      "characters": [
+        "narrator_child",
+        "brother_child"
+      ],
+      "image_prompt": "two boys seen from behind walking side by side on a grassy path toward a spring, each carrying a yellow water container",
+      "motion_prompt": "camera follows slowly behind them, grass moving in the wind",
+      "seed": 1004,
+      "narration": {
+        "text": "እኔና ወንድሜ ጎን ለጎን ወደ ምንጩ ሄደን ውሃ እንቀዳ ነበር።",
+        "subtitle_en": "my brother and I went side by side to the spring to fetch water.",
         "speech_metadata": {
           "pause_before_s": 0.2,
           "pause_after_s": 0.4
@@ -107,33 +132,8 @@
       }
     },
     {
-      "id": "s04",
-      "duration_s": 5.5,
-      "reason": "Introduce my brother and the bond: a shared daily task, side by side",
-      "shot_size": "medium",
-      "characters": [
-        "narrator_child",
-        "brother_child"
-      ],
-      "image_prompt": "two boys seen from behind walking side by side on a grassy path toward a spring, each carrying a yellow water container",
-      "motion_prompt": "camera follows slowly behind them, grass moving in the wind",
-      "seed": 1004,
-      "narration": {
-        "text": "እኔና ወንድሜም ውሃ ለመቅዳት ጎን ለጎን ወደ ምንጩ እንሄድ ነበር።",
-        "subtitle_en": "And my brother and I walked side by side to the spring to fetch water.",
-        "speech_metadata": {
-          "pause_before_s": 0.3,
-          "pause_after_s": 0.3
-        }
-      },
-      "video": {
-        "method": "wan_i2v",
-        "fallback": "ken_burns"
-      }
-    },
-    {
       "id": "s05",
-      "duration_s": 6.0,
+      "duration_s": 4.5,
       "reason": "Play and joy: a lighter beat after the chores",
       "shot_size": "wide",
       "characters": [
@@ -144,11 +144,11 @@
       "motion_prompt": "camera static, the boys run after the ball, a cow turns its head",
       "seed": 1005,
       "narration": {
-        "text": "ውሃውን አድርሰን፣ ከብቶቹ እያዩን ሜዳ ላይ ኳስ እንጫወት ነበር።",
-        "subtitle_en": "With the water home, we played football in the field as the cattle watched.",
+        "text": "ውሃውን አድርሰን፣ ከብቶቹ እያዩን ሜዳ ላይ ኳስ እንጫወትና፣",
+        "subtitle_en": "With the water home, we played football in the field as the cattle watched,",
         "speech_metadata": {
           "pause_before_s": 0.2,
-          "pause_after_s": 0.3
+          "pause_after_s": 0.2
         }
       },
       "video": {
@@ -169,8 +169,8 @@
       "motion_prompt": "slow push-in, water splashing gently, light glittering on the river",
       "seed": 1006,
       "narration": {
-        "text": "ቀኑ ሲሞቅ ደግሞ ወደ ወንዙ ታች ወርደን እንዋኝ ነበር።",
-        "subtitle_en": "And when the day grew hot, we went down the river to swim.",
+        "text": "ቀኑ ሲሞቅ ወደ ወንዙ ታች ወርደን እንዋኝ ነበር።",
+        "subtitle_en": "and when the day grew hot, we went down the river to swim.",
         "speech_metadata": {
           "pause_before_s": 0.2,
           "pause_after_s": 0.5
@@ -194,11 +194,11 @@
       "motion_prompt": "camera static, children lifting bundles of grass, grass swaying",
       "seed": 1007,
       "narration": {
-        "text": "በዓል ሲቃረብ ከጓደኞቻችን ጋር ቄጠማና ረጃጅም ሳር እንሰበስብ ነበር፤",
-        "subtitle_en": "When a holiday drew near, we gathered qetema and tall grass with our friends,",
+        "text": "በዓል ሲቃረብ ደግሞ ከጓደኞቻችን ጋር ቄጠማና ረጃጅም ሳር እንሰበስብ ነበር።",
+        "subtitle_en": "When a holiday drew near, we gathered qetema and tall grass with our friends.",
         "speech_metadata": {
           "pause_before_s": 0.3,
-          "pause_after_s": 0.2
+          "pause_after_s": 0.4
         }
       },
       "video": {
@@ -208,19 +208,19 @@
     },
     {
       "id": "s08",
-      "duration_s": 4.5,
-      "reason": "Warmth of home: the qetema on the floor and the coffee ceremony",
+      "duration_s": 6.5,
+      "reason": "Warmth of home: qetema, coffee and people dressed up for the holiday",
       "shot_size": "insert",
       "characters": [],
-      "image_prompt": "traditional coffee ceremony on a floor covered with fresh green qetema grass, a black clay jebena on glowing charcoal, small cups on a tray",
+      "image_prompt": "holiday coffee ceremony in a rural home, floor covered with fresh green qetema grass, a black clay jebena on glowing charcoal, small cups on a tray, people in white holiday clothes gathered around, seen from behind",
       "motion_prompt": "camera static, steam and incense smoke rising slowly",
       "seed": 1008,
       "narration": {
-        "text": "ቄጠማው ቤት ውስጥ ሲጎዘጎዝ፣ ቡናው ይፈላ ነበር።",
-        "subtitle_en": "and as the qetema was spread through the house, the coffee brewed.",
+        "text": "ቄጠማው ሲጎዘጎዝ፣ ቡናው ሲፈላ፣ ሰዉም ተውቦ ስናይ ደስ ይል ነበር።",
+        "subtitle_en": "Qetema spread on the floor, coffee brewing, everyone dressed up: it was a joy.",
         "speech_metadata": {
           "pause_before_s": 0.2,
-          "pause_after_s": 0.5
+          "pause_after_s": 0.6
         }
       },
       "video": {
@@ -230,7 +230,7 @@
     },
     {
       "id": "s09",
-      "duration_s": 5.5,
+      "duration_s": 5.0,
       "reason": "The family proverb, given room to land: the film's central idea",
       "shot_size": "close_up",
       "characters": [],
@@ -252,7 +252,7 @@
     },
     {
       "id": "s10",
-      "duration_s": 8.5,
+      "duration_s": 13.0,
       "reason": "Close on belonging: the same valley at dusk answers the opening and the proverb",
       "shot_size": "extreme_wide",
       "characters": [],
@@ -260,8 +260,8 @@
       "motion_prompt": "slow pull-back, smoke rising, light fading",
       "seed": 1010,
       "narration": {
-        "text": "የእኛ ቤት ግን ባዶ ሆኖ አያውቅም። የእኔና የወንድሜ ሥር ዛሬም እዚያው ገጠር ነው።",
-        "subtitle_en": "But our home was never empty. My brother's roots and mine are still there, in the countryside.",
+        "text": "የእኛ ቤት ግን ባዶ ሆኖ አያውቅም። እነዚህ ነገሮች በገጠር ማደጌን እንድወደው አድርገውኛል፤ እዚያ ያደገ ሁሉ ይህን ስሜት ያውቀዋል፣ መቼም አይረሳውም።",
+        "subtitle_en": "But our home was never empty. These things made me love growing up in the countryside; whoever grew up there knows this feeling and never forgets it.",
         "speech_metadata": {
           "pause_before_s": 0.4,
           "pause_after_s": 1.5
@@ -277,7 +277,7 @@
     {
       "id": "m1",
       "start_s": 0.0,
-      "end_s": 44.0,
+      "end_s": 43.5,
       "caption": "gentle Ethiopian countryside morning, soft krar plucking, airy washint flute, warm ambient pad, nostalgic pentatonic mood, no vocals",
       "instrumental": true,
       "bpm": 70,
@@ -285,8 +285,8 @@
     },
     {
       "id": "m2",
-      "start_s": 44.0,
-      "end_s": 65.5,
+      "start_s": 43.5,
+      "end_s": 71.0,
       "caption": "the opening washint theme returns warmer and fuller, soft kebero hand drum like a heartbeat, resolving gently, nostalgic, no vocals",
       "instrumental": true,
       "bpm": 70,
