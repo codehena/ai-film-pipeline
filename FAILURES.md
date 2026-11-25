@@ -108,3 +108,30 @@ What broke, what I tried, what fixed it (or how I worked around it). Write these
   - The live continuous read waits for quota. **Reset time confirmed from the log:** with the fuller error text, the next attempt (01:35 UTC) recorded `retryDelay: '23084s'`, i.e. 6.4 h, which ends at 08:00 UTC: midnight Pacific time, **11:00 EAT**.
   - **Follow-up bug:** my retry still waited its 120 s cap three times against that 6.4 h wait, which was pointless. Now, when the server asks for longer than the cap, `with_retry` stops at once with `QuotaExhausted` and says when the quota resets (`tests/test_retry.py::test_long_server_wait_fails_fast_instead_of_retrying`).
 - **Lesson:** at 10 requests a day, the unit of work has to be the whole narration, not the line. And a log that cuts off the reason for an error is a log that misleads.
+---
+
+### F-10: `retime` rewrote storyboard.json with Windows line endings
+- **Date:** 2026-11-25
+- **Stage / model:** retime (local)
+- **What happened:** the first real `retime` (after the 11:01 EAT continuous read) wrote `storyboard.json` with CRLF line endings. `Path.write_text` in text mode on Windows turns every `\n` into `\r\n`, while `.gitattributes` stores LF. Git warned on every touch, and the working-copy diff became noisy.
+- **What fixed it / workaround:** `write_text(..., newline="\n")`, plus a test assertion that the written file contains no `\r\n`. Re-running `retime` now leaves the file byte-identical (checked 2026-11-25 18:21 EAT: 0 CRLF, 300 LF).
+- **Lesson:** any code that writes a tracked text file on Windows must pick its line endings explicitly. (The same bug was fixed earlier in `runlog.py`.)
+
+---
+
+### F-11: The radio cut missed the loudness target (−15.9 LUFS instead of −14)
+- **Date:** 2026-11-25
+- **Stage / model:** assemble --mode radio / FFmpeg `loudnorm`
+- **What happened:** verifying the draft 3 cut (`radio_633140d7a506.mp4`) measured **−15.88 LUFS** integrated and **−0.80 dBTP** true peak. The target is −14 LUFS with true peak ≤ −1. Draft 2 had also missed, at −14.77 / −0.79.
+- **Root cause (measured):** the raw mix (narration plus ducked pad) is **−23.54 LUFS with true peak −3.61 dBTP**, so its peaks sit 20 dB above its loudness. Reaching −14 needs +9.5 dB, which would put peaks near +6 dBTP. Single-pass `loudnorm` therefore silently falls back to "dynamic" mode and stops short of the target.
+- **What I tried:** each attempt was measured on the real mix in a scratch folder (EXPERIMENTS.md EXP-04).
+  1. Two-pass linear `loudnorm` alone: still dynamic, final −14.42.
+  2. A −3 dBFS limiter before it: did nothing, because the peaks were already below −3.
+  3. Pre-gain to −14 plus a limiter at −1.5 or −2 dBFS: −14.2 to −14.3, but true peaks between samples overshot and the final pass stayed dynamic.
+- **What fixed it:** `common/loudness.py`, in three steps:
+  - measure the raw mix
+  - pre-gain by (−14 − measured + 2 dB) and limit at −3.5 dBFS
+  - measure again, then apply `loudnorm` with those measurements and `linear=true`
+
+  Result: **−14.0 LUFS, −1.58 dBTP, final pass linear**. FFmpeg's independent `ebur128` meter agrees: −13.9 LUFS, −1.6 dB. Every step's numbers go to `radio_<hash>.loudness.json`, and the stage prints a WARNING if the delivered file misses the target. The end-to-end test now requires a problem-free loudness report.
+- **Lesson:** "I ran loudnorm" is not "the file is at −14 LUFS". Measure the delivered file, and make missing the target loud.

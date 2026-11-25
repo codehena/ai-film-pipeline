@@ -59,7 +59,11 @@ Each shot's reason is in `storyboard.json` → `shots[].reason`. In short:
 | The opening voice was great ("cool"); later lines changed | one style for every line (the opening's), one continuous read (EXP-02) |
 | I am a man and want a man's voice | male voice audition (EXP-03); I chose **Iapetus** |
 
-- **Draft 3 radio cut:** TODO, waiting for the daily TTS quota (FAILURES.md F-09).
+- **Draft 3 radio cut, the one to share with listeners:** `outputs/cuts/radio_e4cfcbb9f085.mp4`
+  - 65.5 s; Iapetus, read in one continuous take
+  - English subtitles on black; −14.0 LUFS
+  - every line fits its shot (timing report `radio_e4cfcbb9f085.timing.md`)
+  - the earlier draft 3 render `radio_633140d7a506.mp4` is the same audio but too quiet (−15.9 LUFS, F-11), so don't share it
 
 ## User test 1: radio cut (at least 3 people from the audience)
 **How:** play the draft 3 radio cut once without introduction (in person, or on Slack or Telegram with headphones), then ask:

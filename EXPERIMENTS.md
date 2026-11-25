@@ -48,7 +48,13 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
   - the split report's `time_vs_word_share` per line
   - number of requests in `runs.jsonl`
 - **Offline evidence so far:** `tests/test_silence.py` shows the splitter places breaks correctly even when a pause inside a line (0.7 s) is longer than the pauses between lines (0.5 s). `tests/test_narration.py` shows that a re-run makes 0 calls and any edit makes 1.
-- **Result:** TODO after the live run.
+- **Result (live, 2026-11-25 11:01 EAT, run `r20261125-110104`):**
+  - **1 request** (latency 24.3 s), giving `full_62660579a53d.wav` (64.68 s).
+  - The splitter found all 10 lines on the first try. Each line's time share was ×0.72 to ×1.26 of its word share (all inside the ×0.5–×2.0 band, none flagged), and 13.44 s of pauses were trimmed (`full_62660579a53d.split.json`).
+  - Speech: 94 words in 51.24 s = **110 words per minute**, against 87 for the per-line Kore read in EXP-01. That comparison is confounded (voice, style and text all changed), so it is not evidence for continuous mode by itself.
+  - `retime` then cut the film from 76.5 s to **65.5 s**, and every line fits.
+- **Decision:** keep `continuous` as the mode. It meets the quota constraint (1 of 10 daily requests), and the split is clean. TODO: my by-ear verdict on whether it sounds like one voice telling one story, which is the actual hypothesis.
+- **Watch:** 65.5 s is close to the 60 s minimum. If listeners want any line cut, the film may fall under 60 s, and pauses or a shot would have to be added back.
 
 ### EXP-03: Which male voice carries the opening best?
 - **Date:** 2026-11-25. **Status:** 2 of 5 takes recorded (quota).
@@ -57,3 +63,25 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
 - **Takes so far:** `outputs/auditions/s01-Charon_b8edc8220fe3.wav` (7.92 s), `outputs/auditions/s01-Iapetus_c97084de6c9e.wav` (8.04 s). Algieba, Umbriel and Orus were blocked by the daily cap.
 - **Result / decision (2026-11-25):** I listened to both takes and chose **Iapetus** for the narration (`voice.voice_name`). TODO: in my own words, what made Iapetus right (warmth, pace, how close it is to the "cool" opening I liked).
 - **Caveat:** only 2 of the 5 planned voices could be heard (the daily cap), so this is the best of two, not of five. Algieba, Umbriel and Orus can be auditioned after the quota resets if Iapetus doesn't hold up over the whole read.
+
+### EXP-04: How to actually reach −14 LUFS on the radio mix
+- **Date:** 2026-11-25
+- **Hypothesis:** single-pass `loudnorm=I=-14:TP=-1` reaches the target. Verifying the draft 3 cut showed it did not (−15.88 LUFS, FAILURES.md F-11), so the new hypothesis is that the mix's peak-to-loudness ratio, not the filter, is the limit.
+- **Change:** one variable at a time, on the same raw mix (`radio_633140d7a506.narration.wav` plus the pad and ducking, rendered without normalisation), each result measured with `loudnorm` in measure-only mode.
+
+| Variant | After limiter: I / TP | Final I (LUFS) | Final TP (dBTP) | Final pass |
+|---|---|---|---|---|
+| A: single-pass loudnorm (old recipe) | – | −15.80 | −1.00 | dynamic |
+| B: two-pass, linear requested | – | −14.42 | −1.00 | dynamic (fallback) |
+| C: limiter −3 dBFS + two-pass | −15.00 / −1.00 | −14.42 | −1.00 | dynamic |
+| D: +9.54 dB, limiter −1.5 dBFS + two-pass | −15.19 / −0.77 | −14.33 | −1.00 | dynamic |
+| E: +11 dB, limiter −3 dBFS + two-pass | −15.09 / −2.08 | −14.05 | −1.00 | dynamic |
+| **F: +11.5 dB, limiter −3.5 dBFS + two-pass** | −15.12 / −2.58 | **−14.00** | **−1.46** | **linear** |
+| G: +12 dB, limiter −4 dBFS + two-pass | −15.17 / −3.08 | −14.00 | −1.91 | linear |
+
+- **Raw mix:** −23.54 LUFS, true peak −3.61 dBTP, so peaks sit 20 dB above the loudness. To get −14 under a −1 ceiling, the peaks must come down by about 7 dB, which only a limiter after pre-gain can do.
+- **Result:** F is the gentlest setting where the final pass is a plain linear gain with real headroom. G limits harder for no gain in loudness.
+  - Built into `common/loudness.py` as pre-gain = target − measured + 2 dB, then the −3.5 dBFS limiter.
+  - On the real cut `radio_e4cfcbb9f085.mp4`: **−14.0 LUFS, −1.58 dBTP, linear**. The independent `ebur128` meter reads −13.9 LUFS, −1.6 dB.
+- **Cost:** the radio render went from 9.5 s to 36 s because of the extra measurement passes. That's acceptable for a correct, auditable level.
+- **Decision:** keep F. Re-check by ear that the limiting (about 7 dB on peaks) doesn't make the voice sound squashed; that's part of user test 1.

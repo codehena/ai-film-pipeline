@@ -19,7 +19,8 @@ storyboard.json ──validate──┬──> narration ───────�
 | keyframes | `style_block`, `characters`, `shots[].image_prompt`, `seed` | reference sheet | `outputs/keyframes/<shot>_<hash>.png` |
 | shots | `shots[].motion_prompt`, `video`, `duration_s`, `seed` | that shot's keyframe | `outputs/shots/<shot>_<hash>.mp4` |
 | music | `music_cues` | – | `outputs/music/` |
-| assemble | everything | all of the above | `outputs/cuts/` (9:16 and 16:9) |
+| retime | `shots[].narration.speech_metadata` pauses, `music_cues` | narration audio | `storyboard.json`: each spoken shot's `duration_s`, plus cue times on shot boundaries (validated before writing, LF line endings) |
+| assemble | everything | all of the above | `outputs/cuts/` (radio now; 9:16 and 16:9 later) |
 
 ## Validation (`pipeline/common/storyboard.py`)
 Before any stage runs:
@@ -56,6 +57,15 @@ Each line's `narration` keeps three things apart:
 Continuous mode asks the model for a clear pause between paragraphs, then `common/silence.py` finds the pauses (20 ms RMS windows below −40 dBFS, at least 0.25 s long). It places each line break with an order-preserving alignment that weighs pause length against distance from the line's expected end, computed from its share of the words. So a pause *inside* a two-sentence line is not mistaken for a break. The split report flags any line whose time share is under 0.5× or over 2× its word share. `audio_path()` hides the mode, so `assemble` and `retime` work the same either way.
 
 `voice.style_mode` decides how style reaches the model. `speech_metadata` uses the SDK's `Part.speech_metadata.style` field, so the style is never part of the spoken string. `prompt_prefix` is the older "Read this in a … style:" approach, and `none` sends the words only. Comparing these modes is an experiment (EXPERIMENTS.md).
+
+## Loudness (`pipeline/common/loudness.py`)
+Every delivered cut is normalised to **−14 LUFS integrated, true peak ≤ −1 dBTP**, in passes whose numbers are all logged to `<cut>.loudness.json`:
+1. Render the mix with no loudness processing, then measure it.
+2. Pre-gain by `−14 − measured + 2 dB`, and limit peaks at −3.5 dBFS. The mix's peaks sit about 20 dB above its loudness, so without this the target is out of reach under the ceiling (FAILURES.md F-11, EXPERIMENTS.md EXP-04).
+3. Measure again, then apply `loudnorm` with those measurements and `linear=true`: a plain gain change.
+4. Measure the delivered MP4. The stage prints a WARNING, and the report lists `problems`, if it is more than 0.5 LU off target, over the ceiling, or the final pass was not linear.
+
+A change to this recipe bumps `assemble.RECIPE_VERSION`, so a new cut gets a new hash and the old one stays as evidence.
 
 ## Failure handling (`pipeline/common/retry.py`, `modelcall.py`)
 - `with_retry()`: up to 3 attempts with backoff of 2 s, 4 s, 8 s plus jitter.

@@ -15,8 +15,10 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 | Stage | Model | Calls | Median latency | GPU minutes | List-price equivalent |
 |---|---|---|---|---|---|
 | smoke | Gemini text, TTS; Cloudflare FLUX.1 schnell | 1 each per run | TTS 3.0 s, text 0.8 s, FLUX 3.6–4.6 s | – | TODO |
-| narration | `gemini-3.8-flash-tts` | 10 ok + 3 rate-limited (429) | **4.2 s** (min 3.3, max 13.8) | – | TODO (free tier: USD 0) |
-| assemble (radio) | FFmpeg 9.1, local | 2 renders | **12.2 s** per 85 s cut | – | 0 |
+| narration (per_line, drafts 1–2) | `gemini-3.8-flash-tts` | 10 ok + 3 rate-limited (429) | **4.2 s** (min 3.3, max 13.8) | – | TODO (free tier: USD 0) |
+| narration (continuous, draft 3) | `gemini-3.8-flash-tts`, Iapetus | **1** ok (after the reset; 4 attempts before it hit the daily cap) | **24.3 s** for the whole 64.7 s read | – | TODO (free tier: USD 0) |
+| assemble (radio), single-pass loudnorm | FFmpeg 9.1, local | 3 renders | 9.5–12.4 s per cut | – | 0 |
+| assemble (radio), two-pass loudness | FFmpeg 9.1, local | 1 render | **36.0 s** per 65.5 s cut (4 measure/render passes) | – | 0 |
 | keyframes | FLUX | – | – | – | – |
 | shots | Wan 2.2 TI2V-5B | – | – | – | – |
 | music | ACE-Step 1.5 | – | – | – | – |
@@ -25,7 +27,9 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 
 **The real budget is per day.** At 10 TTS requests a day, per-line mode spends the **whole day's quota** on one full read. Continuous mode (EXP-02) reads the whole story in **1** request, so a day's quota covers a full read, a few voice auditions and several re-takes. Each audition take costs 1 request.
 
-**What caching saved:** changing all 10 shot durations (draft 1 → draft 2) cost **0 TTS calls** (10 `cache_hit` lines) and one 12 s FFmpeg render.
+**What caching saved:** changing all 10 shot durations (draft 1 → draft 2) cost **0 TTS calls** (10 `cache_hit` lines) and one 12 s FFmpeg render. For draft 3, retiming, the loudness fix and the character descriptions together cost **0 TTS calls**: the one continuous read was reused every time, and an unchanged radio cut is a logged `cache_hit` (0 s).
+
+**Quota used for the whole draft 3 radio cut: 1 of 10 daily TTS requests.** Under per-line mode the same read would have taken all 10.
 
 ## How list-price equivalents were calculated
 TODO: the price source and date for each provider.
