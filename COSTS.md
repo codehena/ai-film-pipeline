@@ -22,6 +22,7 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 | narration (continuous, draft 4) | `gemini-3.8-flash-tts`, Iapetus | **1** ok | 64.9 s read; split corrected at no TTS cost | – | TODO (free tier: USD 0) |
 | qa: asr-check | `gemini-3.5-flash` | 21 ok, 8 errors (503 or quota) | a few s per segment | – | TODO (free tier: USD 0) |
 | assemble (radio), recipe v3/v4 (oversampled limiter, split subtitles) | FFmpeg 9.1, local | 3 renders | **38.7–41.1 s** per 71 s cut | – | 0 |
+| assemble (radio), Option A spacing (draft 4b) | FFmpeg 9.1, local | 1 render | **22.4 s** per 70.3 s cut; 0 model calls | – | 0 |
 | keyframes | FLUX | – | – | – | – |
 | shots | Wan 2.2 TI2V-5B | – | – | – | – |
 | music | ACE-Step 1.5 | – | – | – | – |

@@ -153,8 +153,37 @@ Tested on the draft 3 radio cut (`radio_e4cfcbb9f085.mp4`), 2026-11-25.
   - 1.00 s lead-in
   - 1.43 s tail
   - **0.70 s net between lines**: 1.72 s added (most of it around the proverb) and 1.02 s removed
-- **Every gap includes rounding slack.** `retime` rounds each shot up to the next 0.5 s, which adds 0–0.5 s of arbitrary silence per line.
-- **Next:** decide between Option A (fix the spacing, 0 TTS calls) and Option B (one targeted re-read, 1 TTS call), as laid out with the agent. TODO: my verdict after comparing.
+- **Every gap includes rounding slack** (before Option A). `retime` rounded each shot up to the next 0.5 s, which added 0–0.5 s of arbitrary silence per line.
+- **Decision:** I chose **Option A**: fix the spacing in the edit, with 0 TTS calls. It fixes everything measurable at no quota cost and leaves time for the picture and music stages before the deadline. Option B (one targeted re-read, grouping the half-sentences and lightening the lists) is kept in reserve in case the delivery still feels stiff.
+
+### Option A: the cut follows the read's own spacing (draft 4b, `radio_4fa2a5146bca.mp4`)
+- **What changed:**
+  - `retime` rounds up to **0.1 s** instead of 0.5 s.
+  - Each line's `pause_before` / `pause_after` is set so that `pause_after` of one line plus `pause_before` of the next ≈ the gap the voice actually left in the read.
+  - Lead-in (1.0 s) and the closing beat before the end card (1.5 s) are kept as design choices.
+  - Same read, same words, 0 model calls.
+- **Result:** 70.3 s (was 71.0); −14.0 LUFS, true peak −1.27 dBTP (EBU R128 meter −13.9 / −1.3); 15 subtitle cues, rows ≤ 43 characters.
+
+| Boundary | Read gap | Old cut (`radio_71461dcbe940`) | New cut (`radio_4fa2a5146bca`) |
+|---|---|---|---|
+| s01→s02 | 0.88 | 0.72 | 0.87 |
+| s02→s03 (after ይናፍቀኛል) | 1.28 | 0.82 | **1.27** |
+| s03→s04 | 0.72 | 0.56 | 0.71 |
+| s04→s05 | 0.86 | 0.94 | 0.94 |
+| s05→s06 | 0.74 | 0.80 | 0.70 |
+| s06→s07 | 1.04 | 1.26 | 1.06 |
+| s07→s08 | 0.86 | 0.62 | 0.92 |
+| s08→s09 (before the proverb) | 1.00 | 1.36 | **1.01** |
+| s09→s10 (after the proverb) | 0.82 | 1.82 | **0.82** |
+
+- **Blind check:** `radio_71461dcbe940.mp4` vs `radio_4fa2a5146bca.mp4`, played in random order, without saying which is new. Which flows more naturally?
+
+| Listener (relation) | Date | Preferred | Why, in their words |
+|---|---|---|---|
+| me | | | |
+| | | | |
+
+- TODO: my verdict. If the new cut still feels stiff, it is intonation inside the lines, and Option B is next (after 11:00 EAT, when `asr-check` can verify a new split).
 
 ### Follow-up check on draft 4 (same 5 questions, blind, headphones)
 Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answers in each person's own words.

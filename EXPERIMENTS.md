@@ -99,3 +99,20 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
 - **Evidence:** `runs.jsonl` stage `qa` (21 ok calls); `outputs/narration/asr_64173211a953.json`; `narration_splits.json`.
 - **Decision:** keep `asr-check` as the split check after every new read. Pronunciation goes to a native ear: the words above are listed in DESIGN.md for the follow-up check.
 - **Cost:** 20 free text requests/day. One full check is 10 requests, so it is cached per segment file and saves after each line.
+
+### EXP-06: Does letting the cut follow the read's own spacing make it feel more natural?
+- **Date:** 2026-11-25
+- **Hypothesis:** the draft 4 cut feels stiffer than draft 3 partly because the edit re-spaced the lines, not because of the voice:
+  - +1.00 s after the proverb
+  - +0.36 s before it
+  - −0.46 s off the breath after ይናፍቀኛል
+  - 0–0.5 s of rounding slack per line
+
+  If every gap matches the read, the cut should flow like the voice did.
+- **Change:**
+  - `retime` rounds to 0.1 s
+  - `pause_before` / `pause_after` set from the read's gaps (DESIGN.md, "Option A")
+- **Held fixed:** the read (`full_64173211a953.wav`), words, voice, loudness recipe, subtitles.
+- **Result (measured):** every between-line gap is now within ±0.08 s of the read (it was −0.46 to +1.00 s). The film runs 70.3 s, and the cut is `radio_4fa2a5146bca.mp4`. Cost: 0 model calls and one 22 s render.
+- **Result (by ear):** TODO, from the blind check against `radio_71461dcbe940.mp4`.
+- **Decision:** keep the spacing rule either way, because it removes edit-made artefacts. If the delivery still feels stiff, the remaining cause is intonation inside the lines, and EXP-07 would be a targeted re-read (Option B).

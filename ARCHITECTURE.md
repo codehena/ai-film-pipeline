@@ -19,7 +19,7 @@ storyboard.json ──validate──┬──> narration ───────�
 | keyframes | `style_block`, `characters`, `shots[].image_prompt`, `seed` | reference sheet | `outputs/keyframes/<shot>_<hash>.png` |
 | shots | `shots[].motion_prompt`, `video`, `duration_s`, `seed` | that shot's keyframe | `outputs/shots/<shot>_<hash>.mp4` |
 | music | `music_cues` | – | `outputs/music/` |
-| retime | `shots[].narration.speech_metadata` pauses, `music_cues` | narration audio | `storyboard.json`: each spoken shot's `duration_s`, plus cue times on shot boundaries (validated before writing, LF line endings) |
+| retime | `shots[].narration.speech_metadata` pauses, `music_cues` | narration audio | `storyboard.json`: each spoken shot's `duration_s` = pause before + line + pause after, rounded up to 0.1 s, plus cue times on shot boundaries (validated before writing, LF line endings) |
 | assemble | everything | all of the above | `outputs/cuts/` (radio now; 9:16 and 16:9 later) |
 
 ## Validation (`pipeline/common/storyboard.py`)
