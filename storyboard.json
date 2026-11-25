@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "notes": "Draft 3 (2026-11-25): one flowing day-arc narration, brother not named, one delivery style for every line, male voice (Charon, provisional: compare outputs/auditions), read in ONE continuous TTS call. Durations are provisional until `py -m pipeline retime`. Amharic lines must be checked by a native speaker. Character descriptions are filled in before keyframes.",
+  "notes": "Draft 3 (2026-11-25): one flowing day-arc narration, brother not named, one delivery style for every line, male voice Iapetus (chosen by ear from the audition, EXP-03), read in ONE continuous TTS call. Durations are provisional until `py -m pipeline retime`. Amharic lines must be checked by a native speaker. Character descriptions are filled in before keyframes.",
   "title": "ገጠር - Geter",
   "logline": "Growing up side by side with my brother in the green Ethiopian countryside, in a home that always had coffee and was never empty.",
   "audience": "Classmates and peers watching together in class, and Ethiopians who grew up in rural places and miss them",
@@ -24,7 +24,7 @@
   ],
   "voice": {
     "model": "gemini-3.8-flash-tts",
-    "voice_name": "Charon",
+    "voice_name": "Iapetus",
     "style": "soft and slow, like waking up",
     "style_mode": "speech_metadata",
     "language_code": "am",

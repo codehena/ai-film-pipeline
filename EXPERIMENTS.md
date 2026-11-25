@@ -55,4 +55,5 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
 - **Hypothesis:** a calm male voice reading the same opening line with the same style will suit the story better than Kore (a female voice), because the narrator is a man telling his own childhood.
 - **Change:** `py -m pipeline audition --shot s01`. Only `voice_name` varies (text, style and model are fixed).
 - **Takes so far:** `outputs/auditions/s01-Charon_b8edc8220fe3.wav` (7.92 s), `outputs/auditions/s01-Iapetus_c97084de6c9e.wav` (8.04 s). Algieba, Umbriel and Orus were blocked by the daily cap.
-- **Result / decision:** TODO: listen and choose. Charon is set provisionally in `storyboard.json`.
+- **Result / decision (2026-11-25):** I listened to both takes and chose **Iapetus** for the narration (`voice.voice_name`). TODO: in my own words, what made Iapetus right (warmth, pace, how close it is to the "cool" opening I liked).
+- **Caveat:** only 2 of the 5 planned voices could be heard (the daily cap), so this is the best of two, not of five. Algieba, Umbriel and Orus can be auditioned after the quota resets if Iapetus doesn't hold up over the whole read.

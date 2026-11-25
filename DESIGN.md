@@ -49,7 +49,7 @@ Each shot's reason is in `storyboard.json` → `shots[].reason`. In short:
 
 ## Prototype: the radio cut
 - **What it is:** Amharic narration with English subtitles on a black screen, over a placeholder pad ducked under the voice. Built with `py -m pipeline narration`, then `retime`, then `assemble --mode radio`.
-- **Draft 2** (`outputs/cuts/radio_4e62d2e01523.mp4`, 85 s): the measured narration runs at 87 Amharic words per minute, so draft 1's shot lengths were too short for 8 of 10 lines. Draft 2 set each `duration_s` from the measured line (EXP-01).
+- **Draft 2** (`outputs/cuts/radio_4e62d2e01523.mp4`, 85 s, local only and **not for sharing**: drafts 1–2 speak my brother's name): the measured narration runs at 87 Amharic words per minute, so draft 1's shot lengths were too short for 8 of 10 lines. Draft 2 set each `duration_s` from the measured line (EXP-01).
 
 ### My own review of draft 2, and what changed (draft 3)
 | What I noticed | Change in draft 3 |
@@ -57,7 +57,7 @@ Each shot's reason is in `storyboard.json` → `shots[].reason`. In short:
 | I'd rather not name my brother; "my brother and I" is enough | name removed from narration and subtitles (`brother_child`) |
 | It felt like separate sentences; I want a flowing story | rewritten as one day; lines joined by connectives |
 | The opening voice was great ("cool"); later lines changed | one style for every line (the opening's), one continuous read (EXP-02) |
-| I am a man and want a man's voice | male voice audition (EXP-03); Charon set provisionally |
+| I am a man and want a man's voice | male voice audition (EXP-03); I chose **Iapetus** |
 
 - **Draft 3 radio cut:** TODO, waiting for the daily TTS quota (FAILURES.md F-09).
 
