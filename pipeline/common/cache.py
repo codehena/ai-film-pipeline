@@ -46,12 +46,24 @@ def _character_descriptions(storyboard: dict, shot: dict) -> list[str]:
     return [chars[c]["description"] for c in shot["characters"]]
 
 
+def speech_style(storyboard: dict, shot: dict) -> str:
+    """The line's own style if it has one, otherwise the film-wide voice.style."""
+    meta = shot["narration"].get("speech_metadata") or {}
+    return meta.get("style") or storyboard["voice"]["style"]
+
+
 def narration_inputs(storyboard: dict, shot: dict) -> dict:
+    """What changes the narration AUDIO. Pauses are deliberately absent: they only
+    move the line in the edit, so changing one must not trigger a new TTS call."""
+    voice = storyboard["voice"]
     return {
         "stage": "narration",
-        "voice": storyboard["voice"],
-        "language": storyboard["language"]["narration"],
-        "text": shot["narration"]["text"],
+        "model": voice["model"],
+        "voice_name": voice["voice_name"],
+        "style": speech_style(storyboard, shot),
+        "style_mode": voice["style_mode"],
+        "language_code": voice.get("language_code") or storyboard["language"]["narration"],
+        "text": shot["narration"]["text"].strip(),
     }
 
 

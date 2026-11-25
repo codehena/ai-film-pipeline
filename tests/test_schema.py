@@ -58,6 +58,21 @@ def test_end_card_must_mention_ai(board, schema):
     assert "end_card.text" in problems(board, schema)
 
 
+def test_speech_metadata_rejects_unknown_cues(board, schema):
+    board["shots"][0]["narration"]["speech_metadata"]["volume"] = 11
+    assert "volume" in problems(board, schema)
+
+
+def test_speech_metadata_is_optional(board, schema):
+    del board["shots"][0]["narration"]["speech_metadata"]
+    validate(board, schema)
+
+
+def test_style_mode_must_be_known(board, schema):
+    board["voice"]["style_mode"] = "telepathy"
+    assert "style_mode" in problems(board, schema)
+
+
 def test_todo_placeholders_are_warnings_not_errors(board, schema):
     warnings = validate(board, schema)
     assert any("title" in w for w in warnings)

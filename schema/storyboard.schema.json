@@ -48,11 +48,16 @@
     "voice": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["model", "voice_name", "style"],
+      "required": ["model", "voice_name", "style", "style_mode"],
       "properties": {
         "model": { "type": "string", "minLength": 1 },
         "voice_name": { "type": "string", "minLength": 1 },
-        "style": { "type": "string", "description": "Plain-language delivery instruction, e.g. calm, warm, unhurried." }
+        "style": { "type": "string", "description": "Default delivery instruction for every line, e.g. calm, warm, unhurried. Never spoken." },
+        "style_mode": {
+          "enum": ["speech_metadata", "prompt_prefix", "none"],
+          "description": "How style reaches the TTS model: the SDK's speech_metadata field, a text prefix, or not at all."
+        },
+        "language_code": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$", "description": "Passed to TTS, e.g. am or am-ET." }
       }
     },
     "shots": {
@@ -106,8 +111,9 @@
           "additionalProperties": false,
           "required": ["text", "subtitle_en"],
           "properties": {
-            "text": { "type": "string", "description": "Narration in the film's language. Empty string = silent shot." },
-            "subtitle_en": { "type": "string" }
+            "text": { "type": "string", "description": "ONLY the words to be spoken, in the film's language. No stage directions. Empty string = silent shot." },
+            "subtitle_en": { "type": "string" },
+            "speech_metadata": { "$ref": "#/$defs/speech_metadata" }
           }
         },
         "video": {
@@ -119,6 +125,16 @@
             "fallback": { "enum": ["ken_burns", "still"] }
           }
         }
+      }
+    },
+    "speech_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Delivery and timing cues, kept apart from the spoken text.",
+      "properties": {
+        "style": { "type": "string", "minLength": 1, "description": "Overrides voice.style for this line. Affects the audio (part of the narration hash)." },
+        "pause_before_s": { "type": "number", "minimum": 0, "maximum": 3, "description": "Silence before the line starts. Edit-only: no new TTS call." },
+        "pause_after_s": { "type": "number", "minimum": 0, "maximum": 5, "description": "Minimum silence after the line. Edit-only: no new TTS call." }
       }
     },
     "music_cue": {

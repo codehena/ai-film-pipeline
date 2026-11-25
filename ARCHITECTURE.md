@@ -35,6 +35,17 @@ Before any stage runs:
 - A video's inputs include its keyframe's **file hash**, so a new keyframe automatically invalidates that shot's video and nothing else.
 - What is deliberately *not* in a hash: `subtitle_en` does not affect narration audio, and `reason` affects nothing that is generated.
 
+### Spoken text vs. delivery cues (`speech_metadata`)
+Each line's `narration` keeps three things apart:
+
+| Field | Meaning | Changing it… |
+|---|---|---|
+| `text` | only the words spoken (no stage directions) | new TTS call for that shot |
+| `speech_metadata.style` | delivery override; falls back to `voice.style` | new TTS call for that shot |
+| `speech_metadata.pause_before_s` / `pause_after_s` | timing in the edit | re-time the cut only, **no** TTS call |
+
+`voice.style_mode` decides how style reaches the model. `speech_metadata` uses the SDK's `Part.speech_metadata.style` field, so the style is never part of the spoken string. `prompt_prefix` is the older "Read this in a … style:" approach, and `none` sends the words only. Comparing these modes is an experiment (EXPERIMENTS.md).
+
 ## Failure handling (`pipeline/common/retry.py`, `modelcall.py`)
 - `with_retry()`: up to 3 attempts with backoff of 2 s, 4 s, 8 s plus jitter.
 - Retried: timeouts, connection errors, HTTP 429 and 5xx. Not retried: 4xx such as a bad key or a bad request.
