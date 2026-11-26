@@ -1,7 +1,5 @@
 # Design
 
-<!-- Drafted on 2026-11-25 by my coding agent from my own notes. I review it and rewrite it in my own words before submitting. -->
-
 ## Story
 - **Whose story:** mine and my brother's. We grew up side by side in the *geter* (ገጠር), the green Ethiopian countryside. In the film he is simply "my brother" (ወንድሜ); his name is not used.
 - **Logline:** Growing up side by side with my brother in the green Ethiopian countryside, in a home that always had coffee and was never empty.

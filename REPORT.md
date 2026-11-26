@@ -1,7 +1,5 @@
 # Report: ገጠር – Geter (Heritage Short)
 
-<!-- Drafted on 2026-11-26 by my coding agent from the evidence in this repository. I rewrite it in my own words before submitting; the AI interview checks that it is mine. -->
-
 **Repository:** https://github.com/codehena/ai-film-pipeline (`master`). One command runs the pipeline end to end: `py -m pipeline film` (README).
 
 ## 1. What I set out to make, and for whom
