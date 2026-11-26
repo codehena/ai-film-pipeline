@@ -234,11 +234,43 @@ Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answe
   - **Films:** `outputs/cuts/final-16x9_6fcb4e5373e3.mp4`, `outputs/cuts/final-9x16_9b8225f4742d.mp4`
 
 ## User test 2: near-final cut (at least 3 people)
-| Who | Date | What they said | Where they reacted |
+**Tested on:** draft 4e (`final-9x16_5f32132d3ee6.mp4` / `final-16x9_77c89e6bd4d1.mp4`, 70.3 s, ACE-Step score c1, Ken Burns motion), 2026-11-26. These are the same three people as test 1, so they could compare against the radio cut.
+
+| Who (relation, not name) | Date | What they said | Where they reacted |
 |---|---|---|---|
-| | | | |
+| My brother (co-subject of the story) | 2026-11-26 | The most nostalgic and touching part was where we used to play football. The music and visuals fit the story well. The sound is better overall, but some pronunciations can still be improved. | s05 (football); the whole film |
+| Best friend | 2026-11-26 | Touched throughout every part, with no issues on the visuals. Same note: the sound is better overall, but some pronunciations can still be improved. | the whole film |
+| Female friend | 2026-11-26 | Good overall. Would have loved to see real motion in the video. The sound is "somehow bearable." | the motion; the sound |
+
+- **Caveat:** my brother is in the story, so his reaction is not neutral. All three also heard the radio cut, so they are judging the improvement as much as the film. A fresh viewer from the audience would be a stronger test.
+
+**Insights, and what I decided because of them:**
+
+| Insight | Who | Evidence | Decision |
+|---|---|---|---|
+| The pictures and the score now carry the story | brother, best friend | "music and visuals fit the story well"; "no issues on the visuals" | Keep the pictures and score c1 as they are (EXP-13). |
+| The football memory is the emotional peak | brother | named it as the most nostalgic part | No change; it sits mid-film, where the narration builds. |
+| Pronunciation is the remaining weakness | all three (2 explicitly, 1 as "somehow bearable") | the same note from different listeners, independently | **Prepared, not shipped** (below). The fix is ready as data on branch `feat/pronunciation-pass`, but the re-read needs the next TTS quota window. With another project due the same day, I shipped the current narration. |
+| Real motion would add life | female friend | one listener | **Not acted on.** Wan 2.2 doesn't fit the free T4 (F-26, EXP-12); Ken Burns stays. A trade-off I accept and record. |
+
+**Pronunciation polish: prepared as data, not shipped (deadline trade-off).** The storyboard changes below are committed on branch `feat/pronunciation-pass` (draft 5). They need one TTS re-read (1 of 10 daily requests) after the quota reset. I chose to submit the current narration on time rather than risk the deadline, which I shared with another project.
+1. The words the listeners flagged (2026-11-26):
+
+   | Word | Shot | Around | Note |
+   |---|---|---|---|
+   | ሲያንዣብቡ (hovering) | s02 | 9–10 s | |
+   | ጥጃዎች (calves) | s02 | | listeners say ጥጆች |
+   | ይናፍቀኛል (I miss it) | s02 | | |
+   | እንቀዳ (we fetched) | s04 | | |
+   | እንዋኝ (we swam) | s06 | | |
+
+2. Fix them in `storyboard.json` → `voice.pronunciations` (written word → the spelling given to the TTS model; ARCHITECTURE.md point 4), never by hand in an audio editor. The change is then visible in git and re-runnable.
+3. After the TTS quota resets (11:00 EAT), one continuous re-read: 1 of the 10 daily requests (EXP-02). Narration is cached by input hash, so nothing else is regenerated.
+4. Re-split and check with `asr-check`, re-time, then `assemble --mode final`. Only the narration and the segments whose timing moved are rebuilt; keyframes are reused.
+5. Log it as an experiment: the old read vs the new one, on the flagged words.
+
+**Still pending from test 1:** "Grew up rural?" for the two friends.
 
 **What changed because of it:**
-- TODO
 - **Draft 4e (score):** the ACE-Step score replaces the placeholder pad. Of three candidates, c1 was chosen by listening under the narration as "more familiar music in Ethiopia", carrying the nostalgia the film is about (EXP-13). Wan motion clips didn't fit the free T4 (F-26), so all 15 visual units keep their Ken Burns moves.
   - **Films (the near-final cut for user test 2):** `outputs/cuts/final-16x9_77c89e6bd4d1.mp4`, `outputs/cuts/final-9x16_5f32132d3ee6.mp4`. 70.3 s, −14.03 LUFS.

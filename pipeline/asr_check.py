@@ -24,7 +24,7 @@ from pathlib import Path
 
 from . import narration
 from .common import MissingInput, config
-from .common.cache import file_hash
+from .common.cache import file_hash, spoken_text
 from .common.modelcall import logged_call
 from .providers import gemini
 
@@ -68,7 +68,8 @@ def run(storyboard: dict, *, model: str = MODEL, transcribe=None,
             cache[sid] = {"file_hash": fh, "model": model, "heard": heard}
             # save after every line: a quota error mid-run must not throw away finished work (F-12)
             cache_path.write_text(json.dumps(cache, indent=2, ensure_ascii=False), encoding="utf-8")
-        script = shot["narration"]["text"].strip()
+        # compare with what the TTS was given (respellings included), not the written line
+        script = spoken_text(storyboard, shot["narration"]["text"].strip())
         rows.append({"shot": sid, "script": script, "heard": heard,
                      "similarity": similarity(script, heard)})
     cache_path.write_text(json.dumps(cache, indent=2, ensure_ascii=False), encoding="utf-8")

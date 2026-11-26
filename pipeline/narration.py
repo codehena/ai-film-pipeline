@@ -24,7 +24,7 @@ import wave
 from pathlib import Path
 
 from .common import config
-from .common.cache import narration_inputs, speech_style, stable_hash
+from .common.cache import narration_inputs, speech_style, spoken_text, stable_hash
 from .common.modelcall import run_model_step
 from .common.silence import SplitError, split_lines, write_segment
 from .common.storyboard import select_shots
@@ -55,7 +55,7 @@ def continuous_inputs(storyboard: dict) -> dict:
         "model": voice["model"], "voice_name": voice["voice_name"], "style": voice["style"],
         "style_mode": voice["style_mode"],
         "language_code": voice.get("language_code") or storyboard["language"]["narration"],
-        "lines": [[s["id"], s["narration"]["text"].strip()]
+        "lines": [[s["id"], spoken_text(storyboard, s["narration"]["text"].strip())]
                   for s in storyboard["shots"] if should_speak(s)],
         "pause_hint": PAUSE_HINT,
     }
@@ -145,7 +145,7 @@ def _run_per_line(storyboard, only, synthesize, out_base, log_path) -> dict[str,
             stage=STAGE, shot=sid, provider="gemini", model=voice["model"], params=params,
             seed=None, inputs=inputs, ext="wav",
             produce=lambda p, shot=shot, style=style: synthesize(
-                model=voice["model"], text=shot["narration"]["text"].strip(),
+                model=voice["model"], text=spoken_text(storyboard, shot["narration"]["text"].strip()),
                 voice_name=voice["voice_name"], style=style, style_mode=voice["style_mode"],
                 language_code=language_code, out_path=p),
             attempts=ATTEMPTS, out_base=out_base, log_path=log_path,
