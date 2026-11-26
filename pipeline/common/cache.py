@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 
 HASH_LEN = 12
@@ -54,6 +55,17 @@ def _character_descriptions(storyboard: dict, shot: dict) -> list[str]:
     return [character_description(storyboard, shot, c) for c in shot["characters"]]
 
 
+def spoken_text(storyboard: dict, text: str) -> str:
+    """The words the TTS model is given: the written line with `voice.pronunciations`
+    applied (written word -> spelling that guides pronunciation). Whole words only;
+    Ethiopic punctuation (፣ ። ፤) counts as a boundary. The written line, the subtitles
+    and the storyboard text stay unchanged. With no map, or no mapped word in the
+    line, the text and therefore the cache key are exactly as before."""
+    for written, spoken in (storyboard["voice"].get("pronunciations") or {}).items():
+        text = re.sub(rf"(?<!\w){re.escape(written)}(?!\w)", lambda _m, s=spoken: s, text)
+    return text
+
+
 def speech_style(storyboard: dict, shot: dict) -> str:
     """The line's own style if it has one, otherwise the film-wide voice.style."""
     meta = shot["narration"].get("speech_metadata") or {}
@@ -71,7 +83,7 @@ def narration_inputs(storyboard: dict, shot: dict) -> dict:
         "style": speech_style(storyboard, shot),
         "style_mode": voice["style_mode"],
         "language_code": voice.get("language_code") or storyboard["language"]["narration"],
-        "text": shot["narration"]["text"].strip(),
+        "text": spoken_text(storyboard, shot["narration"]["text"].strip()),
     }
 
 

@@ -58,6 +58,12 @@
           "description": "How style reaches the TTS model: the SDK's speech_metadata field, a text prefix, or not at all."
         },
         "language_code": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$", "description": "Passed to TTS, e.g. am or am-ET." },
+        "pronunciations": {
+          "type": "object",
+          "description": "Written word -> spelling given to the TTS model so it is pronounced right (whole words only). Changes only the spoken audio: the written line and the subtitles stay as they are. Each entry should be backed by a listener's note (DESIGN.md) and an experiment.",
+          "additionalProperties": { "type": "string", "minLength": 1 },
+          "propertyNames": { "minLength": 1 }
+        },
         "mode": {
           "enum": ["per_line", "continuous"],
           "default": "per_line",
