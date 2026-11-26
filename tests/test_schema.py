@@ -11,9 +11,13 @@ def problems(board, schema):
     return "\n".join(info.value.problems)
 
 
-def test_real_storyboard_is_valid(board, schema):
+def test_real_storyboard_is_valid(real_board, schema):
+    validate(real_board, schema)
+    assert 60 <= film_duration(real_board) <= 90
+
+
+def test_fixture_storyboard_is_valid(board, schema):
     validate(board, schema)
-    assert 60 <= film_duration(board) <= 90
 
 
 def test_missing_field_is_reported(board, schema):
@@ -58,6 +62,21 @@ def test_end_card_must_mention_ai(board, schema):
     assert "end_card.text" in problems(board, schema)
 
 
+def test_speech_metadata_rejects_unknown_cues(board, schema):
+    board["shots"][0]["narration"]["speech_metadata"]["volume"] = 11
+    assert "volume" in problems(board, schema)
+
+
+def test_speech_metadata_is_optional(board, schema):
+    del board["shots"][0]["narration"]["speech_metadata"]
+    validate(board, schema)
+
+
+def test_style_mode_must_be_known(board, schema):
+    board["voice"]["style_mode"] = "telepathy"
+    assert "style_mode" in problems(board, schema)
+
+
 def test_todo_placeholders_are_warnings_not_errors(board, schema):
     warnings = validate(board, schema)
     assert any("title" in w for w in warnings)
@@ -78,3 +97,26 @@ def test_select_shots(board):
     assert len(select_shots(board)) == len(board["shots"])
     with pytest.raises(StoryboardError):
         select_shots(board, ["s99"])
+
+
+def test_still_from_must_name_another_existing_shot(board, schema):
+    board["shots"][1]["video"]["still"] = {"from": "s01", "zoom": [1.2, 1.5]}
+    validate(board, schema)
+    board["shots"][1]["video"]["still"] = {"from": "s99"}
+    assert "video.still.from 's99'" in problems(board, schema)
+    board["shots"][1]["video"]["still"] = {"from": board["shots"][1]["id"]}
+    assert "must be another existing shot" in problems(board, schema)
+
+
+def test_focus_must_be_fractions(board, schema):
+    board["shots"][0]["video"]["focus"] = [1.4, 0.5]
+    assert "focus" in problems(board, schema)
+
+
+def test_safe_box_must_be_well_formed(board, schema):
+    board["shots"][0]["video"]["safe_box"] = [0.2, 0.1, 0.8, 0.4]
+    validate(board, schema)
+    board["shots"][0]["video"]["safe_box"] = [0.8, 0.1, 0.2, 0.4]
+    assert "safe_box" in problems(board, schema)
+    board["shots"][0]["video"]["safe_box"] = [0.2, 0.1, 1.4, 0.4]
+    assert "safe_box" in problems(board, schema)

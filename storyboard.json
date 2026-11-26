@@ -1,95 +1,394 @@
 {
   "version": 1,
-  "notes": "PLACEHOLDER storyboard so the pipeline and tests run. Replace every TODO with your real story before generating anything.",
-  "title": "TODO: film title",
-  "logline": "TODO: one sentence that sums up the story",
-  "audience": "TODO: who watches, and where (e.g. cousins in the diaspora, on their phones)",
-  "intent": "TODO: what they should feel or understand when it ends",
-  "language": { "narration": "am", "subtitles": "en" },
-  "format": { "aspect_ratios": ["9:16", "16:9"], "fps": 24 },
-  "style_block": "warm, grainy, hand-painted look, soft golden-hour light, earthy palette, subject centred in frame",
+  "notes": "Draft 4 (2026-11-25): narration polished after user test 1 (3 listeners, DESIGN.md): richer sensory opening, fewer ነበር endings (8 -> 4) with clauses chained across shots, smoother close on loving a rural childhood. Pauses follow the read's own gaps (Option A, EXPERIMENTS.md EXP-06). Brother not named. Iapetus, one continuous TTS read. Character descriptions are proposals: adjust before keyframes. s09 is an insert pushing in on s08's jebena: 3 takes of its own keyframe failed (a handled mug twice, then a two-spouted pot; EXPERIMENTS.md EXP-07). Draft 4c pictures (2026-11-25): beats show each named thing as it is spoken (s02, s03, s10); ensera jars, swimming in shorts, friends turned away, the brothers at the ceremony in traditional clothes, gojo bet farmland; head-safe framing (F-19, F-20).",
+  "title": "ገጠር - Geter",
+  "logline": "Growing up side by side with my brother in the green Ethiopian countryside, in a home that always had coffee and was never empty.",
+  "audience": "Classmates and peers watching together in class, and Ethiopians who grew up in rural places and miss them",
+  "intent": "Warmth, reflection and nostalgia: viewers who grew up in the countryside should feel their own childhood home again",
+  "language": {
+    "narration": "am",
+    "subtitles": "en"
+  },
+  "format": {
+    "aspect_ratios": [
+      "16:9",
+      "9:16"
+    ],
+    "fps": 24
+  },
+  "style_block": "hand-painted gouache illustration, lush green Ethiopian highland countryside, soft golden morning light, warm earthy palette, gentle film grain, faces simplified and stylised (not portraits), subject centred in frame",
   "characters": [
     {
-      "id": "main_character",
-      "description": "TODO: age, face, hair, clothing - use the exact same words every time",
+      "id": "narrator_child",
+      "description": "an Ethiopian highland boy of about ten, slim, warm brown skin, short tightly curled black hair, faded green short-sleeved cotton shirt, knee-length khaki shorts, black plastic sandals",
       "reference_image": null,
-      "consent_ref": "ETHICS.md#main-character"
+      "consent_ref": "ETHICS.md#narrator"
+    },
+    {
+      "id": "brother_child",
+      "description": "an Ethiopian highland boy of about the same age, slim, warm brown skin, short tightly curled black hair, faded red short-sleeved cotton shirt, dark blue shorts, barefoot",
+      "reference_image": null,
+      "consent_ref": "ETHICS.md#brother"
     }
   ],
   "voice": {
-    "model": "TODO: Gemini TTS model id (check AI Studio)",
-    "voice_name": "TODO: voice name",
-    "style": "calm, warm, unhurried"
+    "model": "gemini-3.8-flash-tts",
+    "voice_name": "Iapetus",
+    "style": "soft and slow, like waking up",
+    "style_mode": "speech_metadata",
+    "language_code": "am",
+    "mode": "continuous"
+  },
+  "image": {
+    "model": "@cf/black-forest-labs/flux-2-klein-4b",
+    "width": 1024,
+    "height": 1024,
+    "reference_sheets": true
+  },
+  "score": {
+    "model": "ACE-Step-1.5",
+    "duration_s": 75,
+    "candidates": 3,
+    "chosen": 1
   },
   "shots": [
     {
-      "id": "s01", "duration_s": 7, "reason": "TODO: establish the place and time",
-      "shot_size": "extreme_wide", "characters": [],
-      "image_prompt": "TODO: the place at dawn", "motion_prompt": "slow push-in, mist drifting",
+      "id": "s01",
+      "duration_s": 7.1,
+      "reason": "Establish the place and its peace before any people appear",
+      "shot_size": "extreme_wide",
+      "characters": [],
+      "image_prompt": "green rural valley at dawn, flowering trees, thatched round houses, thin morning mist over the fields, birds in the sky",
+      "motion_prompt": "slow push-in, mist drifting, birds crossing the sky",
       "seed": 1001,
-      "narration": { "text": "TODO: line 1", "subtitle_en": "TODO: line 1 in English" },
-      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+      "narration": {
+        "text": "ያደግኩት ገጠር ነው። ጠዋቱ ሁሌም በአበቦች መዓዛ ይጀምራል።",
+        "subtitle_en": "I grew up in the countryside. There, mornings always begin with the scent of flowers.",
+        "speech_metadata": {
+          "pause_before_s": 1.0,
+          "pause_after_s": 0.6
+        }
+      },
+      "video": {
+        "method": "wan_i2v",
+        "fallback": "ken_burns"
+      }
     },
     {
-      "id": "s02", "duration_s": 9, "reason": "TODO: introduce the main character",
-      "shot_size": "medium", "characters": ["main_character"],
-      "image_prompt": "TODO: main character in the place", "motion_prompt": "camera static, she turns her head slowly",
+      "id": "s02",
+      "duration_s": 12.5,
+      "reason": "The senses of the village, each shown as it is named: bees, birds, calves, chickens",
+      "shot_size": "close_up",
+      "characters": [],
+      "image_prompt": "branch of a flowering tree in close-up, white and yellow blossoms, honey bees on the flowers, soft background blur",
+      "motion_prompt": "camera static, bees moving between blossoms, petals trembling in a light breeze",
       "seed": 1002,
-      "narration": { "text": "TODO: line 2", "subtitle_en": "TODO: line 2 in English" },
-      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+      "narration": {
+        "text": "ንቦች አበቦች ላይ ሲያንዣብቡ፣ ወፎች ሲዘምሩ፣ ጥጃዎች ሲዘሉ፣ ዶሮዎች ሲሯሯጡ ማየት ለየት ያለ ስሜት አለው፤ አንዳንዴም ይናፍቀኛል።",
+        "subtitle_en": "Watching bees hover over flowers, birds sing, calves leap and chickens scurry is a special feeling; sometimes I miss it.",
+        "speech_metadata": {
+          "pause_before_s": 0.25,
+          "pause_after_s": 0.95
+        }
+      },
+      "video": {
+        "method": "wan_i2v",
+        "fallback": "ken_burns"
+      },
+      "beats": [
+        {
+          "from_word": 4,
+          "image_prompt": "small colourful songbirds singing on a branch of a flowering tree, beaks open, morning light",
+          "motion_prompt": "birds hopping along the branch, camera static"
+        },
+        {
+          "from_word": 6,
+          "image_prompt": "two young calves running and jumping playfully in a green meadow, legs kicking up, morning light",
+          "motion_prompt": "calves leaping across the meadow, slow pan left to right"
+        },
+        {
+          "from_word": 8,
+          "image_prompt": "brown hens walking and pecking at grain on the dirt yard beside a round thatched house",
+          "motion_prompt": "hens pecking and walking, camera static"
+        }
+      ]
     },
     {
-      "id": "s03", "duration_s": 8, "reason": "TODO: a detail that matters",
-      "shot_size": "close_up", "characters": ["main_character"],
-      "image_prompt": "TODO: hands doing the important thing", "motion_prompt": "gentle hand movement, camera static",
+      "id": "s03",
+      "duration_s": 5.1,
+      "reason": "Everyday village life: animals, work and the river that later shots return to",
+      "shot_size": "wide",
+      "characters": [],
+      "image_prompt": "a herd of cattle walking out along a dirt path to a green pasture in the morning, a donkey carrying a load behind them, rolling green hills",
+      "motion_prompt": "slow pan left to right, cattle walking, river water flowing",
       "seed": 1003,
-      "narration": { "text": "TODO: line 3", "subtitle_en": "TODO: line 3 in English" },
-      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+      "narration": {
+        "text": "ከብቶች ወደ መስክ ሲወጡ፣ እናቶች ደግሞ ከወንዙ ላይ ልብስ ሲያጥቡ፣",
+        "subtitle_en": "As the cattle went out to pasture and mothers washed clothes upstream,",
+        "speech_metadata": {
+          "pause_before_s": 0.3,
+          "pause_after_s": 0.45
+        }
+      },
+      "video": {
+        "method": "wan_i2v",
+        "fallback": "ken_burns"
+      },
+      "beats": [
+        {
+          "from_word": 4,
+          "image_prompt": "women in white cotton dresses washing clothes on the rocks of a river bend, seen from behind and from a distance, washed clothes laid out to dry on the grass",
+          "motion_prompt": "river water flowing, camera static"
+        }
+      ]
     },
     {
-      "id": "s04", "duration_s": 9, "reason": "TODO: the journey or the work",
-      "shot_size": "wide", "characters": ["main_character"],
-      "image_prompt": "TODO: walking along the road", "motion_prompt": "slow tracking shot alongside",
+      "id": "s04",
+      "duration_s": 4.5,
+      "reason": "Introduce my brother and the bond: a shared daily task, side by side",
+      "shot_size": "medium",
+      "characters": [
+        "narrator_child",
+        "brother_child"
+      ],
+      "image_prompt": "two boys seen from behind walking side by side on a grassy path toward a spring, each carrying a traditional round clay water jar (ensera) on his back, held with a rope over the shoulder",
+      "motion_prompt": "camera follows slowly behind them, grass moving in the wind",
       "seed": 1004,
-      "narration": { "text": "TODO: line 4", "subtitle_en": "TODO: line 4 in English" },
-      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+      "narration": {
+        "text": "እኔና ወንድሜ ጎን ለጎን ወደ ምንጩ ሄደን ውሃ እንቀዳ ነበር።",
+        "subtitle_en": "my brother and I went side by side to the spring to fetch water.",
+        "speech_metadata": {
+          "pause_before_s": 0.25,
+          "pause_after_s": 0.6
+        }
+      },
+      "video": {
+        "method": "wan_i2v",
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.27,
+          0.19,
+          0.71,
+          0.4
+        ]
+      }
     },
     {
-      "id": "s05", "duration_s": 8, "reason": "TODO: the turning point",
-      "shot_size": "medium_close_up", "characters": ["main_character"],
-      "image_prompt": "TODO: the moment that changes things", "motion_prompt": "slow push-in on her face",
+      "id": "s05",
+      "duration_s": 4.4,
+      "reason": "Play and joy: a lighter beat after the chores",
+      "shot_size": "wide",
+      "characters": [
+        "narrator_child",
+        "brother_child"
+      ],
+      "image_prompt": "two boys playing football in an open green field, seen from behind and from a distance, a homemade ball, cows grazing nearby watching",
+      "motion_prompt": "camera static, the boys run after the ball, a cow turns its head",
       "seed": 1005,
-      "narration": { "text": "TODO: line 5", "subtitle_en": "TODO: line 5 in English" },
-      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+      "narration": {
+        "text": "ውሃውን አድርሰን፣ ከብቶቹ እያዩን ሜዳ ላይ ኳስ እንጫወትና፣",
+        "subtitle_en": "With the water home, we played football in the field as the cattle watched,",
+        "speech_metadata": {
+          "pause_before_s": 0.25,
+          "pause_after_s": 0.45
+        }
+      },
+      "video": {
+        "method": "wan_i2v",
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.3,
+          0.33,
+          0.7,
+          0.6
+        ]
+      }
     },
     {
-      "id": "s06", "duration_s": 9, "reason": "TODO: what it cost or meant",
-      "shot_size": "insert", "characters": [],
-      "image_prompt": "TODO: an object that carries the memory", "motion_prompt": "camera static, light shifts slowly",
+      "id": "s06",
+      "duration_s": 4.4,
+      "reason": "Freedom of the river; downstream answers s03. Swimming in shorts, shirts left on the bank (attempt 2: without reference images, which kept putting the shirts on, F-21)",
+      "shot_size": "wide",
+      "characters": [],
+      "image_prompt": "two Ethiopian boys of about ten seen from behind at a distance, swimming in a shallow river in their shorts only (one in khaki shorts, one in dark blue shorts), bare backs, splashing water, a faded green shirt and a faded red shirt folded on a rock on the riverbank, late afternoon light",
+      "motion_prompt": "slow push-in, water splashing gently, light glittering on the river",
       "seed": 1006,
-      "narration": { "text": "TODO: line 6", "subtitle_en": "TODO: line 6 in English" },
-      "video": { "method": "ken_burns", "fallback": "still" }
+      "narration": {
+        "text": "ቀኑ ሲሞቅ ወደ ወንዙ ታች ወርደን እንዋኝ ነበር።",
+        "subtitle_en": "and when the day grew hot, we went down the river to swim.",
+        "speech_metadata": {
+          "pause_before_s": 0.25,
+          "pause_after_s": 0.75
+        }
+      },
+      "video": {
+        "method": "wan_i2v",
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.08,
+          0.4,
+          0.95,
+          0.85
+        ]
+      }
     },
     {
-      "id": "s07", "duration_s": 9, "reason": "TODO: connect past to present",
-      "shot_size": "wide", "characters": ["main_character"],
-      "image_prompt": "TODO: the place today", "motion_prompt": "slow pan left to right",
+      "id": "s07",
+      "duration_s": 6.2,
+      "reason": "Holiday tradition shared with friends; the qetema carries us into the home",
+      "shot_size": "medium",
+      "characters": [
+        "narrator_child",
+        "brother_child"
+      ],
+      "image_prompt": "the two boys gathering bundles of fresh green qetema grass and tall grass in a meadow, a few friends around them on the grass, everyone seen from behind or turned away, faces not visible",
+      "motion_prompt": "camera static, children lifting bundles of grass, grass swaying",
       "seed": 1007,
-      "narration": { "text": "TODO: line 7", "subtitle_en": "TODO: line 7 in English" },
-      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+      "narration": {
+        "text": "በዓል ሲቃረብ ደግሞ ከጓደኞቻችን ጋር ቄጠማና ረጃጅም ሳር እንሰበስብ ነበር።",
+        "subtitle_en": "When a holiday drew near, we gathered qetema and tall grass with our friends.",
+        "speech_metadata": {
+          "pause_before_s": 0.25,
+          "pause_after_s": 0.6
+        }
+      },
+      "video": {
+        "method": "wan_i2v",
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.25,
+          0.27,
+          0.72,
+          0.45
+        ]
+      }
     },
     {
-      "id": "s08", "duration_s": 10, "reason": "TODO: closing image, return of the motif",
-      "shot_size": "extreme_wide", "characters": [],
-      "image_prompt": "TODO: the place at dusk", "motion_prompt": "slow pull-back, camera rises",
+      "id": "s08",
+      "duration_s": 6.2,
+      "reason": "Warmth of home: an authentic buna ceremony, qetema on the floor, women in habesha kemis and netela",
+      "shot_size": "insert",
+      "characters": [],
+      "image_prompt": "authentic Ethiopian buna coffee ceremony in a rural home, seen from the side and behind: women wearing traditional Ethiopian habesha kemis, long white handwoven cotton dresses with colourful woven tibeb borders at the hem and cuffs, a light white cotton netela shawl with a tibeb border draped over the shoulders, hair braided; in the centre, on a woven straw ring on the floor beside a small charcoal brazier, a tall black clay jebena: a spherical body at the bottom with a long thin vertical neck rising from its top like a bottle neck, the neck as tall as the body, a thin straight spout rising from the shoulder of the body beside the neck, and a small loop handle joining the neck to the body; tiny white porcelain sini cups shaped like small round bowls arranged on a low carved wooden rekebot tray; frankincense smoke from a small clay incense burner; a plate of popcorn; fresh green qetema grass spread on the floor; warm light from a doorway",
+      "motion_prompt": "camera static, steam and incense smoke rising slowly",
       "seed": 1008,
-      "narration": { "text": "TODO: line 8", "subtitle_en": "TODO: line 8 in English" },
-      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+      "narration": {
+        "text": "ቄጠማው ሲጎዘጎዝ፣ ቡናው ሲፈላ፣ ሰዉም ተውቦ ስናይ ደስ ይል ነበር።",
+        "subtitle_en": "Qetema spread on the floor, coffee brewing, everyone dressed up: it was a joy.",
+        "speech_metadata": {
+          "pause_before_s": 0.25,
+          "pause_after_s": 0.4
+        }
+      },
+      "video": {
+        "method": "wan_i2v",
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.1,
+          0.21,
+          0.92,
+          0.77
+        ]
+      }
+    },
+    {
+      "id": "s09",
+      "duration_s": 4.0,
+      "reason": "The family proverb, given room to land: a slow push-in to the jebena of the coffee ceremony",
+      "shot_size": "close_up",
+      "characters": [],
+      "image_prompt": "close-up of a traditional black clay jebena coffee pot with a round body and a long narrow neck, resting on a small glowing charcoal brazier, steam curling from its spout, fresh green qetema grass on the floor around it, warm soft light",
+      "motion_prompt": "very slow push-in, steam curling upward",
+      "seed": 1009,
+      "narration": {
+        "text": "እንደሚባለው፣ ቡና የሌለው ቤት፣ ባዶ ነው።",
+        "subtitle_en": "As they say, \"A house without coffee is empty.\"",
+        "speech_metadata": {
+          "pause_before_s": 0.6,
+          "pause_after_s": 0.4
+        }
+      },
+      "video": {
+        "method": "ken_burns",
+        "fallback": "still",
+        "focus": [
+          0.5,
+          0.62
+        ],
+        "still": {
+          "from": "s08",
+          "zoom": [
+            1.15,
+            1.4
+          ]
+        },
+        "safe_box": [
+          0.4,
+          0.42,
+          0.6,
+          0.82
+        ]
+      }
+    },
+    {
+      "id": "s10",
+      "duration_s": 12.9,
+      "reason": "Our home was never empty: the two of us at the coffee ceremony, then the farmland around the homestead",
+      "shot_size": "extreme_wide",
+      "characters": [],
+      "image_prompt": "inside a rural Ethiopian home at a holiday coffee ceremony, seen from behind: two boys of about ten sit side by side on a low bench with their backs to the viewer, faces not visible, both wearing traditional white cotton holiday tunics, one with a green woven tibeb border, the other with a red woven tibeb border, short tightly curled black hair; they look towards a black clay jebena coffee pot with a round body and a long narrow neck on a small charcoal brazier, a tray of small white sini cups, family members seen from behind, warm lamplight, fresh qetema on the floor; medium-wide framing with clear space above their heads",
+      "motion_prompt": "slow push-in, steam rising from the jebena",
+      "seed": 1010,
+      "narration": {
+        "text": "የእኛ ቤት ግን ባዶ ሆኖ አያውቅም። እነዚህ ነገሮች በገጠር ማደጌን እንድወደው አድርገውኛል፤ እዚያ ያደገ ሁሉ ይህን ስሜት ያውቀዋል፣ መቼም አይረሳውም።",
+        "subtitle_en": "But our home was never empty. These things made me love growing up in the countryside; whoever grew up there knows this feeling and never forgets it.",
+        "speech_metadata": {
+          "pause_before_s": 0.4,
+          "pause_after_s": 1.5
+        }
+      },
+      "video": {
+        "method": "wan_i2v",
+        "fallback": "ken_burns",
+        "safe_box": [
+          0.23,
+          0.23,
+          0.79,
+          0.42
+        ]
+      },
+      "beats": [
+        {
+          "from_word": 6,
+          "characters": [],
+          "image_prompt": "evening view of farmland around a rural Ethiopian homestead: traditional gojo bet round houses with conical thatched roofs, terraced fields of teff and maize, eucalyptus trees, smoke rising from a roof, warm dusk light",
+          "motion_prompt": "slow pull-back, smoke rising, light fading"
+        }
+      ]
     }
   ],
   "music_cues": [
-    { "id": "m1", "start_s": 0, "end_s": 40, "caption": "soft ambient strings and krar, gentle texture, no lead melody", "instrumental": true, "bpm": 70, "key": "D minor" },
-    { "id": "m2", "start_s": 40, "end_s": 72, "caption": "the opening theme returns, warmer, slowly resolving", "instrumental": true, "bpm": 70, "key": "D major" }
+    {
+      "id": "m1",
+      "start_s": 0.0,
+      "end_s": 44.2,
+      "caption": "gentle Ethiopian countryside morning, soft krar plucking, airy washint flute, warm ambient pad, nostalgic pentatonic mood, no vocals",
+      "instrumental": true,
+      "bpm": 70,
+      "key": "C major"
+    },
+    {
+      "id": "m2",
+      "start_s": 44.2,
+      "end_s": 70.3,
+      "caption": "the opening washint theme returns warmer and fuller, soft kebero hand drum like a heartbeat, resolving gently, nostalgic, no vocals",
+      "instrumental": true,
+      "bpm": 70,
+      "key": "C major"
+    }
   ],
-  "end_card": { "text": "Made with AI tools. Story told with family consent.", "duration_s": 3 }
+  "end_card": {
+    "text": "Made with AI tools. A true story, shared with my brother's consent.",
+    "duration_s": 3
+  }
 }

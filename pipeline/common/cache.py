@@ -41,17 +41,37 @@ def output_name(shot_id: str, inputs: dict, ext: str) -> str:
     return f"{shot_id}_{stable_hash(inputs)}.{ext.lstrip('.')}"
 
 
+def character_description(storyboard: dict, shot: dict, cid: str) -> str:
+    """A shot's `appearance` replaces a character's description for that shot only
+    (e.g. swimming in shorts), so it is part of that shot's keyframe key and no other."""
+    override = (shot.get("appearance") or {}).get(cid)
+    if override:
+        return override
+    return next(c["description"] for c in storyboard["characters"] if c["id"] == cid)
+
+
 def _character_descriptions(storyboard: dict, shot: dict) -> list[str]:
-    chars = {c["id"]: c for c in storyboard["characters"]}
-    return [chars[c]["description"] for c in shot["characters"]]
+    return [character_description(storyboard, shot, c) for c in shot["characters"]]
+
+
+def speech_style(storyboard: dict, shot: dict) -> str:
+    """The line's own style if it has one, otherwise the film-wide voice.style."""
+    meta = shot["narration"].get("speech_metadata") or {}
+    return meta.get("style") or storyboard["voice"]["style"]
 
 
 def narration_inputs(storyboard: dict, shot: dict) -> dict:
+    """What changes the narration AUDIO. Pauses are deliberately absent: they only
+    move the line in the edit, so changing one must not trigger a new TTS call."""
+    voice = storyboard["voice"]
     return {
         "stage": "narration",
-        "voice": storyboard["voice"],
-        "language": storyboard["language"]["narration"],
-        "text": shot["narration"]["text"],
+        "model": voice["model"],
+        "voice_name": voice["voice_name"],
+        "style": speech_style(storyboard, shot),
+        "style_mode": voice["style_mode"],
+        "language_code": voice.get("language_code") or storyboard["language"]["narration"],
+        "text": shot["narration"]["text"].strip(),
     }
 
 
@@ -71,13 +91,15 @@ def keyframe_inputs(
 
 
 def video_inputs(shot: dict, *, keyframe_hash: str, model: str, params: dict) -> dict:
+    """A Wan clip is always ~5 s (params.frame_num); assembly trims or holds it to the
+    shot's length. So the shot's duration is NOT in the key: retiming the narration
+    must never invalidate motion clips (audio stays swappable)."""
     return {
         "stage": "shots",
         "model": model,
         "params": params,
         "method": shot["video"]["method"],
         "motion_prompt": shot["motion_prompt"],
-        "duration_s": shot["duration_s"],
         "keyframe": keyframe_hash,
         "seed": shot["seed"],
     }

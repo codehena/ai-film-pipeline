@@ -1,0 +1,252 @@
+"""Picture building blocks for the final cut (FFmpeg; no AI).
+
+- crop_window(): the largest window of a target aspect ratio around a focus point.
+  One square keyframe serves both 16:9 and 9:16 because subjects are centred.
+- move_for(): a Ken Burns move (zoom range, horizontal drift) read from the shot's own
+  motion_prompt ("push-in", "pull-back", "pan left to right", "static" ...) or from
+  an explicit `video.still.zoom`. Neighbouring shots therefore move differently.
+- segment commands: still -> moving shot, motion clip -> fitted shot, end card.
+- frame_bounds(): shot boundaries in whole frames from the timeline, so 10 shots never
+  drift against the narration (rounding is done on cumulative times, not durations).
+
+Pure functions are kept apart from the FFmpeg command builders so they can be tested.
+"""
+from __future__ import annotations
+
+import json
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+
+from .common import config
+
+FPS = 24
+FORMATS = {"16:9": (1280, 720), "9:16": (720, 1280)}
+UPSCALE = 4  # zoompan moves in whole pixels; working at 4x resolution removes visible jitter
+CARD_BG = "0x14110f"  # warm near-black for the end card
+
+
+@dataclass(frozen=True)
+class Move:
+    zoom: tuple[float, float]   # start, end (1.0 = the full crop window)
+    drift: tuple[float, float]  # horizontal focus at start, end (0-1 of the crop window)
+
+
+def image_size(path: Path) -> tuple[int, int]:
+    out = subprocess.run([config.find_tool("ffprobe"), "-v", "error", "-select_streams", "v:0",
+                          "-show_entries", "stream=width,height", "-of", "json", str(path)],
+                         capture_output=True, text=True, check=True).stdout
+    s = json.loads(out)["streams"][0]
+    return int(s["width"]), int(s["height"])
+
+
+def media_duration(path: Path) -> float:
+    out = subprocess.run([config.find_tool("ffprobe"), "-v", "error", "-show_entries",
+                          "format=duration", "-of", "json", str(path)],
+                         capture_output=True, text=True).stdout
+    try:
+        return float(json.loads(out)["format"]["duration"])
+    except (KeyError, ValueError, json.JSONDecodeError):
+        return 0.0
+
+
+SAFE_MARGIN = 0.05  # breathing room kept around a safe box (fraction of the image)
+
+Box = tuple[float, float, float, float]  # x0, y0, x1, y1 as fractions (0-1)
+
+
+def _place(lo_need: float, hi_need: float, size: float, ideal: float, limit: float,
+           overflow: str) -> float:
+    """Start of a window of `size` inside [0, limit] that contains [lo_need, hi_need] if
+    it can, as close to `ideal` as possible. If the region is bigger than the window:
+    overflow="start" keeps its start (vertically: keep heads, lose feet), "centre" centres
+    it (sideways: don't favour the left person)."""
+    if hi_need - lo_need > size:
+        start = lo_need if overflow == "start" else (lo_need + hi_need) / 2 - size / 2
+    else:
+        start = min(max(ideal, hi_need - size), lo_need)
+    return min(max(start, 0.0), limit - size)
+
+
+def _axis(b0: float, b1: float, size: float, limit: float, overflow: str) -> float:
+    """Window start on one axis for a box [b0, b1] (fractions). The margin is shrunk when the
+    box itself fits but box + margin doesn't (s08: heads + jebena span 56% of a 56.25% window),
+    instead of falling back to the overflow rule and cutting more of the box."""
+    lo, hi = max(b0 - SAFE_MARGIN, 0) * limit, min(b1 + SAFE_MARGIN, 1) * limit
+    if hi - lo > size and (b1 - b0) * limit <= size:
+        lo, hi = b0 * limit, b1 * limit
+    return _place(lo, hi, size, ((b0 + b1) / 2) * limit - size / 2, limit, overflow)
+
+
+def crop_window(src_w: int, src_h: int, ratio: float, focus: tuple[float, float] = (0.5, 0.5),
+                safe_box: Box | None = None) -> tuple[int, int, int, int]:
+    """(x, y, w, h): the largest window of aspect `ratio` (w/h). With a safe_box (heads,
+    faces, key action) the window contains that box plus SAFE_MARGIN wherever it fits,
+    otherwise it keeps the box's top; without one it centres on `focus`. Even sizes."""
+    if src_w / src_h > ratio:
+        h = src_h
+        w = round(h * ratio)
+    else:
+        w = src_w
+        h = round(w / ratio)
+    w, h = w - w % 2, h - h % 2
+    ideal_x, ideal_y = focus[0] * src_w - w / 2, focus[1] * src_h - h / 2
+    if safe_box is None:
+        x = min(max(ideal_x, 0), src_w - w)
+        y = min(max(ideal_y, 0), src_h - h)
+    else:
+        bx0, by0, bx1, by1 = safe_box
+        x = _axis(bx0, bx1, w, src_w, "centre")
+        y = _axis(by0, by1, h, src_h, "start")
+    return round(x), round(y), w, h
+
+
+def box_in_window(safe_box: Box, src_wh: tuple[int, int],
+                  window: tuple[int, int, int, int]) -> Box:
+    """The safe box in the window's own 0-1 coordinates (clipped to the window)."""
+    sw, sh = src_wh
+    x, y, w, h = window
+    b = ((safe_box[0] * sw - x) / w, (safe_box[1] * sh - y) / h,
+         (safe_box[2] * sw - x) / w, (safe_box[3] * sh - y) / h)
+    return tuple(min(max(v, 0.0), 1.0) for v in b)
+
+
+def _centre_range(lo: float, hi: float, z: float) -> tuple[float, float]:
+    """Allowed centres of a view of width 1/z (in window units) that keep [lo, hi] visible."""
+    half = 0.5 / z
+    a, b = max(hi - half, half), min(lo + half, 1 - half)
+    return (a, b) if a <= b else (lo + half, lo + half)   # region too big: keep its start
+
+
+def fit_move(move: Move, box: Box | None) -> tuple[Move, float]:
+    """Clamp a Ken Burns move so `box` (window coordinates) stays fully visible all the way
+    through: zoom never tighter than the box allows, drift kept to where the box still
+    fits. Returns the fitted move and the vertical centre to use."""
+    if box is None:
+        return move, 0.5
+    x0, y0, x1, y1 = box
+    zmax = max(1.0, min(1 / max(x1 - x0, 1e-6), 1 / max(y1 - y0, 1e-6)))
+    z0, z1 = (min(z, zmax) for z in move.zoom)
+    drift = []
+    for d, z in zip(move.drift, (z0, z1)):
+        a, b = _centre_range(x0, x1, z)
+        drift.append(min(max(d, a), b))
+    za = max(z0, z1)
+    a, b = _centre_range(y0, y1, za)
+    fy = min(max((y0 + y1) / 2, a), b)
+    return Move((z0, z1), (drift[0], drift[1])), fy
+
+
+def move_for(shot: dict) -> Move:
+    video = shot["video"]
+    still = video.get("still") or {}
+    if still.get("zoom"):
+        z0, z1 = still["zoom"]
+        return Move((z0, z1), (0.5, 0.5))
+    m = shot["motion_prompt"].lower()
+    if "pull-back" in m or "pull back" in m or "zoom out" in m:
+        return Move((1.12, 1.0), (0.5, 0.5))
+    if "left to right" in m or "pan right" in m:
+        return Move((1.12, 1.12), (0.42, 0.58))
+    if "right to left" in m or "pan left" in m:
+        return Move((1.12, 1.12), (0.58, 0.42))
+    if "static" in m:
+        return Move((1.0, 1.04), (0.5, 0.5))      # a breath of movement, not a frozen frame
+    return Move((1.0, 1.10), (0.5, 0.5))          # push-in, follow, track: move gently forward
+
+
+def frame_bounds(starts_ends: list[tuple[float, float]]) -> list[int]:
+    """Frame counts per segment, rounded on cumulative times (no drift)."""
+    return [round(e * FPS) - round(s * FPS) for s, e in starts_ends]
+
+
+def zoompan_filter(move: Move, frames: int, focus_y: float, out_w: int, out_h: int) -> str:
+    n = max(frames - 1, 1)
+    z0, z1 = move.zoom
+    d0, d1 = move.drift
+    z = f"{z0}+({z1 - z0})*on/{n}"
+    cx = f"({d0}+({d1 - d0})*on/{n})"
+    x = f"max(0,min(iw-iw/zoom,{cx}*iw-iw/zoom/2))"
+    y = f"max(0,min(ih-ih/zoom,{focus_y}*ih-ih/zoom/2))"
+    return f"zoompan=z='{z}':x='{x}':y='{y}':d=1:s={out_w}x{out_h}:fps={FPS}"
+
+
+def still_plan(image_wh: tuple[int, int], ratio_key: str, focus: tuple[float, float],
+               move: Move, safe_box: Box | None = None) -> dict:
+    """Exactly what a still segment will show: crop window, fitted move, vertical centre.
+    Segments are cached by THIS, not by its inputs, so a change to the framing rules
+    rebuilds exactly the segments whose pixels change (and no others)."""
+    out_w, out_h = FORMATS[ratio_key]
+    window = crop_window(*image_wh, out_w / out_h, focus, safe_box)
+    x, y, w, h = window
+    if safe_box is not None:
+        # the move may never zoom or drift the safe box (heads) out of frame
+        move, fy = fit_move(move, box_in_window(safe_box, image_wh, window))
+    else:
+        # focus inside the crop window, so the zoom closes in on the subject
+        fy = min(max((focus[1] * image_wh[1] - y) / h, 0.0), 1.0)
+    return {"window": window, "zoom": [round(z, 6) for z in move.zoom],
+            "drift": [round(d, 6) for d in move.drift], "fy": round(fy, 6), "out": (out_w, out_h)}
+
+
+def still_segment_cmd(ffmpeg: str, image: Path, image_wh: tuple[int, int], ratio_key: str,
+                      focus: tuple[float, float], move: Move, frames: int, out: Path,
+                      safe_box: Box | None = None) -> list[str]:
+    plan = still_plan(image_wh, ratio_key, focus, move, safe_box)
+    x, y, w, h = plan["window"]
+    out_w, out_h = plan["out"]
+    move, fy = Move(tuple(plan["zoom"]), tuple(plan["drift"])), plan["fy"]
+    vf = (f"crop={w}:{h}:{x}:{y},scale={w * UPSCALE}:{h * UPSCALE}:flags=lanczos,"
+          f"{zoompan_filter(move, frames, fy, out_w, out_h)},setsar=1,format=yuv420p")
+    return [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-loop", "1",
+            "-framerate", str(FPS), "-i", str(image), "-vf", vf, "-frames:v", str(frames),
+            "-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-an", str(out)]
+
+
+def clip_segment_cmd(ffmpeg: str, clip: Path, clip_wh: tuple[int, int], ratio_key: str,
+                     focus: tuple[float, float], frames: int, out: Path,
+                     safe_box: Box | None = None) -> list[str]:
+    """A motion clip cropped to the ratio; held on its last frame if the shot is longer.
+    safe_box is in the CLIP's coordinates (see shots.export_job)."""
+    out_w, out_h = FORMATS[ratio_key]
+    x, y, w, h = crop_window(*clip_wh, out_w / out_h, focus, safe_box)
+    vf = (f"crop={w}:{h}:{x}:{y},scale={out_w}:{out_h}:flags=lanczos,fps={FPS},"
+          f"tpad=stop_mode=clone:stop_duration={frames / FPS + 1:.3f},setsar=1,format=yuv420p")
+    return [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-i", str(clip), "-vf", vf,
+            "-frames:v", str(frames), "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
+            "-an", str(out)]
+
+
+def card_style(ratio_key: str) -> str:
+    # FFmpeg reads force_style alignment in legacy SSA numbering: 10 = middle centre
+    # (5 put the card in the top-left corner of the first render)
+    size = 24 if ratio_key == "16:9" else 14
+    return f"Alignment=10,FontSize={size},Outline=0,Shadow=0,PrimaryColour=&H00E8EEF2"
+
+
+def card_segment_cmd(ffmpeg: str, srt_name: str, ratio_key: str, frames: int, out_name: str) -> list[str]:
+    """End card: the card text centred on a warm dark background. Run with cwd = the srt's
+    folder (Windows drive colons break the subtitles filter's file argument)."""
+    out_w, out_h = FORMATS[ratio_key]
+    return [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
+            f"color=c={CARD_BG}:s={out_w}x{out_h}:r={FPS}",
+            "-vf", f"subtitles={srt_name}:force_style='{card_style(ratio_key)}',setsar=1,format=yuv420p",
+            "-frames:v", str(frames), "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
+            "-an", out_name]
+
+
+def subtitle_style(ratio_key: str) -> str:
+    """16:9: low on the frame. 9:16: larger, and lifted above the bottom ~20% that phone
+    apps cover with captions and buttons (safe area)."""
+    if ratio_key == "16:9":
+        return "FontSize=20,Outline=1.5,Shadow=0,MarginV=30"
+    return "FontSize=11,Outline=1.2,Shadow=0,MarginV=62,MarginL=16,MarginR=16"
+
+
+def mux_cmd(ffmpeg: str, video: str, audio: str, srt: str, ratio_key: str, total: float,
+            out: str) -> list[str]:
+    return [ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-i", video, "-i", audio,
+            "-vf", f"subtitles={srt}:force_style='{subtitle_style(ratio_key)}',format=yuv420p",
+            "-map", "0:v", "-map", "1:a", "-c:v", "libx264", "-preset", "medium", "-crf", "20",
+            "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-t", f"{total:.3f}",
+            "-movflags", "+faststart", out]

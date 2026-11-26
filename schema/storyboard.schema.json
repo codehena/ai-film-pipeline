@@ -5,7 +5,7 @@
   "description": "The contract between every pipeline stage. Every stage reads this file; nothing about the film is hidden in code.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "title", "logline", "audience", "intent", "language", "format", "style_block", "characters", "voice", "shots", "music_cues", "end_card"],
+  "required": ["version", "title", "logline", "audience", "intent", "language", "format", "style_block", "characters", "voice", "image", "shots", "music_cues", "end_card"],
   "properties": {
     "version": { "const": 1 },
     "notes": { "type": "string", "description": "Free text for humans. Ignored by the pipeline." },
@@ -48,11 +48,45 @@
     "voice": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["model", "voice_name", "style"],
+      "required": ["model", "voice_name", "style", "style_mode"],
       "properties": {
         "model": { "type": "string", "minLength": 1 },
         "voice_name": { "type": "string", "minLength": 1 },
-        "style": { "type": "string", "description": "Plain-language delivery instruction, e.g. calm, warm, unhurried." }
+        "style": { "type": "string", "description": "Default delivery instruction for every line, e.g. calm, warm, unhurried. Never spoken." },
+        "style_mode": {
+          "enum": ["speech_metadata", "prompt_prefix", "none"],
+          "description": "How style reaches the TTS model: the SDK's speech_metadata field, a text prefix, or not at all."
+        },
+        "language_code": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$", "description": "Passed to TTS, e.g. am or am-ET." },
+        "mode": {
+          "enum": ["per_line", "continuous"],
+          "default": "per_line",
+          "description": "per_line: one TTS call per shot (cheap single-line retakes). continuous: the whole narration in ONE call (one voice and flow throughout), split at pauses into per-shot segments. Per-line style overrides are ignored in continuous mode."
+        }
+      }
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "width", "height"],
+      "description": "Keyframe generation. One square master per shot, cropped to 16:9 and 9:16 in assembly (subjects are centred).",
+      "properties": {
+        "model": { "type": "string", "minLength": 1, "description": "Must be listed in providers/cloudflare.MODELS." },
+        "width": { "type": "integer", "minimum": 256, "maximum": 2048, "multipleOf": 16 },
+        "height": { "type": "integer", "minimum": 256, "maximum": 2048, "multipleOf": 16 },
+        "reference_sheets": { "type": "boolean", "default": true, "description": "One reference sheet per character; every shot of that character is conditioned on it (if the model supports references)." }
+      }
+    },
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "duration_s", "candidates"],
+      "description": "Music generated on Kaggle (ACE-Step) from music_cues, then trimmed to the film length.",
+      "properties": {
+        "model": { "type": "string", "minLength": 1 },
+        "duration_s": { "type": "number", "minimum": 30, "maximum": 180 },
+        "candidates": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "chosen": { "type": ["integer", "null"], "minimum": 1, "description": "Which candidate is used in the film (null = placeholder pad)." }
       }
     },
     "shots": {
@@ -101,13 +135,34 @@
         "image_prompt": { "type": "string", "minLength": 1 },
         "motion_prompt": { "type": "string", "minLength": 1, "description": "Only motion and camera; the keyframe already holds the subject." },
         "seed": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "appearance": { "$ref": "#/$defs/appearance" },
+        "beats": {
+          "type": "array",
+          "description": "More pictures inside this shot, each starting at the word it shows (pipeline/beats.py). The shot's own image is beat 0.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from_word", "image_prompt"],
+            "properties": {
+              "from_word": { "type": "integer", "minimum": 1, "description": "Index of the narration word (0-based, split on spaces) this picture lands on." },
+              "image_prompt": { "type": "string", "minLength": 1 },
+              "motion_prompt": { "type": "string", "minLength": 1 },
+              "characters": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+              "appearance": { "$ref": "#/$defs/appearance" },
+              "seed": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+              "focus": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+              "safe_box": { "$ref": "#/$defs/box" }
+            }
+          }
+        },
         "narration": {
           "type": "object",
           "additionalProperties": false,
           "required": ["text", "subtitle_en"],
           "properties": {
-            "text": { "type": "string", "description": "Narration in the film's language. Empty string = silent shot." },
-            "subtitle_en": { "type": "string" }
+            "text": { "type": "string", "description": "ONLY the words to be spoken, in the film's language. No stage directions. Empty string = silent shot." },
+            "subtitle_en": { "type": "string" },
+            "speech_metadata": { "$ref": "#/$defs/speech_metadata" }
           }
         },
         "video": {
@@ -116,9 +171,44 @@
           "required": ["method", "fallback"],
           "properties": {
             "method": { "enum": ["wan_i2v", "hunyuan_i2v", "ken_burns", "still"] },
-            "fallback": { "enum": ["ken_burns", "still"] }
+            "fallback": { "enum": ["ken_burns", "still"] },
+            "focus": {
+              "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0, "maximum": 1 },
+              "description": "Point of interest (x, y as fractions of the keyframe) that the 16:9 / 9:16 crops and the Ken Burns move centre on. Default [0.5, 0.5]."
+            },
+            "safe_box": { "$ref": "#/$defs/box" },
+            "still": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["from"],
+              "description": "Ken Burns on another shot's keyframe (an insert from the same scene), e.g. after 3 failed takes of this shot's own keyframe.",
+              "properties": {
+                "from": { "type": "string", "pattern": "^s[0-9]{2}$" },
+                "zoom": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 1, "maximum": 3 } }
+              }
+            }
           }
         }
+      }
+    },
+    "appearance": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 },
+      "description": "Character id -> a full description used instead of the character's own for this shot/beat only (e.g. swimming in shorts)."
+    },
+    "box": {
+      "type": "array", "minItems": 4, "maxItems": 4,
+      "items": { "type": "number", "minimum": 0, "maximum": 1 },
+      "description": "x0, y0, x1, y1 as fractions of the keyframe: the region (heads, faces, key action) that must stay inside every crop and every Ken Burns move."
+    },
+    "speech_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Delivery and timing cues, kept apart from the spoken text.",
+      "properties": {
+        "style": { "type": "string", "minLength": 1, "description": "Overrides voice.style for this line. Affects the audio (part of the narration hash)." },
+        "pause_before_s": { "type": "number", "minimum": 0, "maximum": 3, "description": "Silence before the line starts. Edit-only: no new TTS call." },
+        "pause_after_s": { "type": "number", "minimum": 0, "maximum": 5, "description": "Minimum silence after the line. Edit-only: no new TTS call." }
       }
     },
     "music_cue": {

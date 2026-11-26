@@ -8,6 +8,8 @@ ROOT = Path(__file__).resolve().parents[2]
 STORYBOARD = ROOT / "storyboard.json"
 SCHEMA = ROOT / "schema" / "storyboard.schema.json"
 RUNS_LOG = ROOT / "runs.jsonl"
+# Verified corrections to the automatic split of a specific continuous read (narration.py, F-12)
+SPLIT_OVERRIDES = ROOT / "narration_splits.json"
 OUTPUTS = ROOT / "outputs"
 CACHE = ROOT / "cache"
 
@@ -35,6 +37,37 @@ def get_secret(name: str) -> str:
             f"{name} is not set. Copy .env.example to .env and fill in {name}."
         )
     return value
+
+
+class MissingTool(Exception):
+    """A required program (e.g. FFmpeg) could not be found."""
+
+
+def find_tool(name: str) -> str:
+    """Locate ffmpeg / ffprobe. Order: <NAME>_PATH env var, PATH, then winget's install folders
+    (a terminal opened before `winget install` has a stale PATH - see FAILURES.md F-05)."""
+    import shutil
+
+    override = os.environ.get(f"{name.upper()}_PATH", "").strip()
+    if override:
+        if Path(override).is_file():
+            return override
+        raise MissingTool(f"{name.upper()}_PATH points to {override}, which does not exist")
+    found = shutil.which(name)
+    if found:
+        return found
+    local = os.environ.get("LOCALAPPDATA")
+    if local:
+        winget = Path(local) / "Microsoft" / "WinGet"
+        candidates = [winget / "Links" / f"{name}.exe",
+                      *sorted((winget / "Packages").glob(f"*FFmpeg*/*/bin/{name}.exe"))]
+        for c in candidates:
+            if c.is_file():
+                return str(c)
+    raise MissingTool(
+        f"{name} not found. Install FFmpeg (Windows: winget install --id Gyan.FFmpeg -e), "
+        f"open a NEW terminal, or set {name.upper()}_PATH in .env."
+    )
 
 
 def output_dir(stage: str, base: Path | None = None) -> Path:

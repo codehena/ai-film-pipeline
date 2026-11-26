@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "notes": "PLACEHOLDER storyboard so the pipeline and tests run. Replace every TODO with your real story before generating anything.",
+  "title": "TODO: film title",
+  "logline": "TODO: one sentence that sums up the story",
+  "audience": "TODO: who watches, and where (e.g. cousins in the diaspora, on their phones)",
+  "intent": "TODO: what they should feel or understand when it ends",
+  "language": { "narration": "am", "subtitles": "en" },
+  "format": { "aspect_ratios": ["9:16", "16:9"], "fps": 24 },
+  "style_block": "warm, grainy, hand-painted look, soft golden-hour light, earthy palette, subject centred in frame",
+  "characters": [
+    {
+      "id": "main_character",
+      "description": "TODO: age, face, hair, clothing - use the exact same words every time",
+      "reference_image": null,
+      "consent_ref": "ETHICS.md#main-character"
+    }
+  ],
+  "voice": {
+    "model": "gemini-3.8-flash-tts",
+    "voice_name": "Kore",
+    "style": "calm, warm, unhurried, like an elder remembering",
+    "style_mode": "speech_metadata",
+    "language_code": "am"
+  },
+  "image": { "model": "@cf/black-forest-labs/flux-2-klein-4b", "width": 1024, "height": 1024, "reference_sheets": true },
+  "score": { "model": "ACE-Step-1.5", "duration_s": 75, "candidates": 3, "chosen": null },
+  "shots": [
+    {
+      "id": "s01", "duration_s": 7, "reason": "TODO: establish the place and time",
+      "shot_size": "extreme_wide", "characters": [],
+      "image_prompt": "TODO: the place at dawn", "motion_prompt": "slow push-in, mist drifting",
+      "seed": 1001,
+      "narration": { "text": "TODO: line 1", "subtitle_en": "TODO: line 1 in English",
+                     "speech_metadata": { "pause_before_s": 0.3, "pause_after_s": 0.5 } },
+      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+    },
+    {
+      "id": "s02", "duration_s": 9, "reason": "TODO: introduce the main character",
+      "shot_size": "medium", "characters": ["main_character"],
+      "image_prompt": "TODO: main character in the place", "motion_prompt": "camera static, she turns her head slowly",
+      "seed": 1002,
+      "narration": { "text": "TODO: line 2", "subtitle_en": "TODO: line 2 in English",
+                     "speech_metadata": { "pause_before_s": 0.3, "pause_after_s": 0.5 } },
+      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+    },
+    {
+      "id": "s03", "duration_s": 8, "reason": "TODO: a detail that matters",
+      "shot_size": "close_up", "characters": ["main_character"],
+      "image_prompt": "TODO: hands doing the important thing", "motion_prompt": "gentle hand movement, camera static",
+      "seed": 1003,
+      "narration": { "text": "TODO: line 3", "subtitle_en": "TODO: line 3 in English",
+                     "speech_metadata": { "pause_before_s": 0.3, "pause_after_s": 0.5 } },
+      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+    },
+    {
+      "id": "s04", "duration_s": 9, "reason": "TODO: the journey or the work",
+      "shot_size": "wide", "characters": ["main_character"],
+      "image_prompt": "TODO: walking along the road", "motion_prompt": "slow tracking shot alongside",
+      "seed": 1004,
+      "narration": { "text": "TODO: line 4", "subtitle_en": "TODO: line 4 in English",
+                     "speech_metadata": { "pause_before_s": 0.3, "pause_after_s": 0.5 } },
+      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+    },
+    {
+      "id": "s05", "duration_s": 8, "reason": "TODO: the turning point",
+      "shot_size": "medium_close_up", "characters": ["main_character"],
+      "image_prompt": "TODO: the moment that changes things", "motion_prompt": "slow push-in on her face",
+      "seed": 1005,
+      "narration": { "text": "TODO: line 5", "subtitle_en": "TODO: line 5 in English",
+                     "speech_metadata": { "pause_before_s": 0.3, "pause_after_s": 0.5 } },
+      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+    },
+    {
+      "id": "s06", "duration_s": 9, "reason": "TODO: what it cost or meant",
+      "shot_size": "insert", "characters": [],
+      "image_prompt": "TODO: an object that carries the memory", "motion_prompt": "camera static, light shifts slowly",
+      "seed": 1006,
+      "narration": { "text": "TODO: line 6", "subtitle_en": "TODO: line 6 in English",
+                     "speech_metadata": { "pause_before_s": 0.3, "pause_after_s": 0.5 } },
+      "video": { "method": "ken_burns", "fallback": "still" }
+    },
+    {
+      "id": "s07", "duration_s": 9, "reason": "TODO: connect past to present",
+      "shot_size": "wide", "characters": ["main_character"],
+      "image_prompt": "TODO: the place today", "motion_prompt": "slow pan left to right",
+      "seed": 1007,
+      "narration": { "text": "TODO: line 7", "subtitle_en": "TODO: line 7 in English",
+                     "speech_metadata": { "pause_before_s": 0.3, "pause_after_s": 0.5 } },
+      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+    },
+    {
+      "id": "s08", "duration_s": 10, "reason": "TODO: closing image, return of the motif",
+      "shot_size": "extreme_wide", "characters": [],
+      "image_prompt": "TODO: the place at dusk", "motion_prompt": "slow pull-back, camera rises",
+      "seed": 1008,
+      "narration": { "text": "TODO: line 8", "subtitle_en": "TODO: line 8 in English",
+                     "speech_metadata": { "pause_before_s": 0.3, "pause_after_s": 0.5 } },
+      "video": { "method": "wan_i2v", "fallback": "ken_burns" }
+    }
+  ],
+  "music_cues": [
+    { "id": "m1", "start_s": 0, "end_s": 40, "caption": "soft ambient strings and krar, gentle texture, no lead melody", "instrumental": true, "bpm": 70, "key": "D minor" },
+    { "id": "m2", "start_s": 40, "end_s": 72, "caption": "the opening theme returns, warmer, slowly resolving", "instrumental": true, "bpm": 70, "key": "D major" }
+  ],
+  "end_card": { "text": "Made with AI tools. Story told with family consent.", "duration_s": 3 }
+}

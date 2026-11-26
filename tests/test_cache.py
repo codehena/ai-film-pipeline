@@ -62,8 +62,40 @@ def test_narration_hash_changes_with_text_only_for_that_shot(board):
     assert [i for i in range(len(before)) if before[i] != after[i]] == [4]
 
 
+def test_pause_change_does_not_regenerate_audio(board):
+    shot = board["shots"][0]
+    h1 = stable_hash(narration_inputs(board, shot))
+    shot["narration"]["speech_metadata"]["pause_before_s"] = 2.0
+    shot["narration"]["speech_metadata"]["pause_after_s"] = 3.0
+    assert stable_hash(narration_inputs(board, shot)) == h1
+
+
+def test_style_override_regenerates_only_that_line(board):
+    before = [stable_hash(narration_inputs(board, s)) for s in board["shots"]]
+    board["shots"][3]["narration"]["speech_metadata"]["style"] = "hushed, slower"
+    after = [stable_hash(narration_inputs(board, s)) for s in board["shots"]]
+    assert [i for i in range(len(before)) if before[i] != after[i]] == [3]
+
+
+def test_film_wide_style_change_regenerates_lines_without_override(board):
+    board["shots"][3]["narration"]["speech_metadata"]["style"] = "hushed"
+    before = [stable_hash(narration_inputs(board, s)) for s in board["shots"]]
+    board["voice"]["style"] = "brighter, faster"
+    after = [stable_hash(narration_inputs(board, s)) for s in board["shots"]]
+    changed = [i for i in range(len(before)) if before[i] != after[i]]
+    assert 3 not in changed and len(changed) == len(board["shots"]) - 1
+
+
 def test_subtitle_change_does_not_regenerate_audio(board):
     shot = board["shots"][0]
     h1 = stable_hash(narration_inputs(board, shot))
     shot["narration"]["subtitle_en"] = "edited subtitle"
     assert stable_hash(narration_inputs(board, shot)) == h1
+
+
+def test_retiming_does_not_invalidate_motion_clips(board):
+    shot = board["shots"][0]
+    h = stable_hash(video_inputs(shot, keyframe_hash="abc", model="wan", params={}))
+    shot["duration_s"] += 2.5
+    shot["narration"]["speech_metadata"]["pause_after_s"] = 1.9
+    assert stable_hash(video_inputs(shot, keyframe_hash="abc", model="wan", params={})) == h

@@ -66,7 +66,8 @@ def log_call(
         "output": output,
         "error": error,
     }
-    with open(log_path or config.RUNS_LOG, "a", encoding="utf-8") as f:
+    # newline="" keeps "\n" as-is (text mode on Windows would write CRLF)
+    with open(log_path or config.RUNS_LOG, "a", encoding="utf-8", newline="") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
     return record
 
