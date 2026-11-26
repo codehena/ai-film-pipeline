@@ -53,7 +53,7 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
   - The splitter found all 10 lines on the first try. Each line's time share was ×0.72 to ×1.26 of its word share (all inside the ×0.5–×2.0 band, none flagged), and 13.44 s of pauses were trimmed (`full_62660579a53d.split.json`).
   - Speech: 94 words in 51.24 s = **110 words per minute**, against 87 for the per-line Kore read in EXP-01. That comparison is confounded (voice, style and text all changed), so it is not evidence for continuous mode by itself.
   - `retime` then cut the film from 76.5 s to **65.5 s**, and every line fits.
-- **Decision:** keep `continuous` as the mode. It meets the quota constraint (1 of 10 daily requests), and the split is clean. TODO: my by-ear verdict on whether it sounds like one voice telling one story, which is the actual hypothesis.
+- **Decision:** keep `continuous` as the mode. It meets the quota constraint (1 of 10 daily requests), and the split is clean. **By ear (the author): yes**, it sounds like one voice telling one story, which is the actual hypothesis.
 - **Watch:** 65.5 s is close to the 60 s minimum. If listeners want any line cut, the film may fall under 60 s, and pauses or a shot would have to be added back.
 
 ### EXP-03: Which male voice carries the opening best?
@@ -61,7 +61,7 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
 - **Hypothesis:** a calm male voice reading the same opening line with the same style will suit the story better than Kore (a female voice), because the narrator is a man telling his own childhood.
 - **Change:** `py -m pipeline audition --shot s01`. Only `voice_name` varies (text, style and model are fixed).
 - **Takes so far:** `outputs/auditions/s01-Charon_b8edc8220fe3.wav` (7.92 s), `outputs/auditions/s01-Iapetus_c97084de6c9e.wav` (8.04 s). Algieba, Umbriel and Orus were blocked by the daily cap.
-- **Result / decision (2026-11-25):** I listened to both takes and chose **Iapetus** for the narration (`voice.voice_name`). TODO: in my own words, what made Iapetus right (warmth, pace, how close it is to the "cool" opening I liked).
+- **Result / decision (2026-11-25):** I listened to both takes and chose **Iapetus** for the narration (`voice.voice_name`). In my words: Iapetus is the more thoughtful reading, and it connects with the nostalgic idea of the film.
 - **Caveat:** only 2 of the 5 planned voices could be heard (the daily cap), so this is the best of two, not of five. Algieba, Umbriel and Orus can be auditioned after the quota resets if Iapetus doesn't hold up over the whole read.
 
 ### EXP-04: How to actually reach −14 LUFS on the radio mix
@@ -114,7 +114,7 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
   - `pause_before` / `pause_after` set from the read's gaps (DESIGN.md, "Option A")
 - **Held fixed:** the read (`full_64173211a953.wav`), words, voice, loudness recipe, subtitles.
 - **Result (measured):** every between-line gap is now within ±0.08 s of the read (it was −0.46 to +1.00 s). The film runs 70.3 s, and the cut is `radio_4fa2a5146bca.mp4`. Cost: 0 model calls and one 22 s render.
-- **Result (by ear):** TODO, from the blind check against `radio_71461dcbe940.mp4`.
+- **Result (by ear, the author):** "not bad, but when the pictures come it comes to life." The spacing alone didn't make it feel fully natural; the remaining stiffness is intonation, which only a re-read can change.
 - **Decision:** keep the spacing rule either way, because it removes edit-made artefacts. If the delivery still feels stiff, the remaining cause is intonation inside the lines, and EXP-07 would be a targeted re-read (Option B).
 
 ### EXP-07: Keyframes on Cloudflare FLUX: what is controllable, and how to keep two boys consistent
@@ -154,7 +154,7 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
   - 15 visual units in place of 10.
   - Narration cache hits throughout (0 TTS calls).
   - Frames checked in both exports.
-  - TODO, by ear: does each picture *feel* on time? If one is late, adjust its `from_word`.
+  - **By ear (the author):** the pictures feel on time, "very much". No `from_word` needed adjusting.
 - **Decision:** keep. Tune `from_word` from the author's viewing rather than adding an ASR dependency.
 
 ### EXP-10: Safe boxes vs. centred crops for 16:9
