@@ -64,7 +64,7 @@ Each licence below was read at its official source on **2026-11-26** (link in th
 - **In the film:** the end card says "Made with AI tools. A true story, shared with my brother's consent." The schema refuses an end card that doesn't mention AI.
 - **Where it is shared:**
   - The two films (16:9 and 9:16) are on Google Drive, with links that open without a login, for the submission.
-  - The public post is on **YouTube**. When uploading, in YouTube Studio → Details → "Altered content", answer **Yes**: the visuals, voice and music are AI-generated. YouTube then shows its AI/altered-content label on the video.
+  - The public post **will be on YouTube**. When uploading, in YouTube Studio → Details → "Altered content", I answer **Yes**: the visuals, voice and music are AI-generated. YouTube then shows its AI/altered-content label on the video.
   - The description also says it plainly (the end card's wording, and that my brother consented).
 - **Provenance:** keep watermarks and provenance metadata (SynthID, C2PA) intact, and don't strip metadata in the export.
 - **Style:** the look is described by its qualities (gouache, hand-painted, golden light), never by naming a living artist.
