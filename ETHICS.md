@@ -48,17 +48,17 @@ Several free endpoints may use inputs for training, so the rule is: send only wh
 - `outputs/` holds the drafts 1–2 narration audio and the radio cuts `radio_35007642475a.mp4` and `radio_4e62d2e01523.mp4`, which **speak his name**. They are not for sharing with test listeners; only draft 3 and later cuts are. I can delete them once draft 3 replaces them.
 
 ## Licences
-Check each one yourself and record the date you checked.
+Each licence below was read at its official source on **2026-11-26** (link in the last column). Model-card claims about outputs are marked as such: they are not licence text.
 
-| Component | Used for | Licence / terms | Checked |
+| Component | Used for | Licence / terms, as stated at the source | Checked |
 |---|---|---|---|
-| Gemini API, `gemini-3.8-flash-tts` | narration | Google Gemini API terms; free tier may use inputs to improve products | TODO |
-| Gemini API, `gemini-3.5-flash-lite` | smoke test only | as above | TODO |
-| FLUX.1 schnell (Cloudflare Workers AI) | keyframes | Apache 2.0 (verify on model card) + Cloudflare terms | TODO |
-| FLUX.2 klein **4B** (Cloudflare Workers AI) | keyframes and reference sheets | Apache 2.0 per the brief (the 9B is non-commercial; not used). Cloudflare's model page links to BFL's terms; zero data retention | TODO: confirm on the model card |
-| Wan 2.2 TI2V-5B | moving shots | Apache 2.0 (per brief) | TODO |
-| ACE-Step 1.5 | score | MIT; outputs usable commercially (per brief) | TODO |
-| FFmpeg 9.1 (gyan.dev full build) | assembly | GPL build (includes libx264) | TODO |
+| Gemini API, `gemini-3.8-flash-tts` | narration | Gemini API Additional Terms (effective 2026-03-23). **Unpaid tier: Google may use submitted content to improve its products.** Paid tier: it doesn't. Google doesn't claim ownership of outputs; I remain responsible for their use. Hence private family details stay out of prompts, and my brother is never named. | 2026-11-26, [terms](https://ai.google.dev/gemini-api/terms) (redirects to aistudio.google.com/docs/terms) |
+| Gemini API, `gemini-3.5-flash` / `flash-lite` | `asr-check` (speech recognition QA), smoke test | the same terms | 2026-11-26, same page |
+| FLUX.1 schnell (Cloudflare Workers AI) | smoke test only (keyframes moved to FLUX.2 klein) | Apache 2.0; personal, scientific and commercial use | 2026-11-26, [model card](https://huggingface.co/black-forest-labs/FLUX.1-schnell) |
+| FLUX.2 klein **4B** (Cloudflare Workers AI) | keyframes and reference sheets | **Apache 2.0**, open weights for commercial use (the 9B is non-commercial, not used). Acceptable-use rules apply. Cloudflare's page links to BFL's terms of service and lists zero data retention. | 2026-11-26, [model card](https://huggingface.co/black-forest-labs/FLUX.2-klein-4B), [Cloudflare](https://developers.cloudflare.com/workers-ai/models/flux-2-klein-4b/) |
+| Wan 2.2 TI2V-5B | moving shots: **tried, not in the film** (F-26) | Apache 2.0. The card claims no rights over generated content; the user is accountable for its use. | 2026-11-26, [model card](https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B) |
+| ACE-Step 1.5 | score (candidate c1) | **MIT** (code: [LICENSE](https://github.com/ACE-Step/ACE-Step-1.5/blob/main/LICENSE); weights: MIT on the card). The model card (not the licence) says generated music may be used commercially. | 2026-11-26, [model card](https://huggingface.co/ACE-Step/Ace-Step1.5) |
+| FFmpeg (gyan.dev full build) | assembly | **GPLv3** (all gyan.dev builds are static, GPLv3). I only run it as a tool and don't redistribute it, so the GPL places no obligations on the film. | 2026-11-26, [builds page](https://www.gyan.dev/ffmpeg/builds/) |
 
 ## Labelling plan
 - **In the film:** the end card says "Made with AI tools. A true story, shared with my brother's consent." The schema refuses an end card that doesn't mention AI.
