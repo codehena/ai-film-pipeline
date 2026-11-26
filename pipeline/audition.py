@@ -15,7 +15,7 @@ import copy
 from pathlib import Path
 
 from .common import config
-from .common.cache import narration_inputs, speech_style
+from .common.cache import narration_inputs, speech_style, spoken_text
 from .common.modelcall import run_model_step
 from .common.storyboard import select_shots
 from .narration import ATTEMPTS, wav_duration
@@ -31,7 +31,7 @@ def run(storyboard: dict, shot_id: str, voices: list[str], *, synthesize=None,
     """Returns {voice: wav_path or the exception that stopped that take}."""
     synthesize = synthesize or gemini.synthesize
     shot = select_shots(storyboard, [shot_id])[0]
-    text = shot["narration"]["text"].strip()
+    text = spoken_text(storyboard, shot["narration"]["text"].strip())
     results: dict[str, object] = {}
 
     for voice_name in voices:

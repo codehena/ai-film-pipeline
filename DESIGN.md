@@ -254,8 +254,17 @@ Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answe
 | Real motion would add life | female friend | one listener | **Not acted on.** Wan 2.2 doesn't fit the free T4 (F-26, EXP-12); Ken Burns stays. A trade-off I accept and record. |
 
 **Planned pronunciation polish, reproducible through the pipeline:**
-1. Ask the listeners which words sounded wrong. TODO: list them here, with the shot each is in.
-2. Fix them in `storyboard.json` (spelling that guides the TTS, or a delivery note in `voice.style`), never by hand in an audio editor. The change is then visible in git and re-runnable.
+1. The words the listeners flagged (2026-11-26):
+
+   | Word | Shot | Around | Note |
+   |---|---|---|---|
+   | ሲያንዣብቡ (hovering) | s02 | 9–10 s | |
+   | ጥጃዎች (calves) | s02 | | listeners say ጥጆች |
+   | ይናፍቀኛል (I miss it) | s02 | | |
+   | እንቀዳ (we fetched) | s04 | | |
+   | እንዋኝ (we swam) | s06 | | |
+
+2. Fix them in `storyboard.json` → `voice.pronunciations` (written word → the spelling given to the TTS model; ARCHITECTURE.md point 4), never by hand in an audio editor. The change is then visible in git and re-runnable.
 3. After the TTS quota resets (11:00 EAT), one continuous re-read: 1 of the 10 daily requests (EXP-02). Narration is cached by input hash, so nothing else is regenerated.
 4. Re-split and check with `asr-check`, re-time, then `assemble --mode final`. Only the narration and the segments whose timing moved are rebuilt; keyframes are reused.
 5. Log it as an experiment: the old read vs the new one, on the flagged words.

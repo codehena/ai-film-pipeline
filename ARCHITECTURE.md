@@ -28,7 +28,7 @@ So swapping the narration (say, a future re-read) re-renders **only the final cu
 
 **3. Quotas shape the unit of work.** At 10 TTS requests/day, the whole narration is read in **one** call (continuous mode) instead of one per line (F-09). At 20 text requests/day, `asr-check` caches per segment and saves after every line (F-12). A daily cap fails fast with the reset time instead of retrying (`QuotaExhausted`).
 
-**4. Corrections are data, not hand-edited outputs.** A wrong split is fixed in `narration_splits.json` (committed, keyed to one specific read), never by editing a generated WAV. Every fix is reproducible and reviewable in git.
+**4. Corrections are data, not hand-edited outputs.** A wrong split is fixed in `narration_splits.json` (committed, keyed to one specific read), never by editing a generated WAV. Every fix is reproducible and reviewable in git. The same goes for pronunciation: a mispronounced word is fixed with `voice.pronunciations` in `storyboard.json` (written word → the spelling the TTS model is given, `cache.spoken_text`). Only the spoken audio changes: the written line, the English subtitles and every line without a mapped word keep their cache keys.
 
 **5. Fallbacks keep a film possible at every step.** No keyframe: the stage stops with a clear error. No motion clip: a Ken Burns pan-and-zoom on the keyframe. No chosen score: the placeholder pad. A complete film can always be rendered from whatever exists.
 
