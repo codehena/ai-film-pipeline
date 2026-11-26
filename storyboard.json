@@ -49,7 +49,7 @@
     "model": "ACE-Step-1.5",
     "duration_s": 75,
     "candidates": 3,
-    "chosen": null
+    "chosen": 1
   },
   "shots": [
     {

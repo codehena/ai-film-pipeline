@@ -45,3 +45,4 @@ TODO
 
 **Draft 4c render cost:** 15 visual units (10 shots + 5 beats) per ratio. A full rebuild of both ratios took 276 s (16:9) + 265 s (9:16) locally, with 0 model calls, because every Ken Burns segment is rendered at 4× for smoothness. Unchanged segments are cached, so later re-renders only rebuild what changed.
 **s08 fix (draft 4d):** 2 keyframe generations (attempt 1: jebena wrong; attempt 2 kept), 0 TTS/ASR calls. s09 changed with it at no generation cost (insert from s08). The new segment cache key (framing plan, F-24) forced one full rebuild of both ratios: 164 s (16:9) + 262 s (9:16), local FFmpeg only.
+**Score chosen (2026-11-26):** 3 listening previews (local FFmpeg, about 30 s each) and one final re-render of both ratios with the chosen score: **139 s** total, all picture segments cached, 0 model calls.

@@ -240,3 +240,5 @@ Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answe
 
 **What changed because of it:**
 - TODO
+- **Draft 4e (score):** the ACE-Step score replaces the placeholder pad. Of three candidates, c1 was chosen by listening under the narration as "more familiar music in Ethiopia", carrying the nostalgia the film is about (EXP-13). Wan motion clips didn't fit the free T4 (F-26), so all 15 visual units keep their Ken Burns moves.
+  - **Films (the near-final cut for user test 2):** `outputs/cuts/final-16x9_77c89e6bd4d1.mp4`, `outputs/cuts/final-9x16_5f32132d3ee6.mp4`. 70.3 s, −14.03 LUFS.

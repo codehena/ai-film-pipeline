@@ -195,3 +195,11 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
 
 - **Result:** the RAM patch works (−9 GB peak, measured). The GPU limit comes from attention at about 27k tokens without flash-attn. Fewer steps can't help, and the model accepts no smaller size.
 - **Decision:** ship with Ken Burns on all 15 visual units (F-26); keep the clip contract for a larger GPU. ACE-Step, the other Kaggle model, ran fine on the same T4 (F-25).
+
+### EXP-13: Choosing the score: three ACE-Step candidates under the narration
+- **Date:** 2026-11-26
+- **Hypothesis:** the three seeds of one caption (krar, washint, kebero; 70 bpm; C major) differ enough that listening under the real narration, rather than alone, decides the choice.
+- **Method:** `scripts/score_previews.py` rendered each candidate through the film's own audio chain (ducked under the voice, two-pass loudness). All three measured −14.0 LUFS (true peak −1.46 / −1.73 / −1.73 dBTP), so loudness didn't bias the comparison.
+- **Result:** the author chose **c1**: "it's more familiar music in Ethiopia and relates to the vibe I want to share, which is nostalgia."
+- **Decision:** `score.chosen = 1`. The final cut was re-rendered with 0 model calls: the picture segments were all cache hits, and only the audio changed. The music is audible alone over the end card (−27 dB mean while it fades) and sits under the voice elsewhere.
+- **Still to test:** whether listeners from the audience hear it as Ethiopian and nostalgic too (user test 2, DESIGN.md).
