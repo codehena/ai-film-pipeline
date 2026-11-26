@@ -4,7 +4,7 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
 
 ## Template
 
-### EXP-01: short title
+### EXP-NN: short title
 - **Date:**
 - **Hypothesis:** If I …, then … because …
 - **Change:** (exactly one thing)

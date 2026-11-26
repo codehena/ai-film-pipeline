@@ -35,7 +35,7 @@ A 70-second film about growing up side by side with my brother in the green Ethi
 - I fixed six environment failures along the way (F-25).
 - I cut peak RAM from over 31 GB to 22 GB by loading the model in bf16.
 - The model still ran out of GPU memory at the first denoising step (F-26, EXP-12).
-- I stopped after about 33 GPU-minutes. Each attempt cost 8 minutes, and even a working run would have given 2–4 clips by the deadline, not 14.
+- I stopped after about 18 GPU-minutes. Each single-clip attempt cost about 8 minutes, and even a working run would have given 2–4 clips by the deadline, not 14.
 - The pipeline was designed so a missing clip falls back to a Ken Burns move (ARCHITECTURE.md §5). So the film stayed complete, and clips from a bigger GPU can still slot in through the same contract.
 
 ## 4. Suggested practices, tested honestly
@@ -65,7 +65,7 @@ A 70-second film about growing up side by side with my brother in the green Ethi
 
 ## Numbers (COSTS.md, runs.jsonl)
 - **TTS:** 2 of 10 daily requests for the two continuous reads that shaped the film.
-- **Images:** 43+ FLUX.2 klein images, 0 errors, about 17 s median.
+- **Images:** 37 FLUX.2 klein images (35 keyframes + 2 probes), 0 errors, about 17 s median; 16 more were cache hits.
 - **Music:** ACE-Step, 3 × 75 s candidates, about 60 s each on a T4 (about 4.5 GPU-minutes).
-- **Wan:** 0 clips, about 33 GPU-minutes spent.
+- **Wan:** 0 clips, about 18 GPU-minutes across 4 attempts (hand-logged in `runs.jsonl`, run_id `kaggle-wan-manual`).
 - **Final re-render after choosing the score:** 139 s, 0 model calls.

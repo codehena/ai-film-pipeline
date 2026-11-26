@@ -12,7 +12,7 @@ One entry per real person shown, described or voiced. The `consent_ref` of each 
 - **Consent:** my own; I wrote the story and approve the narration lines.
 
 ### brother
-- **Who:** my brother. He grew up with me and appears in shots s04–s07.
+- **Who:** my brother. He grew up with me and appears in shots s04–s07 and s10 (always from behind or at a distance).
 - **Privacy framing:** the film tells our story as "my brother and I" (እኔና ወንድሜ). He is never named in the narration, subtitles, prompts, storyboard, documents or commit history. That was my choice, to keep the film about a shared childhood rather than about identifying him.
 - **Shown as:** a stylised boy (`brother_child`), hand-painted, not a portrait, never a realistic likeness.
 - **Voiced:** no. He is mentioned in the narration (s04, s10) but does not speak.
