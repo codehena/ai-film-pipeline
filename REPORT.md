@@ -18,7 +18,7 @@ A 70-second film about growing up side by side with my brother in the green Ethi
 
 **User test 2** (near-final cut, same 3 people, DESIGN.md):
 - The pictures and the score now carry the story: "music and visuals fit the story well", "no issues on the visuals". Football (s05) was the most nostalgic moment for my brother.
-- All three pointed at the **pronunciation** of the narration: two explicitly, one called the sound "somehow bearable". This is the one thing I'm still acting on: a reproducible pronunciation pass through `storyboard.json`, after the TTS quota resets.
+- All three pointed at the **pronunciation** of the narration: two explicitly, one called the sound "somehow bearable". I prepared the fix as data in `storyboard.json` on branch `feat/pronunciation-pass`: two words replaced (ሲበሩ, ትዝ ይለኛል), one respelled for the voice (ጥጆች), and stress notes for the rest. I didn't ship it: it needs a TTS re-read after the daily quota resets, and I had another project due the same day. Shipping on time was the trade-off I chose.
 - One listener wanted real motion. I didn't act on that, and section 3 explains why.
 - **Caveat:** my brother is in the story and all three had heard the radio cut, so a fresh viewer would be a stronger test.
 
@@ -28,7 +28,7 @@ A 70-second film about growing up side by side with my brother in the green Ethi
 - **A continuous read fixed the budget and the voice.** I switched to one continuous read of the whole story (EXP-02): 1 request instead of 10, and one consistent voice.
 - **The continuous read had to be cut into shots.** Splitting it by silence put words in the wrong shots (F-12). I fixed the split with a reviewed corrections file (`narration_splits.json`) and checked it with a speech recogniser (`asr-check`, EXP-05).
 - **The pauses had to sound natural.** The cut now follows the read's own spacing instead of forcing pauses (Option A, EXP-06).
-- **The audience result:** the narration is now one voice and on time. Test 2 shows pronunciation is the remaining gap, so that's what I'm fixing now.
+- **The audience result:** the narration is now one voice and on time. Test 2 shows pronunciation is the remaining gap, and the fix is prepared but not yet shipped (section 2).
 
 **A second hard problem: real motion.**
 - I prepared Kaggle notebooks for Wan 2.2 TI2V-5B on the free T4.
@@ -59,7 +59,7 @@ A 70-second film about growing up side by side with my brother in the green Ethi
 - **Cultural accuracy as an experiment:** describing a jebena's *shape* rather than naming it was what made the model draw a real one (EXP-11).
 
 ## 6. What I would build next
-- The pronunciation pass, as a pipeline feature: a per-word pronunciation map in the storyboard, applied before TTS and checked by `asr-check`.
+- Run the pronunciation pass that's already prepared (`feat/pronunciation-pass`): one re-read, `asr-check`, `retime`, re-render. The pipeline feature behind it (`voice.pronunciations`) is built and tested.
 - Wan 2.2 on a ≥ 24 GB GPU for the 4–6 shots where motion matters most (s01 mist, s05 football, s06 river). Each clip would be reviewed against the consent terms, because video models can turn heads toward the camera.
 - A third user test with viewers who haven't heard earlier cuts.
 

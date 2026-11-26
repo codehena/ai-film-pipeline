@@ -250,10 +250,10 @@ Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answe
 |---|---|---|---|
 | The pictures and the score now carry the story | brother, best friend | "music and visuals fit the story well"; "no issues on the visuals" | Keep the pictures and score c1 as they are (EXP-13). |
 | The football memory is the emotional peak | brother | named it as the most nostalgic part | No change; it sits mid-film, where the narration builds. |
-| Pronunciation is the remaining weakness | all three (2 explicitly, 1 as "somehow bearable") | the same note from different listeners, independently | **Act on it** (below). This reopens the Option A narration decision, deliberately and because of audience evidence. |
+| Pronunciation is the remaining weakness | all three (2 explicitly, 1 as "somehow bearable") | the same note from different listeners, independently | **Prepared, not shipped** (below). The fix is ready as data on branch `feat/pronunciation-pass`, but the re-read needs the next TTS quota window. With another project due the same day, I shipped the current narration. |
 | Real motion would add life | female friend | one listener | **Not acted on.** Wan 2.2 doesn't fit the free T4 (F-26, EXP-12); Ken Burns stays. A trade-off I accept and record. |
 
-**Planned pronunciation polish, reproducible through the pipeline:**
+**Pronunciation polish: prepared as data, not shipped (deadline trade-off).** The storyboard changes below are committed on branch `feat/pronunciation-pass` (draft 5). They need one TTS re-read (1 of 10 daily requests) after the quota reset. I chose to submit the current narration on time rather than risk the deadline, which I shared with another project.
 1. The words the listeners flagged (2026-11-26):
 
    | Word | Shot | Around | Note |
