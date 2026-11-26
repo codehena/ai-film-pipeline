@@ -82,7 +82,8 @@ DESIGN.md  ARCHITECTURE.md  EXPERIMENTS.md  FAILURES.md  COSTS.md  ETHICS.md
 - [x] Skeleton: schema, validation, caching, retries, logging, tests
 - [x] Step 2: smoke test, narration, radio cut (code done; real story + user test 1 pending)
 - [x] Step 3a: reference sheets, keyframes, Ken Burns final cut in 16:9 and 9:16
-- [ ] Step 3b: Wan 2.2 clips and ACE-Step score (notebooks ready; run on Kaggle)
+- [x] Step 3b: ACE-Step score: 3 candidates generated on Kaggle T4 (`notebooks/acestep_score.ipynb`)
+- [ ] Step 3c: Wan 2.2 clips: tried on Kaggle T4, out of memory (FAILURES.md F-26); shots keep their Ken Burns moves, and clips from a ≥ 24 GB GPU slot in through the same contract
 - [ ] Step 4: final edit (ducking, subtitles, loudness, end card, 9:16 + 16:9)
 
 ## Secrets

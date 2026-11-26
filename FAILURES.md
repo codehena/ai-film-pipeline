@@ -278,3 +278,26 @@ What broke, what I tried, what fixed it (or how I worked around it). Write these
 - **Found while:** fixing s08's crop. Heads plus the jebena (56% of the height) fit a 16:9 window (56.25%), but box + 5% margin didn't. The rule then fell back to "keep the top" and cut the jebena's body. **Fix:** shrink the margin before cutting into the box (tested).
 - **The risk it exposed:** a segment's cache key held the crop *inputs* (focus, safe box), not the crop *computed*. A change to the rules could therefore silently reuse old segments with the old framing.
 - **Fix:** `render.still_plan()` computes exactly what a segment shows (window, fitted move, vertical centre), and segments are keyed by that. Tested both ways: a rule change that moves pixels rebuilds the segment, and one that doesn't keeps the cache. The new key format meant one full rebuild.
+
+### F-25: Kaggle environments: six install failures before ACE-Step ran
+- **Date:** 2026-11-25 (Kaggle, 2× Tesla T4, system Python 3.13)
+- **What happened, in order:**
+  1. `python -m acestep.infer` doesn't exist. The entry point was guessed from memory. **Fix:** read the repo (`cli.py` is an interactive wizard) and call the Python API that `run_generate_test.py` uses (`AceStepHandler.initialize_service`, `LLMHandler.initialize`, `generate_music`).
+  2. Installing ACE-Step's requirements into Kaggle's system Python downgraded numpy to 1.26. That broke jax and, through diffusers, Wan's import (`numpy.dtypes ... StringDType`). `flash-attn` failed to compile, so the rest of the list (e.g. `loguru`) never installed. **Fix:** Factory reset; one isolated Python 3.11 venv per model (`uv venv /tmp/ace`, `/tmp/wan`), with flash-attn filtered out.
+  3. The venvs stayed empty: Kaggle's image makes `uv pip install` target the system Python even with `VIRTUAL_ENV` set. **Fix:** pass `--python <venv>/bin/python` on every install, and a smoke test that asserts `sys.prefix`.
+  4. `torchaudio 2.11` was resolved next to `torch 2.10` (`undefined symbol torch_dtype_float4_e2m1fn_x2`). **Fix:** pin the matching trio (`2.10.0 / 0.25.0 / 2.10.0`) and `torchcodec 0.10`.
+  5. Matplotlib in the venv rejected the notebook's `MPLBACKEND=module://matplotlib_inline...`, which subprocesses inherit. **Fix:** `MPLBACKEND=Agg`.
+  6. In the Wan venv, an unpinned requirement pulled `torch 2.15` (CUDA 13) over the pinned 2.5.1. **Fix:** a constraints file (`-c`) holding the torch trio and `numpy<2`.
+- **Result:** ACE-Step ran. 3 candidates × 75 s, about 60 s each (it switches itself to fp16 on pre-Ampere GPUs).
+- **Lesson:** never install a model's requirements into a shared interpreter. Give each model its own venv, address it explicitly, pin the torch trio together, and make every setup cell end in an import-level smoke test that fails fast.
+
+### F-26: Wan 2.2 TI2V-5B does not fit a Kaggle T4 (memory). Shipped with Ken Burns.
+- **Date:** 2026-11-25
+- **Setup:** isolated venv (torch 2.5.1+cu124). `flash_attention` patched to Wan's SDPA fallback, because flash-attn can't build for sm_75. Unused modes (`speech2video`, `animate`) made optional imports.
+- **What happened, in order:**
+  1. **Two clips in parallel (one per T4): system RAM out of memory.** The kernel restarted. Each process holds the T5 encoder (`--t5_cpu`, about 11 GB) plus the DiT in host RAM, against about 31 GB available.
+  2. **One clip: RAM out of memory again.** The DiT loads in fp32 (about 20 GB) before `--convert_model_dtype`. **Fix:** patched `WanModel.from_pretrained(..., torch_dtype=param_dtype, low_cpu_mem_usage=True)`. Measured peak RAM 22/31 GB, so this worked.
+  3. **GPU out of memory at denoising step 0** (T4 = 14.6 GB), at both 50 and 20 steps. A 1280×704×121 clip is about 27k tokens. Without flash-attn, and with bf16 (which sm_75 lacks), SDPA falls back to the math kernel. That kernel builds the full attention matrix (about 35 GB). **Next idea, not confirmed:** an fp16 memory-efficient SDPA wrapper was written, but the logs don't show whether it was active in the last run. The size can't be lowered: ti2v-5B only accepts 1280×704 or 704×1280.
+- **Decision:** stop. Each attempt cost about 8 minutes before failing. Even if one worked, the estimate is 30–60 min per clip on a T4, so 2–4 clips by the deadline, not 14. Also, every clip would need checking against the consent terms, because video models redraw figures and can turn heads toward the camera.
+- **Workaround (by design, ARCHITECTURE.md §5):** every shot keeps its Ken Burns move. The clip contract (`shots --export/--import`) is unchanged, so clips from a bigger GPU (A100/L4, or a hosted endpoint) slot in shot by shot without touching anything else.
+- **Lesson:** check the model's minimum VRAM against the free GPU *before* building the pipeline around it. The fallback-first architecture is why this failure cost minutes of film quality and not the film.

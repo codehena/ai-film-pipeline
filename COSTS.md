@@ -9,7 +9,7 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 | Gemini API, `gemini-3.5-flash` (text; used for `asr-check`) | **20 requests per day** (the error names `gemini-3.6-flash`, so the quota seems shared); 503 "high demand" seen on 3.8/3.7 flash | 429 during asr-check (F-12) | 2026-11-25 |
 | Gemini API, `gemini-3.8-flash-tts` | **10 requests per day** ("Generate content requests per day limit", limit 10); resets 08:00 UTC = 11:00 EAT (`retryDelay` 23084 s at 01:35 UTC) | 429 errors during the voice audition (F-09) | 2026-11-25 |
 | Cloudflare Workers AI | Not hit: **43** FLUX.2 klein images on 2026-11-25 with 0 errors (free daily neuron allowance; per-image neurons aren't reported by the API) | `runs.jsonl` stages `keyframes`, `probe` | 2026-11-25 |
-| Kaggle GPU | TODO (hours/week) | | |
+| Kaggle GPU | 2× Tesla T4 (14.6 GB VRAM each), about 31 GB host RAM per session; weekly GPU-hour quota (check the Kaggle settings page) | Kaggle session, `nvidia-smi`, `free -g` | 2026-11-25 |
 
 ## Per stage (Phase 1: radio cut)
 | Stage | Model | Calls | Median latency | GPU minutes | List-price equivalent |
@@ -26,8 +26,8 @@ All numbers are **measured** from `runs.jsonl` unless marked as an estimate. Fre
 | keyframes (2 sheets + 10 shots + retakes) | FLUX.2 klein 4B (Cloudflare) | **19** ok + 2 probe, 0 errors | **16.8 s** (12.1–25.8) | – | TODO (free tier: USD 0) |
 | keyframes, draft 4c (beats, ensera, swimming, friends, ceremony, gojo bet) | FLUX.2 klein 4B | **14** ok (11 + s06 retake + 2 s10 retakes), 0 errors | **18.1 s** median | – | TODO (free tier: USD 0) |
 | assemble (final, 16:9 + 9:16) | FFmpeg 9.1, local | 5 renders | first render 110 s (16:9) + 72 s (9:16), building every Ken Burns segment at 4×; re-renders with cached segments 13–42 s | – | 0 |
-| shots | Wan 2.2 TI2V-5B | – | – | – | – |
-| music | ACE-Step 1.5 | – | – | – | – |
+| shots | Wan 2.2 TI2V-5B (Kaggle T4) | 4 attempts, 0 clips (OOM, F-26) | about 8 min to failure (≈4 min loading weights) | ≈ 33 GPU-min spent, 0 output | 0 (free tier) |
+| music | ACE-Step 1.5 turbo + 5Hz LM 1.7B (Kaggle T4, fp16) | 3 ok, 0 errors | **60 s** per 75 s candidate (≈51 s LM codes + ≈3 s diffusion + ≈4 s VAE); ≈1.5 min model load once | ≈ 4.5 GPU-min | 0 (free tier) |
 
 **Narration throughput:** 68.6 s of Amharic speech from 10 calls, at 87 words per minute (EXP-01). At 3 requests per minute, a full 10-line re-voice takes at least about 3.5 minutes of wall-clock time on the free tier. Caching means a single-line edit is one call.
 

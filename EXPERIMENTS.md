@@ -180,3 +180,18 @@ Aim for about ten. Change **one thing** at a time and keep the seed fixed. Point
 
 - **Result:** describing shape and parts worked, on the second attempt. Naming the thing to avoid ("handleless", and the reason "teapot" was left out) does the opposite.
 - **Decision:** for every culturally specific object, the prompt describes its shape. Recorded as a prompt rule in ARCHITECTURE.md.
+
+### EXP-12: Can Wan 2.2 TI2V-5B run on a free Kaggle T4 with memory patches?
+- **Date:** 2026-11-25
+- **Hypothesis:** with the DiT loaded in bf16 (not fp32), T5 on the CPU, model offload and an SDPA attention fallback, one 121-frame 1280×704 clip fits a T4 (14.6 GB VRAM, about 31 GB RAM).
+- **Evidence:**
+
+| Attempt | Change | Peak RAM | Result |
+|---|---|---|---|
+| 1 | 2 clips in parallel, one per GPU | > 31 GB | RAM OOM, kernel restarted |
+| 2 | 1 clip | > 31 GB | RAM OOM (the DiT loads in fp32 first) |
+| 3 | DiT loaded straight in bf16 | 22 / 31 GB | loads; GPU OOM at step 0/50 |
+| 4 | + 20 steps | 22 / 31 GB | GPU OOM at step 0/20 (steps don't change memory per step) |
+
+- **Result:** the RAM patch works (−9 GB peak, measured). The GPU limit comes from attention at about 27k tokens without flash-attn. Fewer steps can't help, and the model accepts no smaller size.
+- **Decision:** ship with Ken Burns on all 15 visual units (F-26); keep the clip contract for a larger GPU. ACE-Step, the other Kaggle model, ran fine on the same T4 (F-25).
