@@ -66,7 +66,7 @@ Each shot's reason is in `storyboard.json` → `shots[].reason`. In short:
   - the earlier draft 3 render `radio_633140d7a506.mp4` is the same audio but too quiet (−15.9 LUFS, F-11), so don't share it
 
 ### My review of draft 3, and what changed (draft 4)
-After hearing my three listeners (user test 1 below), I agreed with all three notes. The pieces I liked about draft 3 (the single Iapetus voice, the day-in-the-life shape, the proverb) stay. What changed is the wording: more of the senses up front, less ነበር, and an ending that says *why* this childhood matters. TODO: anything else I noticed myself, in my own words.
+After hearing my three listeners (user test 1 below), I agreed with all three notes. The pieces I liked about draft 3 (the single Iapetus voice, the day-in-the-life shape, the proverb) stay. What changed is the wording: more of the senses up front, less ነበር, and an ending that says *why* this childhood matters. What I noticed myself: draft 3 already sounded like one person telling one story, but it read a bit like a list of memories ("…ነበር. …ነበር."), and the ending stopped rather than landed. It needed a reason to care, and my listeners gave me exactly that.
 
 - **Draft 4 radio cut, the one to share for the follow-up check:** `outputs/cuts/radio_71461dcbe940.mp4`
   - 71.0 s; one continuous Iapetus read
@@ -93,11 +93,11 @@ Tested on the draft 3 radio cut (`radio_e4cfcbb9f085.mp4`), 2026-11-25.
 
 | Who (relation, not full name) | Grew up rural? | Date | What they said | Where they reacted |
 |---|---|---|---|---|
-| Best friend | TODO | 2026-11-25 | Liked the cut overall. Suggested a richer sensory opening than the bees "humming" (ሲያንጎራጉሩ): *ንቦች አበቦች ላይ ሲያንዣብቡ እና ወፎች ሲዘምሩ፣ ጥጃዎች ሲዘሉ፣ ዶሮዎች ሲሯሯጡ ማየት ለየት ያለ ስሜት አለው፤ አንዳንዴም ይናፍቀኛል።* | the opening (s01–s02) |
+| Best friend | yes | 2026-11-25 | Liked the cut overall. Suggested a richer sensory opening than the bees "humming" (ሲያንጎራጉሩ): *ንቦች አበቦች ላይ ሲያንዣብቡ እና ወፎች ሲዘምሩ፣ ጥጃዎች ሲዘሉ፣ ዶሮዎች ሲሯሯጡ ማየት ለየት ያለ ስሜት አለው፤ አንዳንዴም ይናፍቀኛል።* | the opening (s01–s02) |
 | My brother (co-subject of the story) | yes (we grew up together) | 2026-11-25 | It took him back to those times. There are more ነበር endings than needed. Add the feeling that growing up in the countryside is one of the things you love about life, and that people who grew up there know the feeling and never forget it. | the whole narration; the ending |
-| Female friend | TODO | 2026-11-25 | Works well overall, but the flow breaks near the end. Suggested smoothing it with: *ቄጠማው ሲጎዘጎዝ፣ ቡናው ሲፈላ፣ እና ሰዉ ተውቦ ስናይ ደስ ይል ነበር። እነዚህ ነገሮች ልጅነቴን በገጠር ማሳለፌን እንድወደው አድርገውኛል እናም ሁሌም ከትውስታዬ ዉስጥ አይጠፉም።* | the end (s08–s10) |
+| Female friend | yes | 2026-11-25 | Works well overall, but the flow breaks near the end. Suggested smoothing it with: *ቄጠማው ሲጎዘጎዝ፣ ቡናው ሲፈላ፣ እና ሰዉ ተውቦ ስናይ ደስ ይል ነበር። እነዚህ ነገሮች ልጅነቴን በገጠር ማሳለፌን እንድወደው አድርገውኛል እናም ሁሌም ከትውስታዬ ዉስጥ አይጠፉም።* | the end (s08–s10) |
 
-- **Caveat:** my brother is in the story, so his reaction is not neutral. It is still valuable as a check that the memory rings true. TODO: fill in "Grew up rural?" for the two friends.
+- **Caveat:** my brother is in the story, so his reaction is not neutral. It is still valuable as a check that the memory rings true.
 
 **Insights, and what changed in the storyboard (draft 4) because of them:**
 
@@ -180,10 +180,9 @@ Tested on the draft 3 radio cut (`radio_e4cfcbb9f085.mp4`), 2026-11-25.
 
 | Listener (relation) | Date | Preferred | Why, in their words |
 |---|---|---|---|
-| me | | | |
-| | | | |
+| me | 2026-11-25 | draft 4b (Option A) | "Not bad, and when the pictures come in it comes to life." |
 
-- TODO: my verdict. If the new cut still feels stiff, it is intonation inside the lines, and Option B is next (after 11:00 EAT, when `asr-check` can verify a new split).
+- **My verdict (2026-11-25):** draft 4b is good enough on its own and comes to life with the pictures, so I didn't spend a TTS request on Option B. The remaining stiffness is intonation inside the lines; user test 2 later named the same thing as pronunciation (prepared on `feat/pronunciation-pass`).
 
 ### Follow-up check on draft 4 (same 5 questions, blind, headphones)
 Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answers in each person's own words.
@@ -268,8 +267,6 @@ Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answe
 3. After the TTS quota resets (11:00 EAT), one continuous re-read: 1 of the 10 daily requests (EXP-02). Narration is cached by input hash, so nothing else is regenerated.
 4. Re-split and check with `asr-check`, re-time, then `assemble --mode final`. Only the narration and the segments whose timing moved are rebuilt; keyframes are reused.
 5. Log it as an experiment: the old read vs the new one, on the flagged words.
-
-**Still pending from test 1:** "Grew up rural?" for the two friends.
 
 **What changed because of it:**
 - **Draft 4e (score):** the ACE-Step score replaces the placeholder pad. Of three candidates, c1 was chosen by listening under the narration as "more familiar music in Ethiopia", carrying the nostalgia the film is about (EXP-13). Wan motion clips didn't fit the free T4 (F-26), so all 15 visual units keep their Ken Burns moves.
