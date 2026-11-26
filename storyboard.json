@@ -34,7 +34,10 @@
   "voice": {
     "model": "gemini-3.8-flash-tts",
     "voice_name": "Iapetus",
-    "style": "soft and slow, like waking up",
+    "style": "deep, warm and slow, a grown man remembering his childhood with quiet nostalgia; natural native Amharic with no hard stress: say ጥጆች gently, without pressing on ጥ or ጆ, and keep the ን soft and unstressed in እንቀዳ and እንዋኝ",
+    "pronunciations": {
+      "ጥጃዎች": "ጥጆች"
+    },
     "style_mode": "speech_metadata",
     "language_code": "am",
     "mode": "continuous"
@@ -84,8 +87,8 @@
       "motion_prompt": "camera static, bees moving between blossoms, petals trembling in a light breeze",
       "seed": 1002,
       "narration": {
-        "text": "ንቦች አበቦች ላይ ሲያንዣብቡ፣ ወፎች ሲዘምሩ፣ ጥጃዎች ሲዘሉ፣ ዶሮዎች ሲሯሯጡ ማየት ለየት ያለ ስሜት አለው፤ አንዳንዴም ይናፍቀኛል።",
-        "subtitle_en": "Watching bees hover over flowers, birds sing, calves leap and chickens scurry is a special feeling; sometimes I miss it.",
+        "text": "ንቦች አበቦች ላይ ሲበሩ፣ ወፎች ሲዘምሩ፣ ጥጃዎች ሲዘሉ፣ ዶሮዎች ሲሯሯጡ ማየት ለየት ያለ ስሜት አለው፤ አንዳንዴም ትዝ ይለኛል።",
+        "subtitle_en": "Watching bees fly over flowers, birds sing, calves leap and chickens scurry is a special feeling; sometimes it comes back to me.",
         "speech_metadata": {
           "pause_before_s": 0.25,
           "pause_after_s": 0.95

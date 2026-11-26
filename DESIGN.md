@@ -258,12 +258,13 @@ Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answe
 
    | Word | Shot | Around | Note |
    |---|---|---|---|
-   | ሲያንዣብቡ (hovering) | s02 | 9–10 s | |
-   | ጥጃዎች (calves) | s02 | | listeners say ጥጆች |
-   | ይናፍቀኛል (I miss it) | s02 | | |
-   | እንቀዳ (we fetched) | s04 | | |
-   | እንዋኝ (we swam) | s06 | | |
+   | ሲያንዣብቡ (hovering) | s02 | 9–10 s | **replaced** by ሲበሩ (flying), a word that reads naturally; subtitle now "bees fly" |
+   | ጥጃዎች (calves) | s02 | | ጥ and ጃ came out too hard. **Respelled** ጥጃዎች → ጥጆች (`voice.pronunciations`), with a delivery note not to press on them |
+   | ይናፍቀኛል (I miss it) | s02 | | **replaced** by ትዝ ይለኛል ("it comes back to me"), gentler and more nostalgic |
+   | እንቀዳ (we fetched) | s04 | | the ን was stressed. **Delivery note** in `voice.style`: keep ን soft and unstressed |
+   | እንዋኝ (we swam) | s06 | | the same ን stress, the same delivery note |
 
+   **Also requested (the author):** a deeper, more nostalgic voice. `voice.style` changes from "soft and slow, like waking up" to "deep, warm and slow, a grown man remembering his childhood with quiet nostalgia", plus the stress notes above. Same voice (Iapetus), so EXP-03's choice still holds.
 2. Fix them in `storyboard.json` → `voice.pronunciations` (written word → the spelling given to the TTS model; ARCHITECTURE.md point 4), never by hand in an audio editor. The change is then visible in git and re-runnable.
 3. After the TTS quota resets (11:00 EAT), one continuous re-read: 1 of the 10 daily requests (EXP-02). Narration is cached by input hash, so nothing else is regenerated.
 4. Re-split and check with `asr-check`, re-time, then `assemble --mode final`. Only the narration and the segments whose timing moved are rebuilt; keyframes are reused.
