@@ -30,7 +30,7 @@ So swapping the narration (say, a future re-read) re-renders **only the final cu
 
 **4. Corrections are data, not hand-edited outputs.** A wrong split is fixed in `narration_splits.json` (committed, keyed to one specific read), never by editing a generated WAV. Every fix is reproducible and reviewable in git. The same goes for pronunciation: a mispronounced word is fixed with `voice.pronunciations` in `storyboard.json` (written word → the spelling the TTS model is given, `cache.spoken_text`). Only the spoken audio changes: the written line, the English subtitles and every line without a mapped word keep their cache keys.
 
-**5. Fallbacks keep a film possible at every step.** No keyframe: the stage stops with a clear error. No motion clip: a Ken Burns pan-and-zoom on the keyframe. No chosen score: the placeholder pad. A complete film can always be rendered from whatever exists.
+**5. Fallbacks keep a film possible at every step.** No keyframe: the stage stops with a clear error. No motion clip: a Ken Burns pan-and-zoom on the keyframe. No chosen score, or a chosen one that isn't on disk (a clean clone: Kaggle outputs aren't in git): the placeholder pad, with a printed warning. A complete film can always be rendered from whatever exists, and `py -m pipeline film` ends in the final cut.
 
 ## Contracts
 
@@ -130,3 +130,8 @@ A change to this recipe bumps `assemble.RECIPE_VERSION`, so a new cut gets a new
 
 ## GPU stages
 Wan 2.2 and ACE-Step run in Kaggle notebooks (`notebooks/`, see its README for the round trip). `shots/music --export` writes a job bundle that lists only what is missing. `--import` copies back only files whose names match the current contract (a clip tied to an old keyframe is ignored) and merges the notebook's log lines without duplicates. The music hash ignores cue *times*, so retiming never invalidates the score.
+
+**What actually ran (2026-11-25):**
+- **ACE-Step** produced 3 candidates on a T4, and c1 was chosen (EXP-13).
+- **Wan 2.2 TI2V-5B** loads after a RAM patch but runs out of GPU memory at step 0 on a T4 (F-26, EXP-12), so the clip contract is in place and unused.
+- **Notebook environments:** each model gets its own Python 3.11 venv, with the torch trio pinned (F-25).

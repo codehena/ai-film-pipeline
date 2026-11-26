@@ -255,19 +255,21 @@ Play `outputs/cuts/radio_71461dcbe940.mp4` without introduction and record answe
 **Pronunciation polish: prepared as data, not shipped (deadline trade-off).** The storyboard changes below are committed on branch `feat/pronunciation-pass` (draft 5). They need one TTS re-read (1 of 10 daily requests) after the quota reset. I chose to submit the current narration on time rather than risk the deadline, which I shared with another project.
 1. The words the listeners flagged (2026-11-26):
 
-   | Word | Shot | Around | Note |
+   | Word | Shot | Around | My decision (prepared on `feat/pronunciation-pass`) |
    |---|---|---|---|
-   | ሲያንዣብቡ (hovering) | s02 | 9–10 s | |
-   | ጥጃዎች (calves) | s02 | | listeners say ጥጆች |
-   | ይናፍቀኛል (I miss it) | s02 | | |
-   | እንቀዳ (we fetched) | s04 | | |
-   | እንዋኝ (we swam) | s06 | | |
+   | ሲያንዣብቡ (hovering) | s02 | 9–10 s | replace with ሲበሩ (flying); subtitle "bees fly" |
+   | ጥጃዎች (calves) | s02 | | ጥ and ጃ too hard: respell ጥጆች for the voice only (`voice.pronunciations`) |
+   | ይናፍቀኛል (I miss it) | s02 | | replace with ትዝ ይለኛል ("it comes back to me"), gentler and more nostalgic |
+   | እንቀዳ (we fetched) | s04 | | the ን stressed: delivery note in `voice.style` to keep it soft |
+   | እንዋኝ (we swam) | s06 | | the same ን stress, the same note |
+
+   **Also my own request:** a deeper, more nostalgic voice. The same voice (Iapetus) with a new delivery note: "deep, warm and slow, a grown man remembering his childhood with quiet nostalgia".
 
 2. Fix them in `storyboard.json` → `voice.pronunciations` (written word → the spelling given to the TTS model; ARCHITECTURE.md point 4), never by hand in an audio editor. The change is then visible in git and re-runnable.
 3. After the TTS quota resets (11:00 EAT), one continuous re-read: 1 of the 10 daily requests (EXP-02). Narration is cached by input hash, so nothing else is regenerated.
 4. Re-split and check with `asr-check`, re-time, then `assemble --mode final`. Only the narration and the segments whose timing moved are rebuilt; keyframes are reused.
 5. Log it as an experiment: the old read vs the new one, on the flagged words.
 
-**What changed because of it:**
+**The cut that was tested:**
 - **Draft 4e (score):** the ACE-Step score replaces the placeholder pad. Of three candidates, c1 was chosen by listening under the narration as "more familiar music in Ethiopia", carrying the nostalgia the film is about (EXP-13). Wan motion clips didn't fit the free T4 (F-26), so all 15 visual units keep their Ken Burns moves.
   - **Films (the near-final cut for user test 2):** `outputs/cuts/final-16x9_77c89e6bd4d1.mp4`, `outputs/cuts/final-9x16_5f32132d3ee6.mp4`. 70.3 s, −14.03 LUFS.

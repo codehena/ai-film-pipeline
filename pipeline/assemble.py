@@ -416,7 +416,12 @@ def run_final(storyboard: dict, out_base: Path | None = None,
     ffmpeg = config.find_tool("ffmpeg")
     folder = config.output_dir(STAGE, out_base)
     parts = config.output_dir(f"{STAGE}/parts", out_base)
-    score = music.score_path(storyboard, out_base)
+    try:
+        score = music.score_path(storyboard, out_base)
+    except MissingInput as e:   # e.g. a clean clone: the Kaggle score isn't in git (outputs/ is ignored)
+        print(f"  WARNING: {e}. Using the placeholder pad so the film still renders "
+              "(ARCHITECTURE.md, point 5).")
+        score = None
     # every shot is one or more visual units (beats), each landing on the word it shows
     by_id = {s["id"]: s for s in storyboard["shots"]}
     visuals, bounds = {}, []

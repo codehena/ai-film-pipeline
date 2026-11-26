@@ -28,3 +28,14 @@ def test_shots_status_command(capsys):
     assert main(["shots"]) == 0
     out = capsys.readouterr().out
     assert "s09: ken burns (by design)" in out
+
+
+def test_film_runs_every_stage_and_delivers_the_final_cut(capsys, monkeypatch):
+    from pipeline import __main__ as cli
+    calls = []
+    for name in cli.FILM_ORDER:
+        monkeypatch.setitem(cli.STAGES, name,
+                            lambda storyboard, only=None, _n=name, **kw: calls.append((_n, kw)))
+    assert main(["film"]) == 0
+    assert [n for n, _ in calls] == list(cli.FILM_ORDER)
+    assert dict(calls)["assemble"] == {"mode": "final"}      # the film, not the radio cut

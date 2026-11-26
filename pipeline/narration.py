@@ -24,7 +24,7 @@ import wave
 from pathlib import Path
 
 from .common import config
-from .common.cache import narration_inputs, speech_style, spoken_text, stable_hash
+from .common.cache import file_hash, narration_inputs, speech_style, spoken_text, stable_hash
 from .common.modelcall import run_model_step
 from .common.silence import SplitError, split_lines, write_segment
 from .common.storyboard import select_shots
@@ -61,16 +61,26 @@ def continuous_inputs(storyboard: dict) -> dict:
     }
 
 
-def split_overrides(read_name: str, path: Path | None = None) -> dict[str, list[float]]:
+def split_overrides(read_name: str, path: Path | None = None,
+                    audio_hash: str | None = None) -> dict[str, list[float]]:
     """Verified corrections for one specific read, e.g. {"s03": [19.02, 23.16]}.
 
     Keyed by the read's file name (full_<hash>), because a new read is a new
     recording with new timings: corrections never leak onto another take.
+    The name is a hash of the *inputs*, so a fresh clone re-reading the same
+    text gets the same name but a different recording (TTS is not
+    deterministic). An entry's `audio_hash` pins it to the exact recording
+    it was verified on; a different recording gets the automatic split.
     """
     p = Path(path or config.SPLIT_OVERRIDES)
     if not p.exists():
         return {}
     entry = json.loads(p.read_text(encoding="utf-8")).get(read_name) or {}
+    pinned = entry.get("audio_hash")
+    if pinned and audio_hash and pinned != audio_hash:
+        print(f"  note: split corrections for {read_name} were verified on another recording "
+              f"({pinned}, this one is {audio_hash}); using the automatic split. Check with asr-check.")
+        return {}
     return {sid: [float(a), float(b)] for sid, (a, b) in entry.get("spans", {}).items()}
 
 
@@ -186,7 +196,7 @@ def _run_continuous(storyboard, only, synthesize, out_base, log_path) -> dict[st
     by_id = {s["id"]: s for s in storyboard["shots"]}
     targets = {sid: audio_path(storyboard, by_id[sid], out_base) for sid, _ in lines}
     report_path = full.with_name(full.name.replace(".wav", ".split.json"))
-    overrides = split_overrides(full.stem)
+    overrides = split_overrides(full.stem, audio_hash=file_hash(full))
     report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.exists() else None
     fresh = (isinstance(report, dict) and report.get("overrides") == overrides
              and report.get("pad_s") == PAD_S

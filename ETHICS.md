@@ -12,7 +12,7 @@ One entry per real person shown, described or voiced. The `consent_ref` of each 
 - **Consent:** my own; I wrote the story and approve the narration lines.
 
 ### brother
-- **Who:** my brother. He grew up with me and appears in shots s04–s07.
+- **Who:** my brother. He grew up with me and appears in shots s04–s07 and s10 (always from behind or at a distance).
 - **Privacy framing:** the film tells our story as "my brother and I" (እኔና ወንድሜ). He is never named in the narration, subtitles, prompts, storyboard, documents or commit history. That was my choice, to keep the film about a shared childhood rather than about identifying him.
 - **Shown as:** a stylised boy (`brother_child`), hand-painted, not a portrait, never a realistic likeness.
 - **Voiced:** no. He is mentioned in the narration (s04, s10) but does not speak.
@@ -62,7 +62,10 @@ Each licence below was read at its official source on **2026-11-26** (link in th
 
 ## Labelling plan
 - **In the film:** the end card says "Made with AI tools. A true story, shared with my brother's consent." The schema refuses an end card that doesn't mention AI.
-- **When posting:** switch on the platform's AI-content disclosure (platform: TODO).
+- **Where it is shared:**
+  - The two films (16:9 and 9:16) are on Google Drive, with links that open without a login, for the submission.
+  - The public post **will be on YouTube**. When uploading, in YouTube Studio → Details → "Altered content", I answer **Yes**: the visuals, voice and music are AI-generated. YouTube then shows its AI/altered-content label on the video.
+  - The description also says it plainly (the end card's wording, and that my brother consented).
 - **Provenance:** keep watermarks and provenance metadata (SynthID, C2PA) intact, and don't strip metadata in the export.
 - **Style:** the look is described by its qualities (gouache, hand-painted, golden light), never by naming a living artist.
 - **In class:** say aloud when presenting that the pictures, voice and music were generated with AI.
