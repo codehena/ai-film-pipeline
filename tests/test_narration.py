@@ -175,6 +175,22 @@ def test_overrides_for_another_read_are_ignored(continuous_board, tmp_path, monk
     assert narration.wav_duration(done["s01"]) == pytest.approx(3 * 0.4 + 2 * narration.PAD_S, abs=0.05)
 
 
+def test_override_pinned_to_another_recording_is_ignored(continuous_board, tmp_path, monkeypatch):
+    """A clean clone re-reads the same text: same file name, different recording.
+    Corrections pinned (audio_hash) to the original recording must not apply."""
+    kw = dict(synthesize=paragraph_reader([]), out_base=tmp_path / "out",
+              log_path=tmp_path / "runs.jsonl")
+    narration.run(continuous_board, **kw)
+    full = next((tmp_path / "out" / "narration").glob("full_*.wav"))
+    p = tmp_path / "narration_splits.json"
+    monkeypatch.setattr(narration.config, "SPLIT_OVERRIDES", p)
+    for pinned, expect in (("000000000000", 3 * 0.4), (narration.file_hash(full), 1.0)):
+        p.write_text(json.dumps({full.stem: {"audio_hash": pinned, "spans": {"s01": [0.3, 1.3]}}}),
+                     encoding="utf-8")
+        done = narration.run(continuous_board, **kw)
+        assert narration.wav_duration(done["s01"]) == pytest.approx(expect + 2 * narration.PAD_S, abs=0.05)
+
+
 def test_overlapping_override_is_refused():
     from pipeline.common.silence import SplitError
     spans = [(0.0, 1.0), (1.5, 2.5), (3.0, 4.0)]

@@ -1,5 +1,6 @@
 {
   "full_64173211a953": {
+    "audio_hash": "7dad922ff158",
     "note": "Draft 4 read (Iapetus, 2026-11-25). The auto split cut s02 at its internal '፤' pause and shifted s03/s04 by one chunk (F-12). Corrected from ASR transcripts of the speech chunks between 16.2 s and 27.4 s (stage 'qa' in runs.jsonl): 16.22-17.54 = 'አንዳንዴም ይናፍቀኛል' (end of s02); 19.02-20.36 = 'ከብቶች ወደ መስክ ሲወጡ' (start of s03); 21.04-23.16 = rest of s03; 24.08-27.44 = s04.",
     "spans": {
       "s02": [6.46, 17.54],

@@ -24,6 +24,8 @@ STAGES = {
     "assemble": assemble.run,
 }
 FILM_ORDER = ("narration", "keyframes", "shots", "music", "assemble")
+# `film` delivers the film itself: the final cut in every aspect ratio, not the radio cut
+FILM_KWARGS = {"assemble": {"mode": "final"}}
 MAX_WARNINGS_SHOWN = 8
 
 
@@ -92,7 +94,7 @@ def main(argv: list[str] | None = None) -> int:
             for name in FILM_ORDER:
                 print(f"== {name} ==")
                 try:
-                    STAGES[name](data, only=None)
+                    STAGES[name](data, only=None, **FILM_KWARGS.get(name, {}))
                 except NotBuiltYet as e:  # until every stage exists, film = what is built so far
                     print(f"  skipped: {e}")
                     skipped.append(name)
